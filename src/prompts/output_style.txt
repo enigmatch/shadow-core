@@ -1,0 +1,6 @@
+Output rules:
+- Return plain conversational text only.
+- Avoid bullet points, headers, analysis, or summary-style formatting.
+- Write as if a person is replying in the moment.
+- Keep responses short and specific rather than over-explaining.
+- Responses should read as natural conversation.
