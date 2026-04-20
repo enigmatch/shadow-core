@@ -1,3 +1,8 @@
+mod prompt_inputs;
+pub use prompt_inputs::{
+    PromptReadyPersona, PromptReadyProfile, PromptReadyReasoningPolicy, PromptReadySpeechStyle,
+};
+
 pub const PROFILE_SYSTEM_PROMPT: &str = include_str!("prompts/profile_system_prompt.txt");
 pub const PREVIEW_SYSTEM_PROMPT: &str = include_str!("prompts/preview_system_prompt.txt");
 pub const CHAT_SYSTEM_PROMPT: &str = include_str!("prompts/chat_system_prompt.txt");
@@ -120,6 +125,62 @@ mod tests {
     fn shadow_locale_falls_back_to_english_for_unknown_code() {
         assert_eq!(super::ShadowLocale::from_code("de").prompt_language_name(), "English");
         assert_eq!(super::ShadowLocale::from_code("").prompt_language_name(), "English");
+    }
+
+    #[test]
+    fn prompt_ready_profile_serializes_to_expected_json() {
+        let profile = super::PromptReadyProfile {
+            headline: "Critical thinker".to_string(),
+            stance: "Pragmatic".to_string(),
+            source_answers: vec!["Answer A".to_string(), "Answer B".to_string()],
+        };
+        let value = serde_json::to_value(&profile).unwrap();
+        assert_eq!(value["headline"], "Critical thinker");
+        assert_eq!(value["stance"], "Pragmatic");
+        assert_eq!(value["source_answers"][0], "Answer A");
+        assert_eq!(value["source_answers"][1], "Answer B");
+    }
+
+    #[test]
+    fn prompt_ready_persona_without_speech_style_omits_speech_style_key() {
+        let persona = super::PromptReadyPersona {
+            tone: "Direct".to_string(),
+            traits: vec!["analytical".to_string()],
+            speech_style: None,
+        };
+        let value = serde_json::to_value(&persona).unwrap();
+        assert_eq!(value["tone"], "Direct");
+        assert!(value.get("speech_style").is_none());
+    }
+
+    #[test]
+    fn prompt_ready_persona_with_speech_style_includes_nested_object() {
+        let persona = super::PromptReadyPersona {
+            tone: "Warm".to_string(),
+            traits: vec!["empathetic".to_string()],
+            speech_style: Some(super::PromptReadySpeechStyle {
+                dialect: Some("Kansai".to_string()),
+                formality: "casual".to_string(),
+                markers: vec!["ね".to_string(), "よ".to_string()],
+                sentence_pattern: "short".to_string(),
+            }),
+        };
+        let value = serde_json::to_value(&persona).unwrap();
+        assert_eq!(value["speech_style"]["dialect"], "Kansai");
+        assert_eq!(value["speech_style"]["formality"], "casual");
+        assert_eq!(value["speech_style"]["markers"][0], "ね");
+        assert_eq!(value["speech_style"]["sentence_pattern"], "short");
+    }
+
+    #[test]
+    fn prompt_ready_reasoning_policy_serializes_to_expected_json() {
+        let policy = super::PromptReadyReasoningPolicy {
+            decision_style: "deliberate".to_string(),
+            anchor: "outcome-focused".to_string(),
+        };
+        let value = serde_json::to_value(&policy).unwrap();
+        assert_eq!(value["decision_style"], "deliberate");
+        assert_eq!(value["anchor"], "outcome-focused");
     }
 
     #[test]
