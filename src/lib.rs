@@ -9,6 +9,30 @@ pub const ONBOARDING_MODE_PROMPT: &str = include_str!("prompts/onboarding_mode.t
 pub const NORMAL_CHAT_MODE_PROMPT: &str = include_str!("prompts/normal_chat_mode.txt");
 pub const OUTPUT_STYLE_PROMPT: &str = include_str!("prompts/output_style.txt");
 
+pub enum ShadowLocale {
+    English,
+    Japanese,
+    French,
+}
+
+impl ShadowLocale {
+    pub fn from_code(code: &str) -> Self {
+        match code {
+            "ja" => Self::Japanese,
+            "fr" => Self::French,
+            _ => Self::English,
+        }
+    }
+
+    pub fn prompt_language_name(&self) -> &'static str {
+        match self {
+            Self::English => "English",
+            Self::Japanese => "Japanese",
+            Self::French => "French",
+        }
+    }
+}
+
 pub struct PromptTemplate<'a> {
     template: &'a str,
 }
@@ -75,6 +99,27 @@ mod tests {
         assert!(rendered.contains("Kage"));
         assert!(rendered.contains("Yuki"));
         assert!(rendered.contains("Japanese"));
+    }
+
+    #[test]
+    fn shadow_locale_from_en_code_returns_english_language_name() {
+        assert_eq!(super::ShadowLocale::from_code("en").prompt_language_name(), "English");
+    }
+
+    #[test]
+    fn shadow_locale_from_ja_code_returns_japanese_language_name() {
+        assert_eq!(super::ShadowLocale::from_code("ja").prompt_language_name(), "Japanese");
+    }
+
+    #[test]
+    fn shadow_locale_from_fr_code_returns_french_language_name() {
+        assert_eq!(super::ShadowLocale::from_code("fr").prompt_language_name(), "French");
+    }
+
+    #[test]
+    fn shadow_locale_falls_back_to_english_for_unknown_code() {
+        assert_eq!(super::ShadowLocale::from_code("de").prompt_language_name(), "English");
+        assert_eq!(super::ShadowLocale::from_code("").prompt_language_name(), "English");
     }
 
     #[test]
