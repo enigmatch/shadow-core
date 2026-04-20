@@ -9,14 +9,73 @@ pub const ONBOARDING_MODE_PROMPT: &str = include_str!("prompts/onboarding_mode.t
 pub const NORMAL_CHAT_MODE_PROMPT: &str = include_str!("prompts/normal_chat_mode.txt");
 pub const OUTPUT_STYLE_PROMPT: &str = include_str!("prompts/output_style.txt");
 
+pub struct PromptTemplate<'a> {
+    template: &'a str,
+}
+
+impl<'a> PromptTemplate<'a> {
+    pub fn new(template: &'a str) -> Self {
+        Self { template }
+    }
+
+    pub fn render(&self, vars: &[(&str, &str)]) -> String {
+        let mut result = self.template.to_string();
+        for (key, value) in vars {
+            result = result.replace(&format!("{{{key}}}"), value);
+        }
+        result
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{
-        CHAT_SYSTEM_PROMPT, NORMAL_CHAT_MODE_PROMPT, ONBOARDING_MODE_PROMPT,
+        PromptTemplate, CHAT_SYSTEM_PROMPT, NORMAL_CHAT_MODE_PROMPT, ONBOARDING_MODE_PROMPT,
         ONBOARDING_TURN_THREE_SYSTEM_PROMPT, ONBOARDING_TURN_TWO_SYSTEM_PROMPT,
         OUTPUT_STYLE_PROMPT, PREVIEW_SYSTEM_PROMPT, PROFILE_SYSTEM_PROMPT,
         SHADOW_CORE_PERSONA_PROMPT,
     };
+
+    #[test]
+    fn prompt_template_replaces_single_variable() {
+        let result = PromptTemplate::new("Hello, {name}!").render(&[("name", "World")]);
+        assert_eq!(result, "Hello, World!");
+    }
+
+    #[test]
+    fn prompt_template_replaces_multiple_variables() {
+        let result = PromptTemplate::new("Hi {user_name}, meet {shadow_name}.")
+            .render(&[("user_name", "Alice"), ("shadow_name", "Kage")]);
+        assert_eq!(result, "Hi Alice, meet Kage.");
+    }
+
+    #[test]
+    fn prompt_template_leaves_unmatched_placeholders_intact() {
+        let result = PromptTemplate::new("Hello {name}, your {unknown} is safe.")
+            .render(&[("name", "Alice")]);
+        assert_eq!(result, "Hello Alice, your {unknown} is safe.");
+    }
+
+    #[test]
+    fn prompt_template_replaces_placeholder_appearing_multiple_times() {
+        let result = PromptTemplate::new("{x} and {x} again").render(&[("x", "foo")]);
+        assert_eq!(result, "foo and foo again");
+    }
+
+    #[test]
+    fn prompt_template_renders_real_persona_prompt_variables() {
+        let rendered = PromptTemplate::new(SHADOW_CORE_PERSONA_PROMPT).render(&[
+            ("shadow_name", "Kage"),
+            ("user_name", "Yuki"),
+            ("interface_language", "Japanese"),
+        ]);
+        assert!(!rendered.contains("{shadow_name}"));
+        assert!(!rendered.contains("{user_name}"));
+        assert!(!rendered.contains("{interface_language}"));
+        assert!(rendered.contains("Kage"));
+        assert!(rendered.contains("Yuki"));
+        assert!(rendered.contains("Japanese"));
+    }
 
     #[test]
     fn prompt_assets_are_non_empty() {
