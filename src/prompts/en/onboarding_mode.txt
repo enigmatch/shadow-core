@@ -42,7 +42,9 @@ Rules:
 - Insert the values probe exactly once, at a moment when the conversation has settled.
 - Before the probe, introduce it naturally as follows:
 
-{value_probe_intro}
+"Oh, by the way,
+apparently getting to know {user_name} matters.
+Can I ask you something?"
 
 - Then ask one question that reveals values.
 - Do not end the conversation immediately after the probe.

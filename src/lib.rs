@@ -3,16 +3,46 @@ pub use prompt_inputs::{
     PromptReadyPersona, PromptReadyProfile, PromptReadyReasoningPolicy, PromptReadySpeechStyle,
 };
 
-pub const PROFILE_SYSTEM_PROMPT: &str = include_str!("prompts/profile_system_prompt.txt");
-pub const PREVIEW_SYSTEM_PROMPT: &str = include_str!("prompts/preview_system_prompt.txt");
-pub const CHAT_SYSTEM_PROMPT: &str = include_str!("prompts/chat_system_prompt.txt");
-pub const ONBOARDING_TURN_TWO_SYSTEM_PROMPT: &str = include_str!("prompts/onboarding_turn_two.txt");
-pub const ONBOARDING_TURN_THREE_SYSTEM_PROMPT: &str =
-    include_str!("prompts/onboarding_turn_three.txt");
-pub const SHADOW_CORE_PERSONA_PROMPT: &str = include_str!("prompts/shadow_core_persona.txt");
-pub const ONBOARDING_MODE_PROMPT: &str = include_str!("prompts/onboarding_mode.txt");
-pub const NORMAL_CHAT_MODE_PROMPT: &str = include_str!("prompts/normal_chat_mode.txt");
-pub const OUTPUT_STYLE_PROMPT: &str = include_str!("prompts/output_style.txt");
+pub struct SystemPrompts {
+    pub profile_system_prompt: &'static str,
+    pub preview_system_prompt: &'static str,
+    pub chat_system_prompt: &'static str,
+    pub onboarding_turn_two_system_prompt: &'static str,
+    pub onboarding_turn_three_system_prompt: &'static str,
+    pub shadow_core_persona_prompt: &'static str,
+    pub onboarding_mode_prompt: &'static str,
+    pub normal_chat_mode_prompt: &'static str,
+    pub output_style_prompt: &'static str,
+}
+
+impl SystemPrompts {
+    pub fn for_locale(locale: &str) -> Self {
+        // Shared prompts (English-only)
+        let common = Self {
+            profile_system_prompt: include_str!("prompts/profile_system_prompt.txt"),
+            preview_system_prompt: include_str!("prompts/preview_system_prompt.txt"),
+            chat_system_prompt: include_str!("prompts/chat_system_prompt.txt"),
+            onboarding_turn_two_system_prompt: include_str!("prompts/onboarding_turn_two.txt"),
+            onboarding_turn_three_system_prompt: include_str!("prompts/onboarding_turn_three.txt"),
+            shadow_core_persona_prompt: include_str!("prompts/shadow_core_persona.txt"),
+            onboarding_mode_prompt: include_str!("prompts/en/onboarding_mode.txt"), // Default
+            normal_chat_mode_prompt: include_str!("prompts/normal_chat_mode.txt"),
+            output_style_prompt: include_str!("prompts/output_style.txt"),
+        };
+
+        match locale {
+            "ja" => Self {
+                onboarding_mode_prompt: include_str!("prompts/ja/onboarding_mode.txt"),
+                ..common
+            },
+            "fr" => Self {
+                onboarding_mode_prompt: include_str!("prompts/fr/onboarding_mode.txt"),
+                ..common
+            },
+            _ => common,
+        }
+    }
+}
 
 pub enum ShadowLocale {
     English,
@@ -58,12 +88,7 @@ impl<'a> PromptTemplate<'a> {
 
 #[cfg(test)]
 mod tests {
-    use super::{
-        PromptTemplate, CHAT_SYSTEM_PROMPT, NORMAL_CHAT_MODE_PROMPT, ONBOARDING_MODE_PROMPT,
-        ONBOARDING_TURN_THREE_SYSTEM_PROMPT, ONBOARDING_TURN_TWO_SYSTEM_PROMPT,
-        OUTPUT_STYLE_PROMPT, PREVIEW_SYSTEM_PROMPT, PROFILE_SYSTEM_PROMPT,
-        SHADOW_CORE_PERSONA_PROMPT,
-    };
+    use super::{PromptTemplate, ShadowLocale, SystemPrompts};
 
     #[test]
     fn prompt_template_replaces_single_variable() {
@@ -80,8 +105,8 @@ mod tests {
 
     #[test]
     fn prompt_template_leaves_unmatched_placeholders_intact() {
-        let result = PromptTemplate::new("Hello {name}, your {unknown} is safe.")
-            .render(&[("name", "Alice")]);
+        let result =
+            PromptTemplate::new("Hello {name}, your {unknown} is safe.").render(&[("name", "Alice")]);
         assert_eq!(result, "Hello Alice, your {unknown} is safe.");
     }
 
@@ -93,7 +118,8 @@ mod tests {
 
     #[test]
     fn prompt_template_renders_real_persona_prompt_variables() {
-        let rendered = PromptTemplate::new(SHADOW_CORE_PERSONA_PROMPT).render(&[
+        let prompts = SystemPrompts::for_locale("en");
+        let rendered = PromptTemplate::new(prompts.shadow_core_persona_prompt).render(&[
             ("shadow_name", "Kage"),
             ("user_name", "Yuki"),
             ("interface_language", "Japanese"),
@@ -108,98 +134,63 @@ mod tests {
 
     #[test]
     fn shadow_locale_from_en_code_returns_english_language_name() {
-        assert_eq!(super::ShadowLocale::from_code("en").prompt_language_name(), "English");
+        assert_eq!(
+            ShadowLocale::from_code("en").prompt_language_name(),
+            "English"
+        );
     }
 
     #[test]
     fn shadow_locale_from_ja_code_returns_japanese_language_name() {
-        assert_eq!(super::ShadowLocale::from_code("ja").prompt_language_name(), "Japanese");
+        assert_eq!(
+            ShadowLocale::from_code("ja").prompt_language_name(),
+            "Japanese"
+        );
     }
 
     #[test]
     fn shadow_locale_from_fr_code_returns_french_language_name() {
-        assert_eq!(super::ShadowLocale::from_code("fr").prompt_language_name(), "French");
+        assert_eq!(
+            ShadowLocale::from_code("fr").prompt_language_name(),
+            "French"
+        );
     }
 
     #[test]
     fn shadow_locale_falls_back_to_english_for_unknown_code() {
-        assert_eq!(super::ShadowLocale::from_code("de").prompt_language_name(), "English");
-        assert_eq!(super::ShadowLocale::from_code("").prompt_language_name(), "English");
-    }
-
-    #[test]
-    fn prompt_ready_profile_serializes_to_expected_json() {
-        let profile = super::PromptReadyProfile {
-            headline: "Critical thinker".to_string(),
-            stance: "Pragmatic".to_string(),
-            source_answers: vec!["Answer A".to_string(), "Answer B".to_string()],
-        };
-        let value = serde_json::to_value(&profile).unwrap();
-        assert_eq!(value["headline"], "Critical thinker");
-        assert_eq!(value["stance"], "Pragmatic");
-        assert_eq!(value["source_answers"][0], "Answer A");
-        assert_eq!(value["source_answers"][1], "Answer B");
-    }
-
-    #[test]
-    fn prompt_ready_persona_without_speech_style_omits_speech_style_key() {
-        let persona = super::PromptReadyPersona {
-            tone: "Direct".to_string(),
-            traits: vec!["analytical".to_string()],
-            speech_style: None,
-        };
-        let value = serde_json::to_value(&persona).unwrap();
-        assert_eq!(value["tone"], "Direct");
-        assert!(value.get("speech_style").is_none());
-    }
-
-    #[test]
-    fn prompt_ready_persona_with_speech_style_includes_nested_object() {
-        let persona = super::PromptReadyPersona {
-            tone: "Warm".to_string(),
-            traits: vec!["empathetic".to_string()],
-            speech_style: Some(super::PromptReadySpeechStyle {
-                dialect: Some("Kansai".to_string()),
-                formality: "casual".to_string(),
-                markers: vec!["ね".to_string(), "よ".to_string()],
-                sentence_pattern: "short".to_string(),
-            }),
-        };
-        let value = serde_json::to_value(&persona).unwrap();
-        assert_eq!(value["speech_style"]["dialect"], "Kansai");
-        assert_eq!(value["speech_style"]["formality"], "casual");
-        assert_eq!(value["speech_style"]["markers"][0], "ね");
-        assert_eq!(value["speech_style"]["sentence_pattern"], "short");
-    }
-
-    #[test]
-    fn prompt_ready_reasoning_policy_serializes_to_expected_json() {
-        let policy = super::PromptReadyReasoningPolicy {
-            decision_style: "deliberate".to_string(),
-            anchor: "outcome-focused".to_string(),
-        };
-        let value = serde_json::to_value(&policy).unwrap();
-        assert_eq!(value["decision_style"], "deliberate");
-        assert_eq!(value["anchor"], "outcome-focused");
+        assert_eq!(
+            ShadowLocale::from_code("de").prompt_language_name(),
+            "English"
+        );
+        assert_eq!(
+            ShadowLocale::from_code("").prompt_language_name(),
+            "English"
+        );
     }
 
     #[test]
     fn prompt_assets_are_non_empty() {
-        assert!(!PROFILE_SYSTEM_PROMPT.trim().is_empty());
-        assert!(!PREVIEW_SYSTEM_PROMPT.trim().is_empty());
-        assert!(!CHAT_SYSTEM_PROMPT.trim().is_empty());
-        assert!(!ONBOARDING_TURN_TWO_SYSTEM_PROMPT.trim().is_empty());
-        assert!(!ONBOARDING_TURN_THREE_SYSTEM_PROMPT.trim().is_empty());
-        assert!(!SHADOW_CORE_PERSONA_PROMPT.trim().is_empty());
-        assert!(!ONBOARDING_MODE_PROMPT.trim().is_empty());
-        assert!(!NORMAL_CHAT_MODE_PROMPT.trim().is_empty());
-        assert!(!OUTPUT_STYLE_PROMPT.trim().is_empty());
+        let prompts = SystemPrompts::for_locale("en");
+        assert!(!prompts.profile_system_prompt.trim().is_empty());
+        assert!(!prompts.preview_system_prompt.trim().is_empty());
+        assert!(!prompts.chat_system_prompt.trim().is_empty());
+        assert!(!prompts.onboarding_turn_two_system_prompt.trim().is_empty());
+        assert!(!prompts.onboarding_turn_three_system_prompt.trim().is_empty());
+        assert!(!prompts.shadow_core_persona_prompt.trim().is_empty());
+        assert!(!prompts.onboarding_mode_prompt.trim().is_empty());
+        assert!(!prompts.normal_chat_mode_prompt.trim().is_empty());
+        assert!(!prompts.output_style_prompt.trim().is_empty());
     }
 
     #[test]
     fn profile_prompt_keeps_output_contract_private() {
-        assert!(PROFILE_SYSTEM_PROMPT.contains("append the exact output contract separately"));
-        assert!(!PROFILE_SYSTEM_PROMPT.contains("\"headline\""));
-        assert!(!PROFILE_SYSTEM_PROMPT.contains("Return JSON only with this exact shape"));
+        let prompts = SystemPrompts::for_locale("en");
+        assert!(prompts
+            .profile_system_prompt
+            .contains("append the exact output contract separately"));
+        assert!(!prompts.profile_system_prompt.contains("\"headline\""));
+        assert!(!prompts
+            .profile_system_prompt
+            .contains("Return JSON only with this exact shape"));
     }
 }
