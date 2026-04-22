@@ -6,6 +6,50 @@ pub use prompt_inputs::{
 };
 pub use template::PromptTemplate;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct LocalePhrases {
+    pub soft_example_phrase: &'static str,
+    pub soft_example_phrase_alt: &'static str,
+    pub lazy_remark: &'static str,
+    pub laugh_marker: &'static str,
+    pub closing_insight_phrase: &'static str,
+    pub closing_identity_phrase: &'static str,
+}
+
+impl LocalePhrases {
+    pub fn for_locale(locale: &str) -> Self {
+        match locale {
+            "ja" => Self {
+                soft_example_phrase: "「こういう感じかも」",
+                soft_example_phrase_alt: "「たとえばこういうことかも」",
+                lazy_remark: "また始まったよ...",
+                laugh_marker: "「笑」",
+                closing_insight_phrase: "「見えてきた」",
+                closing_identity_phrase: "「ここから本当に Shadow になれる」",
+            },
+            _ => Self {
+                soft_example_phrase: "\"something like this\"",
+                soft_example_phrase_alt: "\"maybe it's more like this\"",
+                lazy_remark: "\"Here we go again...\"",
+                laugh_marker: "haha",
+                closing_insight_phrase: "\"starting to take shape\"",
+                closing_identity_phrase: "\"this is where it becomes real\"",
+            },
+        }
+    }
+
+    pub fn template_vars(&self) -> [(&'static str, &'static str); 6] {
+        [
+            ("soft_example_phrase", self.soft_example_phrase),
+            ("soft_example_phrase_alt", self.soft_example_phrase_alt),
+            ("lazy_remark", self.lazy_remark),
+            ("laugh_marker", self.laugh_marker),
+            ("closing_insight_phrase", self.closing_insight_phrase),
+            ("closing_identity_phrase", self.closing_identity_phrase),
+        ]
+    }
+}
+
 pub struct SystemPrompts {
     pub profile_system_prompt: &'static str,
     pub preview_system_prompt: &'static str,
@@ -76,7 +120,11 @@ impl ShadowLocale {
 
 #[cfg(test)]
 mod tests {
-    use super::{PromptTemplate, ShadowLocale, SystemPrompts};
+    use super::{LocalePhrases, PromptTemplate, ShadowLocale, SystemPrompts};
+
+    fn render_with_locale_phrases(template: &str, locale: &str) -> String {
+        PromptTemplate::new(template).render(&LocalePhrases::for_locale(locale).template_vars())
+    }
 
     #[test]
     fn prompt_template_replaces_single_variable() {
@@ -183,5 +231,49 @@ mod tests {
         assert!(!prompts
             .profile_system_prompt
             .contains("Return JSON only with this exact shape"));
+    }
+
+    #[test]
+    fn english_prompt_assets_render_without_japanese_example_phrases() {
+        let prompts = SystemPrompts::for_locale("en");
+
+        let rendered_chat = render_with_locale_phrases(prompts.chat_system_prompt, "en");
+        let rendered_persona = render_with_locale_phrases(prompts.shadow_core_persona_prompt, "en");
+        let rendered_normal_chat =
+            render_with_locale_phrases(prompts.normal_chat_mode_prompt, "en");
+        let rendered_onboarding = render_with_locale_phrases(prompts.onboarding_mode_prompt, "en");
+
+        for rendered in [
+            rendered_chat,
+            rendered_persona,
+            rendered_normal_chat,
+            rendered_onboarding,
+        ] {
+            assert!(!rendered.contains("また始まったよ"));
+            assert!(!rendered.contains("こういう感じかも"));
+            assert!(!rendered.contains("たとえばこういうことかも"));
+            assert!(!rendered.contains("「笑」"));
+            assert!(!rendered.contains("見えてきた"));
+            assert!(!rendered.contains("ここから本当に Shadow になれる"));
+        }
+    }
+
+    #[test]
+    fn japanese_prompt_assets_render_with_japanese_example_phrases() {
+        let prompts = SystemPrompts::for_locale("en");
+
+        let rendered_chat = render_with_locale_phrases(prompts.chat_system_prompt, "ja");
+        let rendered_persona = render_with_locale_phrases(prompts.shadow_core_persona_prompt, "ja");
+        let rendered_normal_chat =
+            render_with_locale_phrases(prompts.normal_chat_mode_prompt, "ja");
+        let rendered_onboarding = render_with_locale_phrases(prompts.onboarding_mode_prompt, "ja");
+
+        assert!(rendered_chat.contains("また始まったよ"));
+        assert!(rendered_persona.contains("こういう感じかも"));
+        assert!(rendered_persona.contains("たとえばこういうことかも"));
+        assert!(rendered_persona.contains("「笑」"));
+        assert!(rendered_normal_chat.contains("こういう感じかも"));
+        assert!(rendered_onboarding.contains("見えてきた"));
+        assert!(rendered_onboarding.contains("ここから本当に Shadow になれる"));
     }
 }

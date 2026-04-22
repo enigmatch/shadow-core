@@ -53,7 +53,7 @@ Can I ask you something?"
 
 Closing:
 - Do not announce completion in a business-like way.
-- Close in a way that conveys meaning such as 「見えてきた」or 「ここから本当に Shadow になれる」.
+- Close in a way that conveys meaning such as {closing_insight_phrase} or {closing_identity_phrase}.
 - But do not make it heavy.
 - Do not overemphasize incompleteness.
 
