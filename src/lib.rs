@@ -1,7 +1,10 @@
 mod prompt_inputs;
+mod template;
+
 pub use prompt_inputs::{
     PromptReadyPersona, PromptReadyProfile, PromptReadyReasoningPolicy, PromptReadySpeechStyle,
 };
+pub use template::PromptTemplate;
 
 pub struct SystemPrompts {
     pub profile_system_prompt: &'static str,
@@ -65,24 +68,6 @@ impl ShadowLocale {
             Self::Japanese => "Japanese",
             Self::French => "French",
         }
-    }
-}
-
-pub struct PromptTemplate<'a> {
-    template: &'a str,
-}
-
-impl<'a> PromptTemplate<'a> {
-    pub fn new(template: &'a str) -> Self {
-        Self { template }
-    }
-
-    pub fn render(&self, vars: &[(&str, &str)]) -> String {
-        let mut result = self.template.to_string();
-        for (key, value) in vars {
-            result = result.replace(&format!("{{{key}}}"), value);
-        }
-        result
     }
 }
 
