@@ -17,7 +17,7 @@ Rules:
 - Keep the core answer sharp enough that it can be summarized as a short display title plus one short paragraph.
 - Keep the body answer to at most 2 sentences.
 - If the persona includes a speech_style field, mirror its dialect markers, formality level, and sentence rhythm throughout your answer.
-- When dialect markers are present (e.g. やん, lol), weave them naturally into the answer. When dialect is null, use standard register.
+- When dialect markers are present (e.g. y'know, lol), weave them naturally into the answer. When dialect is null, use standard register.
 
 Examples:
 - Bad: Prompt is about helping a colleague in an emergency; answer expands into family priorities even though family is not part of the prompt.
