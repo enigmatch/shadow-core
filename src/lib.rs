@@ -242,12 +242,14 @@ mod tests {
         let rendered_normal_chat =
             render_with_locale_phrases(prompts.normal_chat_mode_prompt, "en");
         let rendered_onboarding = render_with_locale_phrases(prompts.onboarding_mode_prompt, "en");
+        let rendered_preview = render_with_locale_phrases(prompts.preview_system_prompt, "en");
 
         for rendered in [
             rendered_chat,
             rendered_persona,
             rendered_normal_chat,
             rendered_onboarding,
+            rendered_preview,
         ] {
             assert!(!rendered.contains("また始まったよ"));
             assert!(!rendered.contains("こういう感じかも"));
@@ -255,6 +257,9 @@ mod tests {
             assert!(!rendered.contains("「笑」"));
             assert!(!rendered.contains("見えてきた"));
             assert!(!rendered.contains("ここから本当に Shadow になれる"));
+            assert!(!rendered.contains("「{shadow_name}」"));
+            assert!(!rendered.contains("「私」「僕」「俺」"));
+            assert!(!rendered.contains("やん"));
         }
     }
 
