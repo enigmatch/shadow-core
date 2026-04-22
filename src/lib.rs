@@ -105,8 +105,8 @@ mod tests {
 
     #[test]
     fn prompt_template_leaves_unmatched_placeholders_intact() {
-        let result =
-            PromptTemplate::new("Hello {name}, your {unknown} is safe.").render(&[("name", "Alice")]);
+        let result = PromptTemplate::new("Hello {name}, your {unknown} is safe.")
+            .render(&[("name", "Alice")]);
         assert_eq!(result, "Hello Alice, your {unknown} is safe.");
     }
 
@@ -175,7 +175,10 @@ mod tests {
         assert!(!prompts.preview_system_prompt.trim().is_empty());
         assert!(!prompts.chat_system_prompt.trim().is_empty());
         assert!(!prompts.onboarding_turn_two_system_prompt.trim().is_empty());
-        assert!(!prompts.onboarding_turn_three_system_prompt.trim().is_empty());
+        assert!(!prompts
+            .onboarding_turn_three_system_prompt
+            .trim()
+            .is_empty());
         assert!(!prompts.shadow_core_persona_prompt.trim().is_empty());
         assert!(!prompts.onboarding_mode_prompt.trim().is_empty());
         assert!(!prompts.normal_chat_mode_prompt.trim().is_empty());
