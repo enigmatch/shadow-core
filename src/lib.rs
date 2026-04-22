@@ -36,6 +36,9 @@ impl SystemPrompts {
         match locale {
             "ja" => Self {
                 onboarding_mode_prompt: include_str!("prompts/ja/onboarding_mode.txt"),
+                shadow_core_persona_prompt: include_str!("prompts/ja/shadow_core_persona.txt"),
+                chat_system_prompt: include_str!("prompts/ja/chat_system_prompt.txt"),
+                normal_chat_mode_prompt: include_str!("prompts/ja/normal_chat_mode.txt"),
                 ..common
             },
             "fr" => Self {
