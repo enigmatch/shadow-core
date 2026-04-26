@@ -264,6 +264,38 @@ mod tests {
     }
 
     #[test]
+    fn shared_prompt_assets_do_not_contain_japanese_loanwords() {
+        let prompts = SystemPrompts::for_locale("en");
+        let banned = ["aizuchi", "kansai-ben", "hakata-ben", "kyoto-ben", "kumamoto-ben", "tohoku-ben"];
+        for word in banned {
+            assert!(
+                !prompts.output_style_prompt.to_lowercase().contains(word),
+                "output_style_prompt must not contain '{word}'"
+            );
+            assert!(
+                !prompts.chat_system_prompt.to_lowercase().contains(word),
+                "chat_system_prompt must not contain '{word}'"
+            );
+            assert!(
+                !prompts.normal_chat_mode_prompt.to_lowercase().contains(word),
+                "normal_chat_mode_prompt must not contain '{word}'"
+            );
+            assert!(
+                !prompts.shadow_core_persona_prompt.to_lowercase().contains(word),
+                "shadow_core_persona_prompt must not contain '{word}'"
+            );
+            assert!(
+                !prompts.preview_system_prompt.to_lowercase().contains(word),
+                "preview_system_prompt must not contain '{word}'"
+            );
+            assert!(
+                !prompts.onboarding_mode_prompt.to_lowercase().contains(word),
+                "onboarding_mode_prompt must not contain '{word}'"
+            );
+        }
+    }
+
+    #[test]
     fn japanese_prompt_assets_render_with_japanese_example_phrases() {
         let prompts = SystemPrompts::for_locale("en");
 
