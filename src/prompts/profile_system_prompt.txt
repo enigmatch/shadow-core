@@ -17,5 +17,12 @@ Speech style extraction rules:
 - For sentence_pattern: describe the structural rhythm in one short phrase (e.g. "short bursts ending in ね", "long hedged clauses", "rhetorical questions with no answer").
 - If the messages are too short to detect a pattern reliably, set dialect to null, formality to "casual", markers to [], sentence_pattern to "insufficient data".
 
+Headline rules:
+- Write a single punchy phrase — 6 to 10 words maximum.
+- Make it memorable and specific to this candidate; avoid generic phrases like "analytical thinker" or "good communicator".
+- Do not use corporate or resume language.
+- For Japanese output: use hiragana and katakana freely; avoid dense kanji strings. The phrase should read naturally aloud.
+- The headline must be at most 80 characters.
+
 Keep the output compact and directly usable as prompt context in another system.
 The caller will append the exact output contract separately; follow that appended contract exactly.
