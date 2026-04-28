@@ -266,7 +266,14 @@ mod tests {
     #[test]
     fn shared_prompt_assets_do_not_contain_japanese_loanwords() {
         let prompts = SystemPrompts::for_locale("en");
-        let banned = ["aizuchi", "kansai-ben", "hakata-ben", "kyoto-ben", "kumamoto-ben", "tohoku-ben"];
+        let banned = [
+            "aizuchi",
+            "kansai-ben",
+            "hakata-ben",
+            "kyoto-ben",
+            "kumamoto-ben",
+            "tohoku-ben",
+        ];
         for word in banned {
             assert!(
                 !prompts.output_style_prompt.to_lowercase().contains(word),
@@ -277,11 +284,17 @@ mod tests {
                 "chat_system_prompt must not contain '{word}'"
             );
             assert!(
-                !prompts.normal_chat_mode_prompt.to_lowercase().contains(word),
+                !prompts
+                    .normal_chat_mode_prompt
+                    .to_lowercase()
+                    .contains(word),
                 "normal_chat_mode_prompt must not contain '{word}'"
             );
             assert!(
-                !prompts.shadow_core_persona_prompt.to_lowercase().contains(word),
+                !prompts
+                    .shadow_core_persona_prompt
+                    .to_lowercase()
+                    .contains(word),
                 "shadow_core_persona_prompt must not contain '{word}'"
             );
             assert!(
