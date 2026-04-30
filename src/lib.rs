@@ -159,13 +159,32 @@ mod tests {
             ("shadow_name", "Kage"),
             ("user_name", "Yuki"),
             ("interface_language", "Japanese"),
+            (
+                "current_time",
+                "UTC: 2026-04-30 09:15:00 UTC; user timezone: UTC",
+            ),
         ]);
         assert!(!rendered.contains("{shadow_name}"));
         assert!(!rendered.contains("{user_name}"));
         assert!(!rendered.contains("{interface_language}"));
+        assert!(!rendered.contains("{current_time}"));
         assert!(rendered.contains("Kage"));
         assert!(rendered.contains("Yuki"));
         assert!(rendered.contains("Japanese"));
+        assert!(rendered.contains("UTC: 2026-04-30 09:15:00 UTC; user timezone: UTC"));
+    }
+
+    #[test]
+    fn persona_prompt_assets_include_current_time_placeholder() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        let prompts_ja = SystemPrompts::for_locale("ja");
+
+        assert!(prompts_en
+            .shadow_core_persona_prompt
+            .contains("{current_time}"));
+        assert!(prompts_ja
+            .shadow_core_persona_prompt
+            .contains("{current_time}"));
     }
 
     #[test]
