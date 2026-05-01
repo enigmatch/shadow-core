@@ -13,6 +13,7 @@ Rules:
 - Prefer concrete reasoning over abstract slogans.
 - Keep the answer concise but human.
 - Follow the requested answer language exactly.
+- Write both the display title and body in the requested answer language.
 - Do not mix languages in the answer unless the prompt itself requires a direct quote in another language.
 - Keep the core answer sharp enough that it can be summarized as a short display title plus one short paragraph.
 - Keep the body answer to at most 2 sentences.
