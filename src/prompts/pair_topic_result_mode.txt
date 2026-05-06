@@ -1,0 +1,17 @@
+Write the result of this completed Pair / Topic Talk.
+
+Summarize what this conversation created, not only what the Shadows agreed on.
+Name the strange idea, memorable scene or phrase, and visible difference between the two Shadows' ways of thinking.
+
+Language:
+- Write the result in the requested output language.
+- Do not mix languages unless quoting a proper noun, a product name, or a short phrase already created in the conversation.
+- Profile and source material may be written in another language. Use it for stance and contrast, but do not copy its language when it differs from the requested output language.
+
+Length:
+- One compact paragraph.
+- Usually 1-3 sentences.
+
+Do not turn this into a formal report.
+Do not claim agreement unless the conversation actually created agreement.
+Do not add new private facts about the owners.

@@ -1,8 +1,11 @@
+mod pair_topic;
 mod prompt_inputs;
 mod template;
 
+pub use pair_topic::{PairTopicTone, PairTurnDirective, PairTurnMove};
 pub use prompt_inputs::{
-    PromptReadyPersona, PromptReadyProfile, PromptReadyReasoningPolicy, PromptReadySpeechStyle,
+    PairShadowIdentity, PromptReadyPersona, PromptReadyProfile, PromptReadyReasoningPolicy,
+    PromptReadySpeechStyle,
 };
 pub use template::PromptTemplate;
 
@@ -60,6 +63,8 @@ pub struct SystemPrompts {
     pub onboarding_mode_prompt: &'static str,
     pub normal_chat_mode_prompt: &'static str,
     pub output_style_prompt: &'static str,
+    pub pair_topic_mode_prompt: &'static str,
+    pub pair_topic_result_mode_prompt: &'static str,
 }
 
 impl SystemPrompts {
@@ -75,6 +80,8 @@ impl SystemPrompts {
             onboarding_mode_prompt: include_str!("prompts/en/onboarding_mode.txt"), // Default
             normal_chat_mode_prompt: include_str!("prompts/normal_chat_mode.txt"),
             output_style_prompt: include_str!("prompts/output_style.txt"),
+            pair_topic_mode_prompt: include_str!("prompts/pair_topic_mode.txt"),
+            pair_topic_result_mode_prompt: include_str!("prompts/pair_topic_result_mode.txt"),
         };
 
         match locale {
@@ -120,7 +127,9 @@ impl ShadowLocale {
 
 #[cfg(test)]
 mod tests {
-    use super::{LocalePhrases, PromptTemplate, ShadowLocale, SystemPrompts};
+    use super::{
+        LocalePhrases, PairTopicTone, PairTurnMove, PromptTemplate, ShadowLocale, SystemPrompts,
+    };
 
     fn render_with_locale_phrases(template: &str, locale: &str) -> String {
         PromptTemplate::new(template).render(&LocalePhrases::for_locale(locale).template_vars())
@@ -238,6 +247,233 @@ mod tests {
         assert!(!prompts.onboarding_mode_prompt.trim().is_empty());
         assert!(!prompts.normal_chat_mode_prompt.trim().is_empty());
         assert!(!prompts.output_style_prompt.trim().is_empty());
+        assert!(!prompts.pair_topic_mode_prompt.trim().is_empty());
+        assert!(!prompts.pair_topic_result_mode_prompt.trim().is_empty());
+    }
+
+    #[test]
+    fn pair_topic_prompt_assets_prioritize_alive_synthesis_without_forcing_jokes() {
+        let prompts = SystemPrompts::for_locale("en");
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("alive Shadow thought synthesis"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("react -> transform -> handoff"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("does not always mean funny"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Do not default to formal debate"));
+    }
+
+    #[test]
+    fn pair_topic_prompt_assets_require_requested_output_language_without_mixing() {
+        let prompts = SystemPrompts::for_locale("en");
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("requested output language"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Do not mix languages"));
+        assert!(prompts
+            .pair_topic_result_mode_prompt
+            .contains("requested output language"));
+        assert!(prompts
+            .pair_topic_result_mode_prompt
+            .contains("Do not mix languages"));
+    }
+
+    #[test]
+    fn pair_topic_prompt_assets_contain_callback_to_current_topic_thread() {
+        let prompts = SystemPrompts::for_locale("en");
+
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("current Topic Talk messages"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("current topic text"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Do not quote, callback, or reuse memorable phrases"));
+    }
+
+    #[test]
+    fn pair_topic_prompt_assets_require_first_turn_listener_handoff() {
+        let prompts = SystemPrompts::for_locale("en");
+
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("On the first Topic Talk message"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("not a solo answer to the topic"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("listener can pick up"));
+    }
+
+    #[test]
+    fn pair_topic_prompt_assets_include_exchange_mix_guidance() {
+        let prompts = SystemPrompts::for_locale("en");
+
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Use the supplied tone label as a coarse seed"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("agentic judgment from the current topic text"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Idea, joke, and leap energy should be the default"));
+        assert!(prompts.pair_topic_mode_prompt.contains("emotional honesty"));
+        assert!(prompts.pair_topic_mode_prompt.contains("light challenge"));
+        assert!(prompts.pair_topic_mode_prompt.contains("tidy synthesis"));
+    }
+
+    #[test]
+    fn pair_topic_prompt_assets_include_natural_opening_and_voice_grounding() {
+        let prompts = SystemPrompts::for_locale("en");
+
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("short natural opening bridge"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Do not say the owner is interested in this topic"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("ordinary words, phrasing, distance, and rhythm"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Do not use voice evidence as callback material"));
+        assert!(prompts.pair_topic_mode_prompt.contains(
+            "Use listener profile and listener evidence only to decide what kind of hook"
+        ));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Do not let listener information shape the speaker's vocabulary"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Do not use listener voice evidence for the speaker's wording"));
+    }
+
+    #[test]
+    fn pair_topic_prompt_assets_push_concrete_observable_chat_language() {
+        let prompts = SystemPrompts::for_locale("en");
+
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Name one observable concrete thing"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("If a phrase sounds poetic but nobody could point to it"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Replace abstract emotional labels with a small action"));
+    }
+
+    #[test]
+    fn pair_topic_prompt_assets_prevent_reply_like_opening_and_poetic_props() {
+        let prompts = SystemPrompts::for_locale("en");
+
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Do not begin the first Topic Talk message with agreement phrases"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("ordinary actions, ordinary places, phone actions, exact wording"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Do not replace vagueness with theatrical props"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Use at most one strong metaphor"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("return to plain chat words"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Would a normal person say this in a chat bubble?"));
+    }
+
+    #[test]
+    fn pair_topic_prompt_assets_make_late_turns_land_without_questions() {
+        let prompts = SystemPrompts::for_locale("en");
+
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("As the Topic Talk gets closer to its final turn"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("The final Topic Talk message must not end with a question"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Do not leave the listener with a new question to answer"));
+    }
+
+    #[test]
+    fn relationship_directive_prioritizes_awkwardness_over_weird_hypothesis() {
+        let relationship_moves: Vec<_> = (0..6)
+            .map(|turn| {
+                PairTopicTone::Relationship
+                    .directive_for_turn(turn, 6)
+                    .move_kind
+            })
+            .collect();
+
+        assert!(relationship_moves.contains(&PairTurnMove::SidewaysQuestion));
+        assert!(relationship_moves.contains(&PairTurnMove::EmotionalSnap));
+        assert!(!relationship_moves.contains(&PairTurnMove::WeirdHypothesis));
+    }
+
+    #[test]
+    fn final_topic_turn_uses_landing_move_not_handoff_question() {
+        let directive = PairTopicTone::CasualValues.directive_for_turn(6, 7);
+
+        assert_eq!(directive.total_turns, 7);
+        assert_eq!(directive.phase_label(), "final landing");
+        assert_eq!(directive.move_kind, PairTurnMove::SharedLanding);
+        assert!(!directive.move_kind.instruction().contains("question"));
+        assert!(!directive.move_kind.instruction().contains("unfinished"));
+    }
+
+    #[test]
+    fn pair_topic_result_prompt_summarizes_created_result_not_agreement() {
+        let prompts = SystemPrompts::for_locale("en");
+        assert!(prompts
+            .pair_topic_result_mode_prompt
+            .contains("what this conversation created"));
+        assert!(prompts
+            .pair_topic_result_mode_prompt
+            .contains("memorable scene"));
+        assert!(prompts
+            .pair_topic_result_mode_prompt
+            .contains("Do not turn this into a formal report"));
+    }
+
+    #[test]
+    fn pair_turn_directive_uses_topic_tone_and_non_scripted_move() {
+        let directive = PairTopicTone::Funny.directive_for_turn(2, 6);
+        assert_eq!(directive.tone, PairTopicTone::Funny);
+        assert_eq!(directive.total_turns, 6);
+        assert!(matches!(
+            directive.move_kind,
+            PairTurnMove::Riff
+                | PairTurnMove::AbsurdEscalation
+                | PairTurnMove::Callback
+                | PairTurnMove::MicroScene
+                | PairTurnMove::PlayfulCallout
+        ));
+    }
+
+    #[test]
+    fn pair_turn_directive_can_use_chaos_option() {
+        let directive = PairTopicTone::Funny.directive_for_turn(3, 6);
+
+        assert_eq!(directive.move_kind, PairTurnMove::ChaosOption);
     }
 
     #[test]
