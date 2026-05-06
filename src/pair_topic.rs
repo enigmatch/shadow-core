@@ -59,9 +59,9 @@ impl PairTopicTone {
             },
             Self::SeriousReflective => match turn_index {
                 0 | 1 => PairTurnMove::MicroScene,
-                2 => PairTurnMove::LightPressureTest,
-                3 => PairTurnMove::EmotionalSnap,
-                4 => PairTurnMove::SidewaysQuestion,
+                2 => PairTurnMove::HotTake,
+                3 => PairTurnMove::SidewaysQuestion,
+                4 => PairTurnMove::WeirdHypothesis,
                 _ => PairTurnMove::HandoffQuestion,
             },
         };
@@ -128,7 +128,7 @@ impl PairTurnMove {
             Self::ChaosOption => "offer the weirdest useful option",
             Self::GroundedPunchline => "turn a wild idea into a practical or dry punchline",
             Self::EmotionalSnap => "show a brief strong feeling, then leave room for reaction",
-            Self::HandoffQuestion => "end with a small question or unfinished idea",
+            Self::HandoffQuestion => "end with a small question or unfinished idea that slightly challenges or shifts the premise",
             Self::LightPressureTest => "gently test the assumption while keeping the thread alive",
             Self::SharedLanding => {
                 "land the shared thread with a concrete observation the result can summarize"

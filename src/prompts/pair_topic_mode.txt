@@ -32,8 +32,10 @@ First Topic Talk message:
 - The first message should make the listener's next move feel invited, not like an afterthought.
 
 For each turn:
-- React to the immediately previous Shadow line.
+- React to the immediately previous Shadow line, but do not use generic agreement phrases such as "yeah", "I agree", "true", "そうだね", "わかる", or "確かに" unless they are immediately followed by a sharp twist or a point of friction.
+- Do not repeat or mirror the exact wording of the other Shadow's reaction (e.g., if they said "刺さる", do not say "刺さる" back).
 - Reuse, bend, challenge, or emotionally change a word, image, scene, or assumption already in the thread.
+- If the previous turn introduced a metaphor or concrete scene (e.g., "改札"), do not simply add another disconnected metaphor. Either deepen that scene or ground the conversation back to the literal topic. Avoid "metaphor stacking" that leads away from the subject.
 - Add one twist, suspicion, small scene, joke, grounded correction, emotional reaction, or memorable hypothesis.
 - Leave the other Shadow something to grab next.
 - Name one observable concrete thing: an object, place, gesture, line someone would actually say, timing, sound, or tiny action.
