@@ -269,6 +269,23 @@ mod tests {
     }
 
     #[test]
+    fn pair_topic_prompt_assets_require_requested_output_language_without_mixing() {
+        let prompts = SystemPrompts::for_locale("en");
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("requested output language"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Do not mix languages"));
+        assert!(prompts
+            .pair_topic_result_mode_prompt
+            .contains("requested output language"));
+        assert!(prompts
+            .pair_topic_result_mode_prompt
+            .contains("Do not mix languages"));
+    }
+
+    #[test]
     fn pair_topic_result_prompt_summarizes_created_result_not_agreement() {
         let prompts = SystemPrompts::for_locale("en");
         assert!(prompts
