@@ -316,6 +316,24 @@ mod tests {
     }
 
     #[test]
+    fn pair_topic_prompt_assets_include_exchange_mix_guidance() {
+        let prompts = SystemPrompts::for_locale("en");
+
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Use the supplied tone label as a coarse seed"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("agentic judgment from the current topic text"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Idea, joke, and leap energy should be the default"));
+        assert!(prompts.pair_topic_mode_prompt.contains("emotional honesty"));
+        assert!(prompts.pair_topic_mode_prompt.contains("light challenge"));
+        assert!(prompts.pair_topic_mode_prompt.contains("tidy synthesis"));
+    }
+
+    #[test]
     fn pair_topic_result_prompt_summarizes_created_result_not_agreement() {
         let prompts = SystemPrompts::for_locale("en");
         assert!(prompts
@@ -342,6 +360,13 @@ mod tests {
                 | PairTurnMove::MicroScene
                 | PairTurnMove::PlayfulCallout
         ));
+    }
+
+    #[test]
+    fn pair_turn_directive_can_use_chaos_option() {
+        let directive = PairTopicTone::Funny.directive_for_turn(3, 6);
+
+        assert_eq!(directive.move_kind, PairTurnMove::ChaosOption);
     }
 
     #[test]

@@ -23,7 +23,7 @@ impl PairTopicTone {
             Self::Funny => match turn_index {
                 0 | 1 => PairTurnMove::MicroScene,
                 2 => PairTurnMove::Riff,
-                3 => PairTurnMove::AbsurdEscalation,
+                3 => PairTurnMove::ChaosOption,
                 4 => PairTurnMove::Callback,
                 _ => PairTurnMove::GroundedPunchline,
             },
