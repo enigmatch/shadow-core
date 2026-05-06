@@ -334,6 +334,33 @@ mod tests {
     }
 
     #[test]
+    fn pair_topic_prompt_assets_include_natural_opening_and_voice_grounding() {
+        let prompts = SystemPrompts::for_locale("en");
+
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("short natural opening bridge"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Do not say the owner is interested in this topic"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("ordinary words, phrasing, distance, and rhythm"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Do not use voice evidence as callback material"));
+        assert!(prompts.pair_topic_mode_prompt.contains(
+            "Use listener profile and listener evidence only to decide what kind of hook"
+        ));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Do not let listener information shape the speaker's vocabulary"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Do not use listener voice evidence for the speaker's wording"));
+    }
+
+    #[test]
     fn pair_topic_result_prompt_summarizes_created_result_not_agreement() {
         let prompts = SystemPrompts::for_locale("en");
         assert!(prompts
