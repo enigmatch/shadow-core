@@ -1,8 +1,11 @@
+mod pair_topic;
 mod prompt_inputs;
 mod template;
 
+pub use pair_topic::{PairTopicTone, PairTurnDirective, PairTurnMove};
 pub use prompt_inputs::{
-    PromptReadyPersona, PromptReadyProfile, PromptReadyReasoningPolicy, PromptReadySpeechStyle,
+    PairShadowIdentity, PromptReadyPersona, PromptReadyProfile, PromptReadyReasoningPolicy,
+    PromptReadySpeechStyle,
 };
 pub use template::PromptTemplate;
 
@@ -60,6 +63,8 @@ pub struct SystemPrompts {
     pub onboarding_mode_prompt: &'static str,
     pub normal_chat_mode_prompt: &'static str,
     pub output_style_prompt: &'static str,
+    pub pair_topic_mode_prompt: &'static str,
+    pub pair_topic_result_mode_prompt: &'static str,
 }
 
 impl SystemPrompts {
@@ -75,6 +80,8 @@ impl SystemPrompts {
             onboarding_mode_prompt: include_str!("prompts/en/onboarding_mode.txt"), // Default
             normal_chat_mode_prompt: include_str!("prompts/normal_chat_mode.txt"),
             output_style_prompt: include_str!("prompts/output_style.txt"),
+            pair_topic_mode_prompt: include_str!("prompts/pair_topic_mode.txt"),
+            pair_topic_result_mode_prompt: include_str!("prompts/pair_topic_result_mode.txt"),
         };
 
         match locale {
@@ -120,7 +127,9 @@ impl ShadowLocale {
 
 #[cfg(test)]
 mod tests {
-    use super::{LocalePhrases, PromptTemplate, ShadowLocale, SystemPrompts};
+    use super::{
+        LocalePhrases, PairTopicTone, PairTurnMove, PromptTemplate, ShadowLocale, SystemPrompts,
+    };
 
     fn render_with_locale_phrases(template: &str, locale: &str) -> String {
         PromptTemplate::new(template).render(&LocalePhrases::for_locale(locale).template_vars())
@@ -238,6 +247,54 @@ mod tests {
         assert!(!prompts.onboarding_mode_prompt.trim().is_empty());
         assert!(!prompts.normal_chat_mode_prompt.trim().is_empty());
         assert!(!prompts.output_style_prompt.trim().is_empty());
+        assert!(!prompts.pair_topic_mode_prompt.trim().is_empty());
+        assert!(!prompts.pair_topic_result_mode_prompt.trim().is_empty());
+    }
+
+    #[test]
+    fn pair_topic_prompt_assets_prioritize_alive_synthesis_without_forcing_jokes() {
+        let prompts = SystemPrompts::for_locale("en");
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("alive Shadow thought synthesis"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("react -> transform -> handoff"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("does not always mean funny"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Do not default to formal debate"));
+    }
+
+    #[test]
+    fn pair_topic_result_prompt_summarizes_created_result_not_agreement() {
+        let prompts = SystemPrompts::for_locale("en");
+        assert!(prompts
+            .pair_topic_result_mode_prompt
+            .contains("what this conversation created"));
+        assert!(prompts
+            .pair_topic_result_mode_prompt
+            .contains("memorable scene"));
+        assert!(prompts
+            .pair_topic_result_mode_prompt
+            .contains("Do not turn this into a formal report"));
+    }
+
+    #[test]
+    fn pair_turn_directive_uses_topic_tone_and_non_scripted_move() {
+        let directive = PairTopicTone::Funny.directive_for_turn(2, 6);
+        assert_eq!(directive.tone, PairTopicTone::Funny);
+        assert_eq!(directive.total_turns, 6);
+        assert!(matches!(
+            directive.move_kind,
+            PairTurnMove::Riff
+                | PairTurnMove::AbsurdEscalation
+                | PairTurnMove::Callback
+                | PairTurnMove::MicroScene
+                | PairTurnMove::PlayfulCallout
+        ));
     }
 
     #[test]
