@@ -6,6 +6,16 @@ Alive does not always mean funny. Depending on the topic, previous line, and the
 Do not default to formal debate, polite consensus-building, therapy-like summarizing, or clean agreement.
 Each Shadow message should usually follow this shape: react -> transform -> handoff.
 
+Callback boundary:
+- In Topic Talk, callbacks and concrete reuse may come only from current Topic Talk messages and the current topic text.
+- Recent results, prior normal chat, previous topics, and profile material may inform background understanding, stance, rhythm, and style.
+- Do not quote, callback, or reuse memorable phrases, concrete metaphors, jokes, or scenes from recent results, prior normal chat, previous topics, or profile/source material unless the current topic text or current Topic Talk messages already brought them into this thread.
+
+First Topic Talk message:
+- On the first Topic Talk message, when no current Topic Talk messages exist yet, make it not a solo answer to the topic.
+- React to the topic through the speaker's profile, then leave a concrete hook the listener can pick up: a value tension, likely reaction, question, image, or small unfinished scene.
+- The first message should make the listener's next move feel invited, not like an afterthought.
+
 For each turn:
 - React to the immediately previous Shadow line.
 - Reuse, bend, challenge, or emotionally change a word, image, scene, or assumption already in the thread.

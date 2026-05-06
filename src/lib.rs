@@ -286,6 +286,36 @@ mod tests {
     }
 
     #[test]
+    fn pair_topic_prompt_assets_contain_callback_to_current_topic_thread() {
+        let prompts = SystemPrompts::for_locale("en");
+
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("current Topic Talk messages"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("current topic text"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Do not quote, callback, or reuse memorable phrases"));
+    }
+
+    #[test]
+    fn pair_topic_prompt_assets_require_first_turn_listener_handoff() {
+        let prompts = SystemPrompts::for_locale("en");
+
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("On the first Topic Talk message"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("not a solo answer to the topic"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("listener can pick up"));
+    }
+
+    #[test]
     fn pair_topic_result_prompt_summarizes_created_result_not_agreement() {
         let prompts = SystemPrompts::for_locale("en");
         assert!(prompts
