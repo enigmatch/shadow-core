@@ -400,6 +400,21 @@ mod tests {
     }
 
     #[test]
+    fn pair_topic_prompt_assets_make_late_turns_land_without_questions() {
+        let prompts = SystemPrompts::for_locale("en");
+
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("As the Topic Talk gets closer to its final turn"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("The final Topic Talk message must not end with a question"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Do not leave the listener with a new question to answer"));
+    }
+
+    #[test]
     fn relationship_directive_prioritizes_awkwardness_over_weird_hypothesis() {
         let relationship_moves: Vec<_> = (0..6)
             .map(|turn| {
@@ -412,6 +427,17 @@ mod tests {
         assert!(relationship_moves.contains(&PairTurnMove::SidewaysQuestion));
         assert!(relationship_moves.contains(&PairTurnMove::EmotionalSnap));
         assert!(!relationship_moves.contains(&PairTurnMove::WeirdHypothesis));
+    }
+
+    #[test]
+    fn final_topic_turn_uses_landing_move_not_handoff_question() {
+        let directive = PairTopicTone::CasualValues.directive_for_turn(6, 7);
+
+        assert_eq!(directive.total_turns, 7);
+        assert_eq!(directive.phase_label(), "final landing");
+        assert_eq!(directive.move_kind, PairTurnMove::SharedLanding);
+        assert!(!directive.move_kind.instruction().contains("question"));
+        assert!(!directive.move_kind.instruction().contains("unfinished"));
     }
 
     #[test]

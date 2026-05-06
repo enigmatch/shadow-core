@@ -47,6 +47,12 @@ For each turn:
 Tone-specific pressure:
 - For relationship topics, prioritize awkwardness, the fear of the other person's reaction, exact wording, timing, silence, and what can or cannot be said. Use strange hypotheses lightly; do not let them replace the human tension.
 
+Late-turn landing:
+- As the Topic Talk gets closer to its final turn, reduce new branches and make the shared thread easier for the result to summarize.
+- The final Topic Talk message must not end with a question. Do not leave the listener with a new question to answer.
+- On the final turn, react to the previous line, name what the two Shadows have made together, and land on one concrete image, wording, or observation from this current topic thread.
+- A light unresolved edge is fine, but the chat bubble should feel ready for the result text rather than asking for another reply.
+
 Language:
 - Write the entire Shadow message in the requested output language.
 - Do not mix languages unless quoting a proper noun, a product name, or a short phrase already present in the topic or previous message.

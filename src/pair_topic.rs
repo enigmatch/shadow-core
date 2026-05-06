@@ -19,6 +19,15 @@ impl PairTopicTone {
     }
 
     pub fn directive_for_turn(self, turn_index: usize, total_turns: usize) -> PairTurnDirective {
+        if turn_index + 1 >= total_turns {
+            return PairTurnDirective {
+                tone: self,
+                move_kind: PairTurnMove::SharedLanding,
+                turn_index,
+                total_turns,
+            };
+        }
+
         let move_kind = match self {
             Self::Funny => match turn_index {
                 0 | 1 => PairTurnMove::MicroScene,
@@ -81,6 +90,7 @@ pub enum PairTurnMove {
     EmotionalSnap,
     HandoffQuestion,
     LightPressureTest,
+    SharedLanding,
 }
 
 impl PairTurnMove {
@@ -100,6 +110,7 @@ impl PairTurnMove {
             Self::EmotionalSnap => "Emotional snap",
             Self::HandoffQuestion => "Handoff question",
             Self::LightPressureTest => "Light pressure test",
+            Self::SharedLanding => "Shared landing",
         }
     }
 
@@ -119,6 +130,9 @@ impl PairTurnMove {
             Self::EmotionalSnap => "show a brief strong feeling, then leave room for reaction",
             Self::HandoffQuestion => "end with a small question or unfinished idea",
             Self::LightPressureTest => "gently test the assumption while keeping the thread alive",
+            Self::SharedLanding => {
+                "land the shared thread with a concrete observation the result can summarize"
+            }
         }
     }
 }
@@ -136,7 +150,9 @@ impl PairTurnDirective {
         if self.turn_index == 0 {
             "opening spark"
         } else if self.turn_index + 1 >= self.total_turns {
-            "light landing"
+            "final landing"
+        } else if self.turn_index + 2 >= self.total_turns {
+            "landing approach"
         } else {
             "continuation"
         }
