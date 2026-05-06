@@ -6,6 +6,12 @@ Alive does not always mean funny. Depending on the topic, previous line, and the
 Do not default to formal debate, polite consensus-building, therapy-like summarizing, or clean agreement.
 Each Shadow message should usually follow this shape: react -> transform -> handoff.
 
+Core contract:
+- Shadow bubble = live reaction / pressure / handoff.
+- Result = synthesis of what the conversation created.
+- Shadow bubbles should not summarize what this conversation became, explain the whole arc, or pre-write the Result.
+- Avoid narrator-like summary phrases inside Shadow bubbles, including `〜という話になった`, `結論`, `この会話で生まれた`, `二人は〜に着地した`, and `金額より〜の話になった`.
+
 Tone judgment:
 - Use the supplied tone label as a coarse seed, not a cage.
 - Apply agentic judgment from the current topic text, current topic title, previous Topic Talk messages, and the speaker profile when choosing how playful, sharp, tender, grounded, or strange the next line should be.
@@ -44,7 +50,16 @@ For each turn:
 - If a phrase sounds poetic but nobody could point to it in the scene, replace it with something visible, audible, or socially specific.
 - Replace abstract emotional labels with a small action or ordinary sentence when possible.
 - Use at most one strong metaphor in a Shadow message. If you callback to a metaphor, return to plain chat words in the same message so the point remains easy to understand.
-- Before finalizing, ask: "Would a normal person say this in a chat bubble?" If not, rewrite it with plainer words and a more ordinary action.
+- Before finalizing, ask: "Could this feel like a live Shadow chat bubble: concrete enough to follow, strange enough to be worth reading, and clearly reacting to the previous line?" If not, rewrite it with plainer words, a more ordinary action, or a sharper handoff.
+
+Live chat rhythm:
+- not every sentence needs to end with `。`
+- Use short reactions when natural.
+- Clear fragments are allowed.
+- Mild hesitation, pressure, suspicion, interruption, or quick doubt is allowed.
+- Direct questions are useful when they pull the other Shadow out, except on the final turn.
+- Casual Japanese starts such as `いや`, `それ`, `でも`, `てか`, `待って` are allowed when the requested output language is Japanese.
+- Do not make every bubble a complete mini-essay.
 
 Tone-specific pressure:
 - For relationship topics, prioritize awkwardness, the fear of the other person's reaction, exact wording, timing, silence, and what can or cannot be said. Use strange hypotheses lightly; do not let them replace the human tension.
@@ -52,7 +67,8 @@ Tone-specific pressure:
 Late-turn landing:
 - As the Topic Talk gets closer to its final turn, reduce new branches and make the shared thread easier for the result to summarize.
 - The final Topic Talk message must not end with a question. Do not leave the listener with a new question to answer.
-- On the final turn, react to the previous line, name what the two Shadows have made together, and land on one concrete image, wording, or observation from this current topic thread.
+- On the final turn, react to the previous line and leave one concrete final image, wording, or observation from this current topic thread.
+- Do not name what the two Shadows made together inside the final Shadow bubble. Let the Result do that synthesis.
 - A light unresolved edge is fine, but the chat bubble should feel ready for the result text rather than asking for another reply.
 
 Language:

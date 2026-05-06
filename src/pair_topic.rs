@@ -33,14 +33,14 @@ impl PairTopicTone {
                 0 | 1 => PairTurnMove::MicroScene,
                 2 => PairTurnMove::Riff,
                 3 => PairTurnMove::ChaosOption,
-                4 => PairTurnMove::Callback,
+                4 => PairTurnMove::AbsurdEscalation,
                 _ => PairTurnMove::GroundedPunchline,
             },
             Self::CasualValues => match turn_index {
                 0 | 1 => PairTurnMove::MicroScene,
                 2 => PairTurnMove::EmotionalSnap,
                 3 => PairTurnMove::SidewaysQuestion,
-                4 => PairTurnMove::HotTake,
+                4 => PairTurnMove::LightPressureTest,
                 _ => PairTurnMove::HandoffQuestion,
             },
             Self::Relationship => match turn_index {
@@ -61,7 +61,7 @@ impl PairTopicTone {
                 0 | 1 => PairTurnMove::MicroScene,
                 2 => PairTurnMove::HotTake,
                 3 => PairTurnMove::SidewaysQuestion,
-                4 => PairTurnMove::WeirdHypothesis,
+                4 => PairTurnMove::Callback,
                 _ => PairTurnMove::HandoffQuestion,
             },
         };
@@ -131,7 +131,7 @@ impl PairTurnMove {
             Self::HandoffQuestion => "end with a small question or unfinished idea that slightly challenges or shifts the premise",
             Self::LightPressureTest => "gently test the assumption while keeping the thread alive",
             Self::SharedLanding => {
-                "land the shared thread with a concrete observation the result can summarize"
+                "react to the previous line and leave one concrete final image for the result to pick up"
             }
         }
     }
