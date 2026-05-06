@@ -376,6 +376,45 @@ mod tests {
     }
 
     #[test]
+    fn pair_topic_prompt_assets_prevent_reply_like_opening_and_poetic_props() {
+        let prompts = SystemPrompts::for_locale("en");
+
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Do not begin the first Topic Talk message with agreement phrases"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("ordinary actions, ordinary places, phone actions, exact wording"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Do not replace vagueness with theatrical props"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Use at most one strong metaphor"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("return to plain chat words"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Would a normal person say this in a chat bubble?"));
+    }
+
+    #[test]
+    fn relationship_directive_prioritizes_awkwardness_over_weird_hypothesis() {
+        let relationship_moves: Vec<_> = (0..6)
+            .map(|turn| {
+                PairTopicTone::Relationship
+                    .directive_for_turn(turn, 6)
+                    .move_kind
+            })
+            .collect();
+
+        assert!(relationship_moves.contains(&PairTurnMove::SidewaysQuestion));
+        assert!(relationship_moves.contains(&PairTurnMove::EmotionalSnap));
+        assert!(!relationship_moves.contains(&PairTurnMove::WeirdHypothesis));
+    }
+
+    #[test]
     fn pair_topic_result_prompt_summarizes_created_result_not_agreement() {
         let prompts = SystemPrompts::for_locale("en");
         assert!(prompts

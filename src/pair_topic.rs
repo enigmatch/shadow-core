@@ -36,10 +36,10 @@ impl PairTopicTone {
             },
             Self::Relationship => match turn_index {
                 0 | 1 => PairTurnMove::PlayfulCallout,
-                2 => PairTurnMove::WeirdHypothesis,
+                2 => PairTurnMove::SidewaysQuestion,
                 3 => PairTurnMove::EmotionalSnap,
                 4 => PairTurnMove::SoftRoast,
-                _ => PairTurnMove::SidewaysQuestion,
+                _ => PairTurnMove::HandoffQuestion,
             },
             Self::WorkDev => match turn_index {
                 0 | 1 => PairTurnMove::HotTake,
