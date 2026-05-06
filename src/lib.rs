@@ -361,6 +361,21 @@ mod tests {
     }
 
     #[test]
+    fn pair_topic_prompt_assets_push_concrete_observable_chat_language() {
+        let prompts = SystemPrompts::for_locale("en");
+
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Name one observable concrete thing"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("If a phrase sounds poetic but nobody could point to it"));
+        assert!(prompts
+            .pair_topic_mode_prompt
+            .contains("Replace abstract emotional labels with a small action"));
+    }
+
+    #[test]
     fn pair_topic_result_prompt_summarizes_created_result_not_agreement() {
         let prompts = SystemPrompts::for_locale("en");
         assert!(prompts

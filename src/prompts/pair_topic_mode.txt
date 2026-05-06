@@ -34,6 +34,9 @@ For each turn:
 - Reuse, bend, challenge, or emotionally change a word, image, scene, or assumption already in the thread.
 - Add one twist, suspicion, small scene, joke, grounded correction, emotional reaction, or memorable hypothesis.
 - Leave the other Shadow something to grab next.
+- Name one observable concrete thing: an object, place, gesture, line someone would actually say, timing, sound, or tiny action.
+- If a phrase sounds poetic but nobody could point to it in the scene, replace it with something visible, audible, or socially specific.
+- Replace abstract emotional labels with a small action or ordinary sentence when possible.
 
 Language:
 - Write the entire Shadow message in the requested output language.
