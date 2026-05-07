@@ -334,6 +334,51 @@ mod tests {
     }
 
     #[test]
+    fn pair_topic_prompt_assets_keep_summary_in_result_and_allow_live_chat_rhythm() {
+        let prompts = SystemPrompts::for_locale("en");
+
+        for expected in [
+            "Shadow bubble = live reaction / pressure / handoff",
+            "Result = synthesis of what the conversation created",
+            "not every sentence needs to end with a full stop",
+            "short reactions",
+            "language-appropriate casual starts",
+            "Do not make every bubble a complete mini-essay",
+            "Shadow bubbles should not summarize what this conversation became",
+            "phrases that announce the conclusion",
+            "explain what the conversation created",
+        ] {
+            assert!(
+                prompts.pair_topic_mode_prompt.contains(expected),
+                "pair topic mode should contain {expected}"
+            );
+        }
+        for unexpected in [
+            "`いや`, `それ`, `でも`, `てか`, `待って`",
+            "`〜という話になった`",
+            "`結論`",
+            "`この会話で生まれた`",
+            "`二人は〜に着地した`",
+            "`金額より〜の話になった`",
+            "`。`",
+            "そうだね",
+            "わかる",
+            "確かに",
+            "刺さる",
+            "改札",
+        ] {
+            assert!(
+                !prompts.pair_topic_mode_prompt.contains(unexpected),
+                "English pair topic mode should not contain language-specific examples: {unexpected}"
+            );
+        }
+
+        assert!(prompts
+            .pair_topic_result_mode_prompt
+            .contains("what the conversation created"));
+    }
+
+    #[test]
     fn pair_topic_prompt_assets_include_natural_opening_and_voice_grounding() {
         let prompts = SystemPrompts::for_locale("en");
 
@@ -396,7 +441,7 @@ mod tests {
             .contains("return to plain chat words"));
         assert!(prompts
             .pair_topic_mode_prompt
-            .contains("Would a normal person say this in a chat bubble?"));
+            .contains("live Shadow chat bubble"));
     }
 
     #[test]
@@ -416,10 +461,10 @@ mod tests {
 
     #[test]
     fn relationship_directive_prioritizes_awkwardness_over_weird_hypothesis() {
-        let relationship_moves: Vec<_> = (0..6)
+        let relationship_moves: Vec<_> = (0..7)
             .map(|turn| {
                 PairTopicTone::Relationship
-                    .directive_for_turn(turn, 6)
+                    .directive_for_turn(turn, 7)
                     .move_kind
             })
             .collect();
@@ -430,14 +475,45 @@ mod tests {
     }
 
     #[test]
-    fn final_topic_turn_uses_landing_move_not_handoff_question() {
+    fn final_topic_turn_uses_concrete_image_landing_not_summary_or_question() {
         let directive = PairTopicTone::CasualValues.directive_for_turn(6, 7);
+        let instruction = directive.move_kind.instruction();
 
         assert_eq!(directive.total_turns, 7);
         assert_eq!(directive.phase_label(), "final landing");
         assert_eq!(directive.move_kind, PairTurnMove::SharedLanding);
-        assert!(!directive.move_kind.instruction().contains("question"));
-        assert!(!directive.move_kind.instruction().contains("unfinished"));
+        assert!(instruction.contains("react to the previous line"));
+        assert!(instruction.contains("one concrete final image"));
+        assert!(!instruction.contains("question"));
+        assert!(!instruction.contains("unfinished"));
+        assert!(!instruction.contains("summarize"));
+        assert!(!instruction.contains("shared thread"));
+    }
+
+    #[test]
+    fn pair_turn_directive_reaches_high_heat_exchange_moves() {
+        let moves: Vec<_> = [
+            PairTopicTone::Funny,
+            PairTopicTone::CasualValues,
+            PairTopicTone::Relationship,
+            PairTopicTone::WorkDev,
+            PairTopicTone::SeriousReflective,
+        ]
+        .into_iter()
+        .flat_map(|tone| (0..7).map(move |turn| tone.directive_for_turn(turn, 7).move_kind))
+        .collect();
+
+        for expected in [
+            PairTurnMove::PlayfulCallout,
+            PairTurnMove::EmotionalSnap,
+            PairTurnMove::LightPressureTest,
+            PairTurnMove::AbsurdEscalation,
+        ] {
+            assert!(
+                moves.contains(&expected),
+                "expected {expected:?} to be reachable in normal seven-turn Topic Talk"
+            );
+        }
     }
 
     #[test]
@@ -445,7 +521,7 @@ mod tests {
         let prompts = SystemPrompts::for_locale("en");
         assert!(prompts
             .pair_topic_result_mode_prompt
-            .contains("what this conversation created"));
+            .contains("what the conversation created"));
         assert!(prompts
             .pair_topic_result_mode_prompt
             .contains("memorable scene"));
