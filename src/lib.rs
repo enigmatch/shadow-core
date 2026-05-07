@@ -340,18 +340,36 @@ mod tests {
         for expected in [
             "Shadow bubble = live reaction / pressure / handoff",
             "Result = synthesis of what the conversation created",
-            "not every sentence needs to end with `。`",
+            "not every sentence needs to end with a full stop",
             "short reactions",
-            "`いや`, `それ`, `でも`, `てか`, `待って`",
+            "language-appropriate casual starts",
             "Do not make every bubble a complete mini-essay",
             "Shadow bubbles should not summarize what this conversation became",
-            "`〜という話になった`",
-            "`結論`",
-            "`この会話で生まれた`",
+            "phrases that announce the conclusion",
+            "explain what the conversation created",
         ] {
             assert!(
                 prompts.pair_topic_mode_prompt.contains(expected),
                 "pair topic mode should contain {expected}"
+            );
+        }
+        for unexpected in [
+            "`いや`, `それ`, `でも`, `てか`, `待って`",
+            "`〜という話になった`",
+            "`結論`",
+            "`この会話で生まれた`",
+            "`二人は〜に着地した`",
+            "`金額より〜の話になった`",
+            "`。`",
+            "そうだね",
+            "わかる",
+            "確かに",
+            "刺さる",
+            "改札",
+        ] {
+            assert!(
+                !prompts.pair_topic_mode_prompt.contains(unexpected),
+                "English pair topic mode should not contain language-specific examples: {unexpected}"
             );
         }
 

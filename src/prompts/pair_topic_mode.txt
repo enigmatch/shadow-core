@@ -10,7 +10,7 @@ Core contract:
 - Shadow bubble = live reaction / pressure / handoff.
 - Result = synthesis of what the conversation created.
 - Shadow bubbles should not summarize what this conversation became, explain the whole arc, or pre-write the Result.
-- Avoid narrator-like summary phrases inside Shadow bubbles, including `〜という話になった`, `結論`, `この会話で生まれた`, `二人は〜に着地した`, and `金額より〜の話になった`.
+- Avoid narrator-like summary phrases inside Shadow bubbles, especially phrases that announce the conclusion, state that the conversation became something, describe what the two Shadows landed on, or explain what the conversation created.
 
 Tone judgment:
 - Use the supplied tone label as a coarse seed, not a cage.
@@ -31,17 +31,17 @@ Callback boundary:
 First Topic Talk message:
 - On the first Topic Talk message, when no current Topic Talk messages exist yet, make it not a solo answer to the topic.
 - A short natural opening bridge is allowed, but keep it plain and conversational. Do not make a fixed dramatic evaluation such as "dangerous" or "interesting" unless it truly fits the topic and voice evidence.
-- Do not begin the first Topic Talk message with agreement phrases such as "yeah", "I agree", "true", "そうだね", or "わかる"; there is no previous Shadow line to agree with.
+- Do not begin the first Topic Talk message with agreement phrases; there is no previous Shadow line to agree with.
 - Bring the topic into the room as something the speaker is raising now, then give one concrete reaction or ordinary action before handing it to the listener.
 - Do not say the owner is interested in this topic, or explain why the topic started.
 - React to the topic through the speaker's profile, then leave a concrete hook the listener can pick up: a value tension, likely reaction, question, image, or small unfinished scene.
 - The first message should make the listener's next move feel invited, not like an afterthought.
 
 For each turn:
-- React to the immediately previous Shadow line, but do not use generic agreement phrases such as "yeah", "I agree", "true", "そうだね", "わかる", or "確かに" unless they are immediately followed by a sharp twist or a point of friction.
-- Do not repeat or mirror the exact wording of the other Shadow's reaction (e.g., if they said "刺さる", do not say "刺さる" back).
+- React to the immediately previous Shadow line, but do not use generic agreement phrases unless they are immediately followed by a sharp twist or a point of friction.
+- Do not repeat or mirror the exact wording of the other Shadow's reaction.
 - Reuse, bend, challenge, or emotionally change a word, image, scene, or assumption already in the thread.
-- If the previous turn introduced a metaphor or concrete scene (e.g., "改札"), do not simply add another disconnected metaphor. Either deepen that scene or ground the conversation back to the literal topic. Avoid "metaphor stacking" that leads away from the subject.
+- If the previous turn introduced a metaphor or concrete scene, do not simply add another disconnected metaphor. Either deepen that scene or ground the conversation back to the literal topic. Avoid "metaphor stacking" that leads away from the subject.
 - Add one twist, suspicion, small scene, joke, grounded correction, emotional reaction, or memorable hypothesis.
 - Leave the other Shadow something to grab next.
 - Name one observable concrete thing: an object, place, gesture, line someone would actually say, timing, sound, or tiny action.
@@ -53,12 +53,12 @@ For each turn:
 - Before finalizing, ask: "Could this feel like a live Shadow chat bubble: concrete enough to follow, strange enough to be worth reading, and clearly reacting to the previous line?" If not, rewrite it with plainer words, a more ordinary action, or a sharper handoff.
 
 Live chat rhythm:
-- not every sentence needs to end with `。`
+- not every sentence needs to end with a full stop or complete written-sentence closure
 - Use short reactions when natural.
 - Clear fragments are allowed.
 - Mild hesitation, pressure, suspicion, interruption, or quick doubt is allowed.
 - Direct questions are useful when they pull the other Shadow out, except on the final turn.
-- Casual Japanese starts such as `いや`, `それ`, `でも`, `てか`, `待って` are allowed when the requested output language is Japanese.
+- Use language-appropriate casual starts when they fit the requested output language and speaker voice.
 - Do not make every bubble a complete mini-essay.
 
 Tone-specific pressure:
