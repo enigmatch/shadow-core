@@ -443,10 +443,10 @@ mod tests {
 
     #[test]
     fn relationship_directive_prioritizes_awkwardness_over_weird_hypothesis() {
-        let relationship_moves: Vec<_> = (0..6)
+        let relationship_moves: Vec<_> = (0..7)
             .map(|turn| {
                 PairTopicTone::Relationship
-                    .directive_for_turn(turn, 6)
+                    .directive_for_turn(turn, 7)
                     .move_kind
             })
             .collect();
@@ -458,10 +458,10 @@ mod tests {
 
     #[test]
     fn final_topic_turn_uses_concrete_image_landing_not_summary_or_question() {
-        let directive = PairTopicTone::CasualValues.directive_for_turn(5, 6);
+        let directive = PairTopicTone::CasualValues.directive_for_turn(6, 7);
         let instruction = directive.move_kind.instruction();
 
-        assert_eq!(directive.total_turns, 6);
+        assert_eq!(directive.total_turns, 7);
         assert_eq!(directive.phase_label(), "final landing");
         assert_eq!(directive.move_kind, PairTurnMove::SharedLanding);
         assert!(instruction.contains("react to the previous line"));
@@ -482,7 +482,7 @@ mod tests {
             PairTopicTone::SeriousReflective,
         ]
         .into_iter()
-        .flat_map(|tone| (0..6).map(move |turn| tone.directive_for_turn(turn, 6).move_kind))
+        .flat_map(|tone| (0..7).map(move |turn| tone.directive_for_turn(turn, 7).move_kind))
         .collect();
 
         for expected in [
@@ -493,7 +493,7 @@ mod tests {
         ] {
             assert!(
                 moves.contains(&expected),
-                "expected {expected:?} to be reachable in normal six-turn Topic Talk"
+                "expected {expected:?} to be reachable in normal seven-turn Topic Talk"
             );
         }
     }
