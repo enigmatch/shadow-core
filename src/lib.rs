@@ -10,6 +10,79 @@ pub use prompt_inputs::{
 pub use template::PromptTemplate;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ShadowModel {
+    Gpt55,
+    Gpt54,
+    Gpt5,
+    Gpt54Mini,
+    Gpt54Nano,
+    Gpt5Nano,
+}
+
+impl ShadowModel {
+    const ORDERED: [Self; 6] = [
+        Self::Gpt55,
+        Self::Gpt54,
+        Self::Gpt5,
+        Self::Gpt54Mini,
+        Self::Gpt54Nano,
+        Self::Gpt5Nano,
+    ];
+
+    #[must_use]
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Gpt55 => "gpt-5.5-2026-04-23",
+            Self::Gpt54 => "gpt-5.4-2026-03-05",
+            Self::Gpt5 => "gpt-5-2025-08-07",
+            Self::Gpt54Mini => "gpt-5.4-mini-2026-03-17",
+            Self::Gpt54Nano => "gpt-5.4-nano-2026-03-17",
+            Self::Gpt5Nano => "gpt-5-nano-2025-08-07",
+        }
+    }
+
+    #[must_use]
+    pub fn from_name(name: &str) -> Option<Self> {
+        let normalized = name.trim();
+        Self::ORDERED
+            .iter()
+            .copied()
+            .find(|model| model.as_str() == normalized)
+    }
+
+    fn fallback_start_index(configured_model: Option<&str>) -> usize {
+        configured_model
+            .and_then(Self::from_name)
+            .and_then(|configured| Self::ORDERED.iter().position(|model| *model == configured))
+            .unwrap_or(0)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ModelFallbackChain {
+    next_index: usize,
+}
+
+impl ModelFallbackChain {
+    #[must_use]
+    pub fn from_configured_model(configured_model: Option<&str>) -> Self {
+        Self {
+            next_index: ShadowModel::fallback_start_index(configured_model),
+        }
+    }
+}
+
+impl Iterator for ModelFallbackChain {
+    type Item = ShadowModel;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let model = ShadowModel::ORDERED.get(self.next_index).copied()?;
+        self.next_index += 1;
+        Some(model)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct LocalePhrases {
     pub soft_example_phrase: &'static str,
     pub soft_example_phrase_alt: &'static str,
@@ -128,7 +201,8 @@ impl ShadowLocale {
 #[cfg(test)]
 mod tests {
     use super::{
-        LocalePhrases, PairTopicTone, PairTurnMove, PromptTemplate, ShadowLocale, SystemPrompts,
+        LocalePhrases, ModelFallbackChain, PairTopicTone, PairTurnMove, PromptTemplate,
+        ShadowLocale, ShadowModel, SystemPrompts,
     };
 
     fn render_with_locale_phrases(template: &str, locale: &str) -> String {
@@ -230,6 +304,63 @@ mod tests {
             ShadowLocale::from_code("").prompt_language_name(),
             "English"
         );
+    }
+
+    #[test]
+    fn shadow_model_fallback_chain_defaults_to_strongest_model_first() {
+        let models = ModelFallbackChain::from_configured_model(None)
+            .map(|model| model.as_str())
+            .collect::<Vec<_>>();
+
+        assert_eq!(
+            models,
+            vec![
+                "gpt-5.5-2026-04-23",
+                "gpt-5.4-2026-03-05",
+                "gpt-5-2025-08-07",
+                "gpt-5.4-mini-2026-03-17",
+                "gpt-5.4-nano-2026-03-17",
+                "gpt-5-nano-2025-08-07",
+            ]
+        );
+    }
+
+    #[test]
+    fn shadow_model_fallback_chain_starts_from_known_configured_model() {
+        let models = ModelFallbackChain::from_configured_model(Some("gpt-5.4-mini-2026-03-17"))
+            .map(|model| model.as_str())
+            .collect::<Vec<_>>();
+
+        assert_eq!(
+            models,
+            vec![
+                "gpt-5.4-mini-2026-03-17",
+                "gpt-5.4-nano-2026-03-17",
+                "gpt-5-nano-2025-08-07",
+            ]
+        );
+    }
+
+    #[test]
+    fn shadow_model_fallback_chain_ignores_unknown_or_blank_configured_model() {
+        let unknown = ModelFallbackChain::from_configured_model(Some("gpt-custom"))
+            .map(|model| model.as_str())
+            .collect::<Vec<_>>();
+        let blank = ModelFallbackChain::from_configured_model(Some("  "))
+            .map(|model| model.as_str())
+            .collect::<Vec<_>>();
+
+        assert_eq!(unknown.first(), Some(&"gpt-5.5-2026-04-23"));
+        assert_eq!(blank.first(), Some(&"gpt-5.5-2026-04-23"));
+    }
+
+    #[test]
+    fn shadow_model_parses_known_model_names() {
+        assert_eq!(
+            ShadowModel::from_name("gpt-5.4-nano-2026-03-17"),
+            Some(ShadowModel::Gpt54Nano)
+        );
+        assert_eq!(ShadowModel::from_name("unknown"), None);
     }
 
     #[test]
