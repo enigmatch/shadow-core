@@ -55,6 +55,7 @@ impl LocalePhrases {
 
 pub struct SystemPrompts {
     pub profile_system_prompt: &'static str,
+    pub profile_body_system_prompt: &'static str,
     pub preview_system_prompt: &'static str,
     pub chat_system_prompt: &'static str,
     pub onboarding_turn_two_system_prompt: &'static str,
@@ -72,6 +73,7 @@ impl SystemPrompts {
         // Shared prompts (English-only)
         let common = Self {
             profile_system_prompt: include_str!("prompts/profile_system_prompt.txt"),
+            profile_body_system_prompt: include_str!("prompts/profile_body_system_prompt.txt"),
             preview_system_prompt: include_str!("prompts/preview_system_prompt.txt"),
             chat_system_prompt: include_str!("prompts/chat_system_prompt.txt"),
             onboarding_turn_two_system_prompt: include_str!("prompts/onboarding_turn_two.txt"),
@@ -133,6 +135,18 @@ mod tests {
 
     fn render_with_locale_phrases(template: &str, locale: &str) -> String {
         PromptTemplate::new(template).render(&LocalePhrases::for_locale(locale).template_vars())
+    }
+
+    fn contains_japanese_script(text: &str) -> bool {
+        text.chars().any(|ch| {
+            matches!(
+                ch,
+                '\u{3040}'..='\u{309f}'
+                    | '\u{30a0}'..='\u{30ff}'
+                    | '\u{3400}'..='\u{9fff}'
+                    | '\u{3000}'..='\u{303f}'
+            )
+        })
     }
 
     #[test]
@@ -236,6 +250,7 @@ mod tests {
     fn prompt_assets_are_non_empty() {
         let prompts = SystemPrompts::for_locale("en");
         assert!(!prompts.profile_system_prompt.trim().is_empty());
+        assert!(!prompts.profile_body_system_prompt.trim().is_empty());
         assert!(!prompts.preview_system_prompt.trim().is_empty());
         assert!(!prompts.chat_system_prompt.trim().is_empty());
         assert!(!prompts.onboarding_turn_two_system_prompt.trim().is_empty());
@@ -565,6 +580,24 @@ mod tests {
     }
 
     #[test]
+    fn profile_body_prompt_contract_excludes_headline_generation() {
+        let prompts = SystemPrompts::for_locale("en");
+
+        assert!(prompts
+            .profile_body_system_prompt
+            .contains("Do not create, infer, rewrite, translate, or return a headline"));
+        assert!(prompts
+            .profile_body_system_prompt
+            .contains("append the exact output contract separately"));
+        assert!(!prompts
+            .profile_body_system_prompt
+            .contains("Return JSON only with this exact shape"));
+        assert!(!prompts
+            .profile_body_system_prompt
+            .contains("Headline rules:"));
+    }
+
+    #[test]
     fn english_prompt_assets_render_without_japanese_example_phrases() {
         let prompts = SystemPrompts::for_locale("en");
 
@@ -573,6 +606,7 @@ mod tests {
         let rendered_normal_chat =
             render_with_locale_phrases(prompts.normal_chat_mode_prompt, "en");
         let rendered_onboarding = render_with_locale_phrases(prompts.onboarding_mode_prompt, "en");
+        let rendered_output_style = render_with_locale_phrases(prompts.output_style_prompt, "en");
         let rendered_preview = render_with_locale_phrases(prompts.preview_system_prompt, "en");
 
         for rendered in [
@@ -580,7 +614,10 @@ mod tests {
             rendered_persona,
             rendered_normal_chat,
             rendered_onboarding,
+            rendered_output_style,
             rendered_preview,
+            prompts.profile_system_prompt.to_string(),
+            prompts.profile_body_system_prompt.to_string(),
         ] {
             assert!(!rendered.contains("また始まったよ"));
             assert!(!rendered.contains("こういう感じかも"));
@@ -591,6 +628,7 @@ mod tests {
             assert!(!rendered.contains("「{shadow_name}」"));
             assert!(!rendered.contains("「私」「僕」「俺」"));
             assert!(!rendered.contains("やん"));
+            assert!(!contains_japanese_script(&rendered));
         }
     }
 
@@ -635,6 +673,17 @@ mod tests {
             assert!(
                 !prompts.onboarding_mode_prompt.to_lowercase().contains(word),
                 "onboarding_mode_prompt must not contain '{word}'"
+            );
+            assert!(
+                !prompts.profile_system_prompt.to_lowercase().contains(word),
+                "profile_system_prompt must not contain '{word}'"
+            );
+            assert!(
+                !prompts
+                    .profile_body_system_prompt
+                    .to_lowercase()
+                    .contains(word),
+                "profile_body_system_prompt must not contain '{word}'"
             );
         }
     }
