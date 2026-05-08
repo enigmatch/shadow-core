@@ -137,6 +137,18 @@ mod tests {
         PromptTemplate::new(template).render(&LocalePhrases::for_locale(locale).template_vars())
     }
 
+    fn contains_japanese_script(text: &str) -> bool {
+        text.chars().any(|ch| {
+            matches!(
+                ch,
+                '\u{3040}'..='\u{309f}'
+                    | '\u{30a0}'..='\u{30ff}'
+                    | '\u{3400}'..='\u{9fff}'
+                    | '\u{3000}'..='\u{303f}'
+            )
+        })
+    }
+
     #[test]
     fn prompt_template_replaces_single_variable() {
         let result = PromptTemplate::new("Hello, {name}!").render(&[("name", "World")]);
@@ -594,6 +606,7 @@ mod tests {
         let rendered_normal_chat =
             render_with_locale_phrases(prompts.normal_chat_mode_prompt, "en");
         let rendered_onboarding = render_with_locale_phrases(prompts.onboarding_mode_prompt, "en");
+        let rendered_output_style = render_with_locale_phrases(prompts.output_style_prompt, "en");
         let rendered_preview = render_with_locale_phrases(prompts.preview_system_prompt, "en");
 
         for rendered in [
@@ -601,7 +614,10 @@ mod tests {
             rendered_persona,
             rendered_normal_chat,
             rendered_onboarding,
+            rendered_output_style,
             rendered_preview,
+            prompts.profile_system_prompt.to_string(),
+            prompts.profile_body_system_prompt.to_string(),
         ] {
             assert!(!rendered.contains("また始まったよ"));
             assert!(!rendered.contains("こういう感じかも"));
@@ -612,6 +628,7 @@ mod tests {
             assert!(!rendered.contains("「{shadow_name}」"));
             assert!(!rendered.contains("「私」「僕」「俺」"));
             assert!(!rendered.contains("やん"));
+            assert!(!contains_japanese_script(&rendered));
         }
     }
 
@@ -656,6 +673,17 @@ mod tests {
             assert!(
                 !prompts.onboarding_mode_prompt.to_lowercase().contains(word),
                 "onboarding_mode_prompt must not contain '{word}'"
+            );
+            assert!(
+                !prompts.profile_system_prompt.to_lowercase().contains(word),
+                "profile_system_prompt must not contain '{word}'"
+            );
+            assert!(
+                !prompts
+                    .profile_body_system_prompt
+                    .to_lowercase()
+                    .contains(word),
+                "profile_body_system_prompt must not contain '{word}'"
             );
         }
     }
