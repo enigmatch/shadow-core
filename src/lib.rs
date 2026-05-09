@@ -1,8 +1,13 @@
+mod drop_seed;
 mod pair_topic;
 mod prompt_inputs;
 mod template;
 
-pub use pair_topic::{PairTopicTone, PairTurnDirective, PairTurnMove};
+pub use drop_seed::{render_drop_definitions_for_locale, DropDefinition, DROP_DEFINITIONS};
+pub use pair_topic::{
+    pair_normal_pair_chat_handoff_transition_note, pair_topic_initial_message_transition_note,
+    PairTopicTone, PairTurnDirective, PairTurnMove,
+};
 pub use prompt_inputs::{
     PairShadowIdentity, PromptReadyPersona, PromptReadyProfile, PromptReadyReasoningPolicy,
     PromptReadySpeechStyle,
@@ -328,6 +333,18 @@ mod tests {
         assert!(prompts
             .pair_topic_mode_prompt
             .contains("listener can pick up"));
+    }
+
+    #[test]
+    fn pair_topic_transition_note_helpers_are_shared_contracts() {
+        assert_eq!(
+            pair_topic_initial_message_transition_note(),
+            "Use a plain natural opening only if it helps the first message feel conversational. Then make the first line a concrete image, opinion, emotional reaction, or small scene from the actual topic. Do not explain why the topic started. This is not a solo answer: bridge toward the listener's likely reaction, values, or question so the listener has a concrete hook to pick up."
+        );
+        assert_eq!(
+            pair_normal_pair_chat_handoff_transition_note(),
+            "For this next message only, bridge out of the completed topic conversation explicitly: briefly acknowledge the completed Topic Talk result in one natural sentence, then start a natural new normal-conversation thread about the original human owners. Do not keep discussing the completed topic; use it only as a short handoff."
+        );
     }
 
     #[test]
