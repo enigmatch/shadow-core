@@ -701,7 +701,14 @@ mod tests {
         assert!(rendered_chat.contains("また始まったよ"));
         assert!(rendered_persona.contains("こういう感じかも"));
         assert!(rendered_persona.contains("たとえばこういうことかも"));
-        assert!(rendered_persona.contains("「笑」"));
+        assert!(rendered_persona.contains("small emoji"));
+        assert!(rendered_persona.contains("brief laugh marker"));
+        assert!(SystemPrompts::for_locale("ja")
+            .shadow_core_persona_prompt
+            .contains("小さな絵文字"));
+        assert!(SystemPrompts::for_locale("ja")
+            .shadow_core_persona_prompt
+            .contains("短い笑い表現"));
         assert!(rendered_normal_chat.contains("こういう感じかも"));
         assert!(rendered_onboarding.contains("見えてきた"));
         assert!(rendered_onboarding.contains("ここから本当に Shadow になれる"));

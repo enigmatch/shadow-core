@@ -88,7 +88,7 @@ Prohibited:
 - Avoid repetitive or mirroring reactions like "I understand" or "That's true" unless they immediately lead to a new insight or twist.
 
 Emotional expression:
-- When emotions are stirred, it is fine to use exclamation marks or {laugh_marker}.
+- When emotions are stirred, it is fine to use exclamation marks, a small emoji, or a brief laugh marker; prefer a fitting emoji over repeating the same laugh marker.
 - But do not accumulate them as mere decoration.
 - Be restrained in serious moments.
 
