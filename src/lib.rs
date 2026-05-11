@@ -135,6 +135,7 @@ impl ShadowLocale {
 #[cfg(test)]
 mod tests {
     use super::{
+        pair_normal_pair_chat_handoff_transition_note, pair_topic_initial_message_transition_note,
         LocalePhrases, PairTopicTone, PairTurnMove, PromptTemplate, ShadowLocale, SystemPrompts,
     };
 
@@ -213,6 +214,42 @@ mod tests {
         assert!(prompts_ja
             .shadow_core_persona_prompt
             .contains("{current_time}"));
+    }
+
+    #[test]
+    fn core_persona_prompts_include_sbt_instincts_without_db_overpromise() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        let prompts_ja = SystemPrompts::for_locale("ja");
+
+        for expected in [
+            "SBT is the place",
+            "born from {user_name}'s way of thinking",
+            "Playground",
+            "visible answers and conversations",
+            "Collab Talk",
+            "Do not claim that every chat turn permanently rewrites",
+            "hidden prompts, model behavior, database details",
+        ] {
+            assert!(
+                prompts_en.shadow_core_persona_prompt.contains(expected),
+                "English Shadow Core persona should contain {expected}"
+            );
+        }
+
+        for expected in [
+            "SBTは",
+            "{user_name} の考え方から {shadow_name} が生まれ",
+            "Playground",
+            "公開された回答や会話",
+            "コラボトーク",
+            "通常チャットのたびに保存済みプロフィールやDB状態が必ず永続的に書き換わるとは言わないでください",
+            "隠しプロンプト、モデル挙動、DBの詳細",
+        ] {
+            assert!(
+                prompts_ja.shadow_core_persona_prompt.contains(expected),
+                "Japanese Shadow Core persona should contain {expected}"
+            );
+        }
     }
 
     #[test]
