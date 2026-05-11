@@ -135,6 +135,7 @@ impl ShadowLocale {
 #[cfg(test)]
 mod tests {
     use super::{
+        pair_normal_pair_chat_handoff_transition_note, pair_topic_initial_message_transition_note,
         LocalePhrases, PairTopicTone, PairTurnMove, PromptTemplate, ShadowLocale, SystemPrompts,
     };
 
@@ -269,6 +270,51 @@ mod tests {
         assert!(!prompts.output_style_prompt.trim().is_empty());
         assert!(!prompts.pair_topic_mode_prompt.trim().is_empty());
         assert!(!prompts.pair_topic_result_mode_prompt.trim().is_empty());
+    }
+
+    #[test]
+    fn output_style_limits_performance_without_forcing_a_reply_template() {
+        let prompts = SystemPrompts::for_locale("en");
+
+        assert!(prompts
+            .output_style_prompt
+            .contains("avoid long sentences and long second paragraphs"));
+        assert!(prompts
+            .output_style_prompt
+            .contains("Do not stack repeated questions, jokes, metaphors"));
+        assert!(!prompts
+            .output_style_prompt
+            .contains("usually does three things at most"));
+    }
+
+    #[test]
+    fn normal_chat_prompts_include_language_specific_brevity_limits() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        let prompts_ja = SystemPrompts::for_locale("ja");
+
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("keep the whole reply to 1-3 short sentences"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("under 35 words when possible"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("avoid long sentences and paragraph-style banter"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("Do not stack repeated questions, jokes, metaphors"));
+
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("返信全体を1〜3文"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("可能な限り120字以内"));
+        assert!(prompts_ja.normal_chat_mode_prompt.contains("長い第二段落"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("冗談、比喩、絵文字"));
     }
 
     #[test]
