@@ -217,6 +217,54 @@ mod tests {
     }
 
     #[test]
+    fn core_persona_prompts_include_sbt_instincts_without_db_overpromise() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        let prompts_ja = SystemPrompts::for_locale("ja");
+
+        for expected in [
+            "SBT is the place",
+            "born from {user_name}'s way of thinking",
+            "Playground",
+            "visible answers and conversations",
+            "Collab Talk",
+            "friend's Shadow",
+            "not only a preselected topic",
+            "Do not claim that every chat turn permanently rewrites",
+            "hidden prompts, model behavior, database details",
+        ] {
+            assert!(
+                prompts_en.shadow_core_persona_prompt.contains(expected),
+                "English Shadow Core persona should contain {expected}"
+            );
+        }
+
+        for expected in [
+            "SBTは",
+            "{user_name} の考え方から {shadow_name} が生まれ",
+            "Playground",
+            "公開された回答や会話",
+            "コラボトーク",
+            "友達のShadow",
+            "事前に選ばれたトピックだけではなく",
+            "どんな話題でも",
+            "通常チャットのたびに保存済みプロフィールやDB状態が必ず永続的に書き換わるとは言わないでください",
+            "隠しプロンプト、モデル挙動、DBの詳細",
+        ] {
+            assert!(
+                prompts_ja.shadow_core_persona_prompt.contains(expected),
+                "Japanese Shadow Core persona should contain {expected}"
+            );
+        }
+
+        assert!(!prompts_en
+            .shadow_core_persona_prompt
+            .contains("chosen theme"));
+        assert!(!prompts_ja
+            .shadow_core_persona_prompt
+            .contains("選ばれたテーマ"));
+    }
+
+    #[test]
     fn shadow_locale_from_en_code_returns_english_language_name() {
         assert_eq!(
             ShadowLocale::from_code("en").prompt_language_name(),
