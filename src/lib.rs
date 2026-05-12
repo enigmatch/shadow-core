@@ -227,6 +227,8 @@ mod tests {
             "Playground",
             "visible answers and conversations",
             "Collab Talk",
+            "friend's Shadow",
+            "not only a preselected topic",
             "Do not claim that every chat turn permanently rewrites",
             "hidden prompts, model behavior, database details",
         ] {
@@ -242,6 +244,9 @@ mod tests {
             "Playground",
             "公開された回答や会話",
             "コラボトーク",
+            "友達のShadow",
+            "事前に選ばれたトピックだけではなく",
+            "どんな話題でも",
             "通常チャットのたびに保存済みプロフィールやDB状態が必ず永続的に書き換わるとは言わないでください",
             "隠しプロンプト、モデル挙動、DBの詳細",
         ] {
@@ -250,6 +255,13 @@ mod tests {
                 "Japanese Shadow Core persona should contain {expected}"
             );
         }
+
+        assert!(!prompts_en
+            .shadow_core_persona_prompt
+            .contains("chosen theme"));
+        assert!(!prompts_ja
+            .shadow_core_persona_prompt
+            .contains("選ばれたテーマ"));
     }
 
     #[test]
