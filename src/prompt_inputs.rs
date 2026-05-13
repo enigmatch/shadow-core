@@ -33,6 +33,8 @@ pub struct PromptReadyReasoningPolicy {
 pub struct PairShadowIdentity {
     pub name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub personal_instruction: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub profile: Option<PromptReadyProfile>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub persona: Option<PromptReadyPersona>,
@@ -73,6 +75,7 @@ mod tests {
     fn pair_shadow_identity_uses_renamed_speech_style_type() {
         let identity = PairShadowIdentity {
             name: "Kage".to_string(),
+            personal_instruction: Some("Open with my own point of view.".to_string()),
             profile: Some(PromptReadyProfile {
                 headline: "clear".to_string(),
                 stance: "measured".to_string(),
@@ -95,6 +98,10 @@ mod tests {
         };
 
         let value = serde_json::to_value(identity).expect("pair identity should serialize");
+        assert_eq!(
+            value["personal_instruction"],
+            "Open with my own point of view."
+        );
         assert_eq!(value["persona"]["speech_style"]["formality"], "neutral");
     }
 
