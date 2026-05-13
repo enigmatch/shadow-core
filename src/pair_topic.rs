@@ -160,7 +160,7 @@ impl PairTurnDirective {
 }
 
 pub fn pair_topic_initial_message_transition_note() -> &'static str {
-    "Use a plain natural opening only if it helps the first message feel conversational. Then make the first line a concrete image, opinion, emotional reaction, or small scene from the actual topic. Do not explain why the topic started. This is not a solo answer: bridge toward the listener's likely reaction, values, or question so the listener has a concrete hook to pick up."
+    "Use a plain natural opening only if it helps the first message feel conversational. Treat the topic as the speaker's own proposal or impulse for opening this conversation now, not as an assignment from someone else. Then make the first line a concrete image, opinion, emotional reaction, or small scene from the actual topic. Do not explain why the topic started. This is not a solo answer: bridge toward the listener's likely reaction, values, or question so the listener has a concrete hook to pick up."
 }
 
 pub fn pair_normal_pair_chat_handoff_transition_note() -> &'static str {
