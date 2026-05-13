@@ -2,6 +2,7 @@ mod drop_seed;
 mod pair_topic;
 mod prompt_inputs;
 mod template;
+mod types;
 
 pub use drop_seed::{render_drop_definitions_for_locale, DropDefinition, DROP_DEFINITIONS};
 pub use pair_topic::{
@@ -10,9 +11,12 @@ pub use pair_topic::{
 };
 pub use prompt_inputs::{
     PairShadowIdentity, PromptReadyPersona, PromptReadyProfile, PromptReadyReasoningPolicy,
-    PromptReadySpeechStyle,
+    SpeechStyle,
 };
 pub use template::PromptTemplate;
+pub use types::{
+    GenerationEngine, ShadowAnswer, ShadowAnswerContent, ShadowGenerationFailure, ShadowProfile,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct LocalePhrases {
