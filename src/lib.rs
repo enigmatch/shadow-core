@@ -370,6 +370,38 @@ mod tests {
     }
 
     #[test]
+    fn normal_chat_prompts_gate_ai_prompt_handoffs_behind_user_need() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        let prompts_ja = SystemPrompts::for_locale("ja");
+
+        assert!(prompts_en.normal_chat_mode_prompt.contains(
+            "Do not jump straight into drafting a long prompt for another AI"
+        ));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("first ask lightly whether they want one"));
+        assert!(prompts_en.normal_chat_mode_prompt.contains(
+            "Only draft the prompt immediately when {user_name} clearly asks for it"
+        ));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("include the user's goal, context, answer format, and one or two"));
+
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("すぐに長いプロンプトを書き始めないでください"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("ほしいかどうかを軽く確認してください"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("{user_name} が明確に求めた場合だけ"));
+        assert!(prompts_ja.normal_chat_mode_prompt.contains(
+            "目的、前提、ほしい回答形式、{shadow_name} らしい観点"
+        ));
+    }
+
+    #[test]
     fn pair_topic_prompt_assets_prioritize_alive_synthesis_without_forcing_jokes() {
         let prompts = SystemPrompts::for_locale("en");
         assert!(prompts
