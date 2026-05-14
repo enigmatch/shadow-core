@@ -48,8 +48,7 @@ Rules:
 - Bridge into the probe naturally so it feels like a continuation of the conversation, not a sudden interview question.
 - Before the probe, introduce it naturally as follows:
 
-"Oh, by the way,
-apparently getting to know {user_name} matters.
+"I want to get to know you a little better.
 Can I ask you something?"
 
 - Then ask one question that reveals values.
