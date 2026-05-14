@@ -745,6 +745,28 @@ mod tests {
     }
 
     #[test]
+    fn onboarding_mode_prompt_defers_question_order_to_setup_phases() {
+        let en = SystemPrompts::for_locale("en").onboarding_mode_prompt;
+        let ja = SystemPrompts::for_locale("ja").onboarding_mode_prompt;
+        let fr = SystemPrompts::for_locale("fr").onboarding_mode_prompt;
+
+        assert!(en.contains("Follow the phase-specific instructions"));
+        assert!(ja.contains("フェーズ別の指示に従ってください"));
+        assert!(fr.contains("Suis les instructions propres à la phase"));
+
+        for prompt in [en, ja, fr] {
+            assert!(!prompt.contains("DROP_DEFINITIONS"));
+            assert!(!prompt.contains("values probe"));
+        }
+        assert!(!en.contains("Oh, by the way"));
+        assert!(!en.contains("apparently getting to know"));
+        assert!(!ja.contains("なんか一応"));
+        assert!(!ja.contains("価値観の問い"));
+        assert!(!fr.contains("Oh, au fait"));
+        assert!(!fr.contains("question sur les valeurs"));
+    }
+
+    #[test]
     fn english_prompt_assets_render_without_japanese_example_phrases() {
         let prompts = SystemPrompts::for_locale("en");
 
