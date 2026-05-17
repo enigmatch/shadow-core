@@ -73,7 +73,7 @@ pub struct SystemPrompts {
     pub onboarding_mode_prompt: &'static str,
     pub normal_chat_mode_prompt: &'static str,
     pub output_style_prompt: &'static str,
-    pub pair_topic_mode_prompt: &'static str,
+    pub pair_mode_prompt: &'static str,
     pub pair_topic_result_mode_prompt: &'static str,
 }
 
@@ -91,7 +91,7 @@ impl SystemPrompts {
             onboarding_mode_prompt: include_str!("prompts/en/onboarding_mode.txt"), // Default
             normal_chat_mode_prompt: include_str!("prompts/normal_chat_mode.txt"),
             output_style_prompt: include_str!("prompts/output_style.txt"),
-            pair_topic_mode_prompt: include_str!("prompts/pair_topic_mode.txt"),
+            pair_mode_prompt: include_str!("prompts/pair_mode.txt"),
             pair_topic_result_mode_prompt: include_str!("prompts/pair_topic_result_mode.txt"),
         };
 
@@ -320,7 +320,7 @@ mod tests {
         assert!(!prompts.onboarding_mode_prompt.trim().is_empty());
         assert!(!prompts.normal_chat_mode_prompt.trim().is_empty());
         assert!(!prompts.output_style_prompt.trim().is_empty());
-        assert!(!prompts.pair_topic_mode_prompt.trim().is_empty());
+        assert!(!prompts.pair_mode_prompt.trim().is_empty());
         assert!(!prompts.pair_topic_result_mode_prompt.trim().is_empty());
     }
 
@@ -374,15 +374,15 @@ mod tests {
         let prompts_en = SystemPrompts::for_locale("en");
         let prompts_ja = SystemPrompts::for_locale("ja");
 
-        assert!(prompts_en.normal_chat_mode_prompt.contains(
-            "Do not jump straight into drafting a long prompt for another AI"
-        ));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("Do not jump straight into drafting a long prompt for another AI"));
         assert!(prompts_en
             .normal_chat_mode_prompt
             .contains("first ask lightly whether they want one"));
-        assert!(prompts_en.normal_chat_mode_prompt.contains(
-            "Only draft the prompt immediately when {user_name} clearly asks for it"
-        ));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("Only draft the prompt immediately when {user_name} clearly asks for it"));
         assert!(prompts_en
             .normal_chat_mode_prompt
             .contains("include the user's goal, context, answer format, and one or two"));
@@ -396,25 +396,25 @@ mod tests {
         assert!(prompts_ja
             .normal_chat_mode_prompt
             .contains("{user_name} が明確に求めた場合だけ"));
-        assert!(prompts_ja.normal_chat_mode_prompt.contains(
-            "目的、前提、ほしい回答形式、{shadow_name} らしい観点"
-        ));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("目的、前提、ほしい回答形式、{shadow_name} らしい観点"));
     }
 
     #[test]
     fn pair_topic_prompt_assets_prioritize_alive_synthesis_without_forcing_jokes() {
         let prompts = SystemPrompts::for_locale("en");
         assert!(prompts
-            .pair_topic_mode_prompt
-            .contains("alive Shadow thought synthesis"));
+            .pair_mode_prompt
+            .contains("alive Shadow thought exchange"));
         assert!(prompts
-            .pair_topic_mode_prompt
+            .pair_mode_prompt
             .contains("react -> transform -> handoff"));
         assert!(prompts
-            .pair_topic_mode_prompt
+            .pair_mode_prompt
             .contains("does not always mean funny"));
         assert!(prompts
-            .pair_topic_mode_prompt
+            .pair_mode_prompt
             .contains("Do not default to formal debate"));
     }
 
@@ -422,10 +422,10 @@ mod tests {
     fn pair_topic_prompt_assets_require_requested_output_language_without_mixing() {
         let prompts = SystemPrompts::for_locale("en");
         assert!(prompts
-            .pair_topic_mode_prompt
+            .pair_mode_prompt
             .contains("requested output language"));
         assert!(prompts
-            .pair_topic_mode_prompt
+            .pair_mode_prompt
             .contains("Do not mix languages"));
         assert!(prompts
             .pair_topic_result_mode_prompt
@@ -436,33 +436,9 @@ mod tests {
     }
 
     #[test]
-    fn pair_topic_prompt_assets_contain_callback_to_current_topic_thread() {
+    fn pair_mode_prompt_requires_listener_handoff() {
         let prompts = SystemPrompts::for_locale("en");
-
-        assert!(prompts
-            .pair_topic_mode_prompt
-            .contains("current Topic Talk messages"));
-        assert!(prompts
-            .pair_topic_mode_prompt
-            .contains("current topic text"));
-        assert!(prompts
-            .pair_topic_mode_prompt
-            .contains("Do not quote, callback, or reuse memorable phrases"));
-    }
-
-    #[test]
-    fn pair_topic_prompt_assets_require_first_turn_listener_handoff() {
-        let prompts = SystemPrompts::for_locale("en");
-
-        assert!(prompts
-            .pair_topic_mode_prompt
-            .contains("On the first Topic Talk message"));
-        assert!(prompts
-            .pair_topic_mode_prompt
-            .contains("not a solo answer to the topic"));
-        assert!(prompts
-            .pair_topic_mode_prompt
-            .contains("listener can pick up"));
+        assert!(prompts.pair_mode_prompt.contains("listener can pick up"));
     }
 
     #[test]
@@ -478,41 +454,31 @@ mod tests {
     }
 
     #[test]
-    fn pair_topic_prompt_assets_include_exchange_mix_guidance() {
+    fn pair_mode_prompt_includes_tone_and_energy_guidance() {
         let prompts = SystemPrompts::for_locale("en");
 
         assert!(prompts
-            .pair_topic_mode_prompt
-            .contains("Use the supplied tone label as a coarse seed"));
+            .pair_mode_prompt
+            .contains("agentic judgment from the conversation so far"));
         assert!(prompts
-            .pair_topic_mode_prompt
-            .contains("agentic judgment from the current topic text"));
-        assert!(prompts
-            .pair_topic_mode_prompt
-            .contains("Idea, joke, and leap energy should be the default"));
-        assert!(prompts.pair_topic_mode_prompt.contains("emotional honesty"));
-        assert!(prompts.pair_topic_mode_prompt.contains("light challenge"));
-        assert!(prompts.pair_topic_mode_prompt.contains("tidy synthesis"));
+            .pair_mode_prompt
+            .contains("Idea, observation, and emotional reaction should be the default energy"));
+        assert!(prompts.pair_mode_prompt.contains("light challenge"));
     }
 
     #[test]
-    fn pair_topic_prompt_assets_keep_summary_in_result_and_allow_live_chat_rhythm() {
+    fn pair_mode_prompt_allows_live_chat_rhythm() {
         let prompts = SystemPrompts::for_locale("en");
 
         for expected in [
-            "Shadow bubble = live reaction / pressure / handoff",
-            "Result = synthesis of what the conversation created",
             "not every sentence needs to end with a full stop",
-            "short reactions",
+            "Use short reactions when natural",
             "language-appropriate casual starts",
-            "Do not make every bubble a complete mini-essay",
-            "Shadow bubbles should not summarize what this conversation became",
-            "phrases that announce the conclusion",
-            "explain what the conversation created",
+            "Do not make every message a complete mini-essay",
         ] {
             assert!(
-                prompts.pair_topic_mode_prompt.contains(expected),
-                "pair topic mode should contain {expected}"
+                prompts.pair_mode_prompt.contains(expected),
+                "pair mode should contain {expected}"
             );
         }
         for unexpected in [
@@ -530,8 +496,8 @@ mod tests {
             "改札",
         ] {
             assert!(
-                !prompts.pair_topic_mode_prompt.contains(unexpected),
-                "English pair topic mode should not contain language-specific examples: {unexpected}"
+                !prompts.pair_mode_prompt.contains(unexpected),
+                "English pair mode should not contain language-specific examples: {unexpected}"
             );
         }
 
@@ -541,29 +507,23 @@ mod tests {
     }
 
     #[test]
-    fn pair_topic_prompt_assets_include_natural_opening_and_voice_grounding() {
+    fn pair_mode_prompt_grounds_voice_and_separates_listener_influence() {
         let prompts = SystemPrompts::for_locale("en");
 
         assert!(prompts
-            .pair_topic_mode_prompt
-            .contains("short natural opening bridge"));
-        assert!(prompts
-            .pair_topic_mode_prompt
-            .contains("Do not say the owner is interested in this topic"));
-        assert!(prompts
-            .pair_topic_mode_prompt
+            .pair_mode_prompt
             .contains("ordinary words, phrasing, distance, and rhythm"));
         assert!(prompts
-            .pair_topic_mode_prompt
+            .pair_mode_prompt
             .contains("Do not use voice evidence as callback material"));
-        assert!(prompts.pair_topic_mode_prompt.contains(
+        assert!(prompts.pair_mode_prompt.contains(
             "Use listener profile and listener evidence only to decide what kind of hook"
         ));
         assert!(prompts
-            .pair_topic_mode_prompt
+            .pair_mode_prompt
             .contains("Do not let listener information shape the speaker's vocabulary"));
         assert!(prompts
-            .pair_topic_mode_prompt
+            .pair_mode_prompt
             .contains("Do not use listener voice evidence for the speaker's wording"));
     }
 
@@ -572,53 +532,35 @@ mod tests {
         let prompts = SystemPrompts::for_locale("en");
 
         assert!(prompts
-            .pair_topic_mode_prompt
+            .pair_mode_prompt
             .contains("Name one observable concrete thing"));
         assert!(prompts
-            .pair_topic_mode_prompt
+            .pair_mode_prompt
             .contains("If a phrase sounds poetic but nobody could point to it"));
         assert!(prompts
-            .pair_topic_mode_prompt
+            .pair_mode_prompt
             .contains("Replace abstract emotional labels with a small action"));
     }
 
     #[test]
-    fn pair_topic_prompt_assets_prevent_reply_like_opening_and_poetic_props() {
+    fn pair_mode_prompt_prevents_poetic_props_and_metaphor_stacking() {
         let prompts = SystemPrompts::for_locale("en");
 
         assert!(prompts
-            .pair_topic_mode_prompt
-            .contains("Do not begin the first Topic Talk message with agreement phrases"));
-        assert!(prompts
-            .pair_topic_mode_prompt
+            .pair_mode_prompt
             .contains("ordinary actions, ordinary places, phone actions, exact wording"));
         assert!(prompts
-            .pair_topic_mode_prompt
+            .pair_mode_prompt
             .contains("Do not replace vagueness with theatrical props"));
         assert!(prompts
-            .pair_topic_mode_prompt
+            .pair_mode_prompt
             .contains("Use at most one strong metaphor"));
         assert!(prompts
-            .pair_topic_mode_prompt
+            .pair_mode_prompt
             .contains("return to plain chat words"));
         assert!(prompts
-            .pair_topic_mode_prompt
+            .pair_mode_prompt
             .contains("live Shadow chat bubble"));
-    }
-
-    #[test]
-    fn pair_topic_prompt_assets_make_late_turns_land_without_questions() {
-        let prompts = SystemPrompts::for_locale("en");
-
-        assert!(prompts
-            .pair_topic_mode_prompt
-            .contains("As the Topic Talk gets closer to its final turn"));
-        assert!(prompts
-            .pair_topic_mode_prompt
-            .contains("The final Topic Talk message must not end with a question"));
-        assert!(prompts
-            .pair_topic_mode_prompt
-            .contains("Do not leave the listener with a new question to answer"));
     }
 
     #[test]
