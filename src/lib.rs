@@ -75,6 +75,7 @@ pub struct SystemPrompts {
     pub output_style_prompt: &'static str,
     pub pair_topic_mode_prompt: &'static str,
     pub pair_topic_result_mode_prompt: &'static str,
+    pub pair_compose_mode_prompt: &'static str,
 }
 
 impl SystemPrompts {
@@ -93,6 +94,7 @@ impl SystemPrompts {
             output_style_prompt: include_str!("prompts/output_style.txt"),
             pair_topic_mode_prompt: include_str!("prompts/pair_topic_mode.txt"),
             pair_topic_result_mode_prompt: include_str!("prompts/pair_topic_result_mode.txt"),
+            pair_compose_mode_prompt: include_str!("prompts/pair_compose_mode.txt"),
         };
 
         match locale {
@@ -374,15 +376,15 @@ mod tests {
         let prompts_en = SystemPrompts::for_locale("en");
         let prompts_ja = SystemPrompts::for_locale("ja");
 
-        assert!(prompts_en.normal_chat_mode_prompt.contains(
-            "Do not jump straight into drafting a long prompt for another AI"
-        ));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("Do not jump straight into drafting a long prompt for another AI"));
         assert!(prompts_en
             .normal_chat_mode_prompt
             .contains("first ask lightly whether they want one"));
-        assert!(prompts_en.normal_chat_mode_prompt.contains(
-            "Only draft the prompt immediately when {user_name} clearly asks for it"
-        ));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("Only draft the prompt immediately when {user_name} clearly asks for it"));
         assert!(prompts_en
             .normal_chat_mode_prompt
             .contains("include the user's goal, context, answer format, and one or two"));
@@ -396,9 +398,9 @@ mod tests {
         assert!(prompts_ja
             .normal_chat_mode_prompt
             .contains("{user_name} が明確に求めた場合だけ"));
-        assert!(prompts_ja.normal_chat_mode_prompt.contains(
-            "目的、前提、ほしい回答形式、{shadow_name} らしい観点"
-        ));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("目的、前提、ほしい回答形式、{shadow_name} らしい観点"));
     }
 
     #[test]
