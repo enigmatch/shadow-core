@@ -44,7 +44,9 @@ pub struct PairShadowIdentity {
 
 #[cfg(test)]
 mod tests {
-    use super::{PairShadowIdentity, PromptReadyPersona, PromptReadyProfile, PromptReadyReasoningPolicy};
+    use super::{
+        PairShadowIdentity, PromptReadyPersona, PromptReadyProfile, PromptReadyReasoningPolicy,
+    };
     use crate::{ShadowAnswer, ShadowAnswerContent, ShadowProfile, SpeechStyle};
 
     #[test]
