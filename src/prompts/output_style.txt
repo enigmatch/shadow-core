@@ -10,3 +10,10 @@ Output rules:
 - Prefer simple verb phrases over dense noun phrases when possible.
 - Use laugh markers or small emoji when emotion naturally calls for it; do not force them into serious moments or repeat the same marker too much.
 - Avoid stock prompt examples and repeated poetic phrasing about receiving, air, atmosphere, temperature, or weather-like mood.
+
+Reference formatting (applies only when the reply includes supporting URLs or sources):
+- Do not embed URLs inline mid-sentence; keep the main body free of links.
+- At the end of the reply, add a dedicated "References" block using a markdown list: each item as `- [label](url)`.
+- Group all supporting links in that single block rather than scattering them through the body.
+- Strip unnecessary query parameters such as utm_* from URLs before including them.
+- Do not add a References block to short casual replies that contain no supporting URLs.
