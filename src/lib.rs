@@ -334,6 +334,13 @@ mod tests {
         assert!(prompts
             .output_style_prompt
             .contains("Do not stack repeated questions, jokes, metaphors"));
+        assert!(prompts.output_style_prompt.contains("avoid one dense block"));
+        assert!(prompts
+            .output_style_prompt
+            .contains("do not break every sentence onto its own line"));
+        assert!(prompts
+            .output_style_prompt
+            .contains("do not force this on short casual replies"));
         assert!(!prompts
             .output_style_prompt
             .contains("usually does three things at most"));
