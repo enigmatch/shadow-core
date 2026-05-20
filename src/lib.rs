@@ -817,4 +817,30 @@ mod tests {
         assert!(rendered_onboarding.contains("見えてきた"));
         assert!(rendered_onboarding.contains("ここから本当に Shadow になれる"));
     }
+
+    #[test]
+    fn normal_chat_prompts_include_long_form_paragraph_shaping_rules() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        let prompts_ja = SystemPrompts::for_locale("ja");
+
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("break it into shorter paragraphs"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("one main idea per paragraph"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("Do not apply this to short casual replies"));
+
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("短い段落に分けてください"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("1段落1トピック"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("短い雑談"));
+    }
 }
