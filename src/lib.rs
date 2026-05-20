@@ -337,7 +337,16 @@ mod tests {
         assert!(prompts.output_style_prompt.contains("avoid one dense block"));
         assert!(prompts
             .output_style_prompt
+            .contains("split the reply into readable paragraphs"));
+        assert!(prompts
+            .output_style_prompt
+            .contains("a small emoji may mark a key point or caution"));
+        assert!(prompts
+            .output_style_prompt
             .contains("do not break every sentence onto its own line"));
+        assert!(prompts
+            .output_style_prompt
+            .contains("keep the reply conversational"));
         assert!(prompts
             .output_style_prompt
             .contains("do not force this on short casual replies"));
