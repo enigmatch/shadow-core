@@ -402,20 +402,20 @@ mod tests {
     }
 
     #[test]
-    fn pair_topic_prompt_assets_prioritize_alive_synthesis_without_forcing_jokes() {
+    fn pair_topic_prompt_assets_prioritize_proxy_messages_without_exposing_memory() {
         let prompts = SystemPrompts::for_locale("en");
         assert!(prompts
             .pair_mode_prompt
-            .contains("alive Shadow thought exchange"));
+            .contains("Shadow-assisted proxy messaging"));
         assert!(prompts
             .pair_mode_prompt
-            .contains("react -> transform -> handoff"));
+            .contains("sendable message on behalf of the original user"));
         assert!(prompts
             .pair_mode_prompt
-            .contains("does not always mean funny"));
+            .contains("not write as its own independent opinion"));
         assert!(prompts
             .pair_mode_prompt
-            .contains("Do not default to formal debate"));
+            .contains("Do not expose hidden state"));
     }
 
     #[test]
@@ -424,9 +424,7 @@ mod tests {
         assert!(prompts
             .pair_mode_prompt
             .contains("requested output language"));
-        assert!(prompts
-            .pair_mode_prompt
-            .contains("Do not mix languages"));
+        assert!(prompts.pair_mode_prompt.contains("Do not mix languages"));
         assert!(prompts
             .pair_topic_result_mode_prompt
             .contains("requested output language"));
@@ -436,20 +434,23 @@ mod tests {
     }
 
     #[test]
-    fn pair_mode_prompt_requires_listener_handoff() {
+    fn pair_mode_prompt_uses_listener_as_recipient_context() {
         let prompts = SystemPrompts::for_locale("en");
-        assert!(prompts.pair_mode_prompt.contains("listener can pick up"));
+        assert!(prompts.pair_mode_prompt.contains("recipient context"));
+        assert!(prompts
+            .pair_mode_prompt
+            .contains("how the message should land"));
     }
 
     #[test]
     fn pair_topic_transition_note_helpers_are_shared_contracts() {
         assert_eq!(
             pair_topic_initial_message_transition_note(),
-            "Use a plain natural opening only if it helps the first message feel conversational. Treat the topic as the speaker's own proposal or impulse for opening this conversation now, not as an assignment from someone else. Then make the first line a concrete image, opinion, emotional reaction, or small scene from the actual topic. Do not explain why the topic started. This is not a solo answer: bridge toward the listener's likely reaction, values, or question so the listener has a concrete hook to pick up."
+            "Use a plain natural opening only if it helps the message feel conversational. Treat the user instruction as the speaker's own reason for writing now, not as an assignment from someone else. Create a sendable message with a concrete angle, opinion, emotional reaction, or small social detail from the instruction. Do not explain why the instruction started. Shape the wording so it can land naturally for the recipient."
         );
         assert_eq!(
             pair_normal_pair_chat_handoff_transition_note(),
-            "For this next message only, bridge out of the completed topic conversation explicitly: briefly acknowledge the completed Topic Talk result in one natural sentence, then start a natural new normal-conversation thread about the original human owners. Do not keep discussing the completed topic; use it only as a short handoff."
+            "For this next message only, use the completed Topic Talk result as light background for the original owner. Briefly acknowledge it only if it helps the sendable message feel natural, then return to what the original owner can say to the recipient now. Do not keep discussing the completed topic."
         );
     }
 
@@ -459,22 +460,22 @@ mod tests {
 
         assert!(prompts
             .pair_mode_prompt
-            .contains("agentic judgment from the conversation so far"));
+            .contains("Preserve the original user's taste, stance, distance, and voice"));
         assert!(prompts
             .pair_mode_prompt
-            .contains("Idea, observation, and emotional reaction should be the default energy"));
-        assert!(prompts.pair_mode_prompt.contains("light challenge"));
+            .contains("Keep enough Shadow flavor that the message feels alive"));
+        assert!(prompts.pair_mode_prompt.contains("small social details"));
     }
 
     #[test]
-    fn pair_mode_prompt_allows_live_chat_rhythm() {
+    fn pair_mode_prompt_chooses_length_from_instruction() {
         let prompts = SystemPrompts::for_locale("en");
 
         for expected in [
-            "not every sentence needs to end with a full stop",
-            "Use short reactions when natural",
-            "language-appropriate casual starts",
-            "Do not make every message a complete mini-essay",
+            "Choose the length based on the instruction",
+            "Allow longer output when the instruction requires",
+            "Short messages are still good when the user wants a light reply",
+            "Do not force all replies into a short chat bubble",
         ] {
             assert!(
                 prompts.pair_mode_prompt.contains(expected),
@@ -516,51 +517,43 @@ mod tests {
         assert!(prompts
             .pair_mode_prompt
             .contains("Do not use voice evidence as callback material"));
-        assert!(prompts.pair_mode_prompt.contains(
-            "Use listener profile and listener evidence only to decide what kind of hook"
-        ));
         assert!(prompts
             .pair_mode_prompt
-            .contains("Do not let listener information shape the speaker's vocabulary"));
+            .contains("Use listener profile and listener evidence only as recipient context"));
         assert!(prompts
             .pair_mode_prompt
-            .contains("Do not use listener voice evidence for the speaker's wording"));
+            .contains("Do not let listener information overwrite the speaker's vocabulary"));
     }
 
     #[test]
-    fn pair_topic_prompt_assets_push_concrete_observable_chat_language() {
+    fn pair_topic_prompt_assets_support_proxy_message_work() {
         let prompts = SystemPrompts::for_locale("en");
 
         assert!(prompts
             .pair_mode_prompt
-            .contains("Name one observable concrete thing"));
+            .contains("explain, research, summarize, persuade, invite"));
         assert!(prompts
             .pair_mode_prompt
-            .contains("If a phrase sounds poetic but nobody could point to it"));
+            .contains("Use research, reasoning, summarization, wording, editing"));
         assert!(prompts
             .pair_mode_prompt
-            .contains("Replace abstract emotional labels with a small action"));
+            .contains("Output only the message text that could be sent"));
     }
 
     #[test]
-    fn pair_mode_prompt_prevents_poetic_props_and_metaphor_stacking() {
+    fn pair_mode_prompt_prevents_meta_memory_exposure() {
         let prompts = SystemPrompts::for_locale("en");
 
         assert!(prompts
             .pair_mode_prompt
-            .contains("ordinary actions, ordinary places, phone actions, exact wording"));
+            .contains("Do not expose hidden state, memory mechanics"));
         assert!(prompts
             .pair_mode_prompt
-            .contains("Do not replace vagueness with theatrical props"));
+            .contains("Do not say that you are expanding cache"));
         assert!(prompts
             .pair_mode_prompt
-            .contains("Use at most one strong metaphor"));
-        assert!(prompts
-            .pair_mode_prompt
-            .contains("return to plain chat words"));
-        assert!(prompts
-            .pair_mode_prompt
-            .contains("live Shadow chat bubble"));
+            .contains("without revealing that retrieval happened"));
+        assert!(prompts.pair_mode_prompt.contains("property names"));
     }
 
     #[test]
