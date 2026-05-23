@@ -8,17 +8,17 @@
 //! Builders that still depend on app-layer code remain in the application crate under
 //! `src/data/shadow_prompts/`.
 
-use crate::{PairShadowIdentity, PairTopicTone, PairTurnDirective, PromptReadyPersona,
-    PromptReadyProfile, PromptReadyReasoningPolicy, ShadowChallenge, ShadowProfile, SpeechStyle,
-    PromptTemplate};
+use crate::{
+    PairShadowIdentity, PairTopicTone, PairTurnDirective, PromptReadyPersona, PromptReadyProfile,
+    PromptReadyReasoningPolicy, PromptTemplate, ShadowChallenge, ShadowProfile, SpeechStyle,
+};
 
 pub const QUESTION_ANSWER_REFLECTION_WEIGHT: u8 = 5;
 pub const NORMAL_CHAT_REFLECTION_WEIGHT: u8 = 3;
 
 // ── Text file includes ───────────────────────────────────────────────────────
 
-const TRANSLATION_PREVIEW_INSTRUCTIONS: &str =
-    include_str!("translation_preview_instructions.txt");
+const TRANSLATION_PREVIEW_INSTRUCTIONS: &str = include_str!("translation_preview_instructions.txt");
 const TRANSLATION_CHAT_INSTRUCTIONS: &str = include_str!("translation_chat_instructions.txt");
 const REFLECTION_REPLY_INSTRUCTIONS: &str = include_str!("reflection_reply_instructions.txt");
 const REFLECTION_REPLY_INPUT: &str = include_str!("reflection_reply_input.txt");
@@ -32,15 +32,13 @@ const ONBOARDING_PHASE_HEADLINE_CONFIRMATION_INSTRUCTIONS: &str =
     include_str!("onboarding_phase_headline_confirmation_instructions.txt");
 const ONBOARDING_PHASE_COMPLETED_INSTRUCTIONS: &str =
     include_str!("onboarding_phase_completed_instructions.txt");
-const ONBOARDING_SDQ_INITIAL_TURN_NOTE: &str =
-    include_str!("onboarding_sdq_initial_turn_note.txt");
+const ONBOARDING_SDQ_INITIAL_TURN_NOTE: &str = include_str!("onboarding_sdq_initial_turn_note.txt");
 const ONBOARDING_SDQ_FOLLOWUP_TURN_NOTE: &str =
     include_str!("onboarding_sdq_followup_turn_note.txt");
 const ONBOARDING_SDQ_PHASE_INSTRUCTIONS: &str =
     include_str!("onboarding_sdq_phase_instructions.txt");
 const EXPLICIT_CORRECTION_INPUT: &str = include_str!("explicit_correction_input.txt");
-const EXPLICIT_CORRECTION_INSTRUCTIONS: &str =
-    include_str!("explicit_correction_instructions.txt");
+const EXPLICIT_CORRECTION_INSTRUCTIONS: &str = include_str!("explicit_correction_instructions.txt");
 const CHAT_CONTEXT_PLANNER_INSTRUCTIONS: &str =
     include_str!("chat_context_planner_instructions.txt");
 const SUMMARY_REFRESH_INSTRUCTIONS: &str = include_str!("summary_refresh_instructions.txt");
@@ -185,7 +183,10 @@ fn normalize_topic_label(label: &str) -> String {
 pub fn build_translation_preview_instructions(source_locale: &str, target_locale: &str) -> String {
     render_template(
         TRANSLATION_PREVIEW_INSTRUCTIONS,
-        &[("source_locale", source_locale), ("target_locale", target_locale)],
+        &[
+            ("source_locale", source_locale),
+            ("target_locale", target_locale),
+        ],
     )
 }
 
@@ -300,7 +301,10 @@ pub fn build_onboarding_sdq_turn_note(
     } else {
         ONBOARDING_SDQ_FOLLOWUP_TURN_NOTE
     };
-    render_template(template, &[("question_index", &question_index), ("topic", topic)])
+    render_template(
+        template,
+        &[("question_index", &question_index), ("topic", topic)],
+    )
 }
 
 pub fn build_onboarding_sdq_phase_instructions(
@@ -397,10 +401,16 @@ pub fn chat_input_with_reflection_memory_and_long_term_context(
     long_term_memory_block: &str,
 ) -> String {
     let (ready_profile, ready_persona, ready_reasoning) = prompt_ready_parts(profile);
-    let relevant_answers_block =
-        bullet_list_block("Relevant onboarding answers", relevant_onboarding_answers, "- none selected");
-    let onboarding_continuity_block =
-        bullet_list_block("Onboarding continuity", onboarding_continuity, "- none captured yet");
+    let relevant_answers_block = bullet_list_block(
+        "Relevant onboarding answers",
+        relevant_onboarding_answers,
+        "- none selected",
+    );
+    let onboarding_continuity_block = bullet_list_block(
+        "Onboarding continuity",
+        onboarding_continuity,
+        "- none captured yet",
+    );
     let conversation_block = if conversation_lines.is_empty() {
         "none yet".to_string()
     } else {
