@@ -1,0 +1,12 @@
+Requested answer language: {requested_answer_language}
+Reflection session status: {reflection_session_status}
+Shadow name: {shadow_name}
+Scenario prompt: {scenario_prompt}
+Original answer title: {original_answer_title}
+Original answer body: {original_answer_body}
+
+Normal chat context before Reflection Talk:
+{normal_chat_context}
+
+Reflection conversation so far:
+{reflection_conversation}

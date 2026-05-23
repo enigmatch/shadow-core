@@ -1,0 +1,1 @@
+Follow-up turn for question {question_index}: {topic}. The user just answered the opening question. Ask one specific follow-up that deepens your understanding of their answer.

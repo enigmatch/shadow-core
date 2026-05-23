@@ -1,5 +1,21 @@
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum SetupProbeKind {
+    InitialWorkstyleProbe,
+    ProjectShiftReflection,
+    DeadlineQualityTradeoff,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ShadowChallenge {
+    pub prompt_text: String,
+    pub tag_label: Option<String>,
+    pub system_context: Option<String>,
+    pub preferred_probe_kind: Option<SetupProbeKind>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ShadowProfile {
     pub headline: String,

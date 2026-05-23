@@ -1,0 +1,4 @@
+Patch the user's long-term memory summary from the previous active summary, the latest normal-chat user messages, and active corrections.
+Use only durable, useful user facts or preferences. Ignore assistant text, reflection talk, onboarding, one-off mood, and transient wording.
+Return JSON with arrays core_profile, preferences_and_interests, personal_context, dated_events_and_plans.
+Each item must include key, value, text, confidence, and optional sensitivity. Use user.* keys when possible.

@@ -1,5 +1,6 @@
 mod builders;
 mod drop_seed;
+pub(crate) mod knowledge;
 mod pair_topic;
 mod prompt_inputs;
 mod template;
@@ -13,6 +14,23 @@ pub use builders::{
     preview_system_prompt_with_context, requested_output_language, PromptTimeContext,
 };
 pub use drop_seed::{render_drop_definitions_for_locale, DropDefinition, DROP_DEFINITIONS};
+pub use knowledge::{
+    build_chat_context_planner_instructions, build_explicit_correction_input,
+    build_onboarding_phase_instructions, build_onboarding_prompt_input,
+    build_onboarding_sdq_phase_instructions, build_onboarding_sdq_turn_note,
+    build_pair_compose_message_input, build_pair_topic_message_input,
+    build_reflection_reply_input, build_reflection_reply_instructions,
+    build_summary_refresh_instructions, build_translation_chat_instructions,
+    build_translation_preview_instructions, bullet_list_block, chat_input,
+    chat_input_with_reflection_memory, chat_input_with_reflection_memory_and_long_term_context,
+    classify_pair_topic_tone, explicit_correction_instructions,
+    normalize_preformatted_block, onboarding_phase_completed_instructions,
+    onboarding_phase_greeting_instructions,
+    onboarding_phase_headline_confirmation_instructions,
+    onboarding_phase_not_started_instructions, preview_input, preview_input_with_reflection_memory,
+    profile_input, PairComposePromptContext, PairTopicPromptContext,
+    NORMAL_CHAT_REFLECTION_WEIGHT, QUESTION_ANSWER_REFLECTION_WEIGHT,
+};
 pub use pair_topic::{
     pair_normal_pair_chat_handoff_transition_note, pair_topic_initial_message_transition_note,
     PairTopicTone, PairTurnDirective, PairTurnMove,
@@ -23,7 +41,8 @@ pub use prompt_inputs::{
 };
 pub use template::PromptTemplate;
 pub use types::{
-    GenerationEngine, ShadowAnswer, ShadowAnswerContent, ShadowGenerationFailure, ShadowProfile,
+    GenerationEngine, SetupProbeKind, ShadowAnswer, ShadowAnswerContent, ShadowChallenge,
+    ShadowGenerationFailure, ShadowProfile,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -371,7 +390,9 @@ mod tests {
         assert!(prompts
             .output_style_prompt
             .contains("Do not stack repeated questions, jokes, metaphors"));
-        assert!(prompts.output_style_prompt.contains("avoid one dense block"));
+        assert!(prompts
+            .output_style_prompt
+            .contains("avoid one dense block"));
         assert!(prompts
             .output_style_prompt
             .contains("split the reply into readable paragraphs"));
@@ -892,8 +913,6 @@ mod tests {
         assert!(prompts_ja
             .normal_chat_mode_prompt
             .contains("1段落1トピック"));
-        assert!(prompts_ja
-            .normal_chat_mode_prompt
-            .contains("短い雑談"));
+        assert!(prompts_ja.normal_chat_mode_prompt.contains("短い雑談"));
     }
 }

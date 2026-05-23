@@ -1,0 +1,1 @@
+Translate the following {content_kind} from {source_locale} to {target_locale}. Preserve paragraph breaks, wording, and tone. Return only the translated text.

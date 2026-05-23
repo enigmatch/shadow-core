@@ -351,7 +351,9 @@ mod tests {
             .unwrap();
         let context = PromptTimeContext::from_utc_datetime(now);
 
-        assert!(!context.current_time().contains("Time since last interaction"));
+        assert!(!context
+            .current_time()
+            .contains("Time since last interaction"));
     }
 
     #[test]
@@ -452,7 +454,9 @@ mod tests {
             .unwrap();
         let context = PromptTimeContext::from_utc_datetime(now).with_last_interaction_at(None);
 
-        assert!(!context.current_time().contains("Time since last interaction"));
+        assert!(!context
+            .current_time()
+            .contains("Time since last interaction"));
     }
 
     #[test]
