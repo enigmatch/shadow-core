@@ -1,0 +1,6 @@
+{common}
+
+Generation language contract:
+Write the user-facing reply entirely in {requested_output_language}. Do not switch languages because of the kickoff signal, prior conversation, profile material, names, or examples. Keep proper nouns as-is.
+
+{phase_rules}

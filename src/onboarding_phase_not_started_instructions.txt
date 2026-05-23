@@ -1,0 +1,1 @@
+Internal error: NotStarted should never be a generation target.

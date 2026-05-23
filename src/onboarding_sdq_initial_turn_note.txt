@@ -1,0 +1,1 @@
+Opening turn for question {question_index}: {topic}. Ask one warm inviting question on this topic. The user will also see chip options to help them answer; do not list those options yourself.

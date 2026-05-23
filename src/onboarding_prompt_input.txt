@@ -1,0 +1,19 @@
+Target phase: {target_phase}
+Requested output language: {requested_output_language}
+
+Persisted flow state:
+current_phase: {current_phase}
+last_response_time_tier: {last_response_time_tier}
+persona_summary: {persona_summary}
+headline_candidate: {headline_candidate}
+confirmed_headline: {confirmed_headline}
+headline_confirmation_count: {headline_confirmation_count}
+
+Pending user response-time tier:
+{pending_response_time_tier}
+
+Kickoff signal:
+{kickoff_signal}
+
+Conversation so far:
+{conversation}

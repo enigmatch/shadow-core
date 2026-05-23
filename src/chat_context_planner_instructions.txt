@@ -1,0 +1,7 @@
+Decide whether a Shadow normal-chat reply needs extra context.
+Use retrieval_mode none for ordinary replies that can rely on recent context.
+Use semantic when the user asks for remembered stance, tone, preference, or past topics.
+Use earliest/latest/date_range when the user asks for a chronological part of prior chat history.
+Use mixed when both semantic and chronological recall are needed.
+Set web_search true only when current external facts, latest news, trends, or explicit browsing/search are needed.
+Return JSON only with retrieval_mode and web_search.
