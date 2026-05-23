@@ -1,9 +1,17 @@
+mod builders;
 mod drop_seed;
 mod pair_topic;
 mod prompt_inputs;
 mod template;
 mod types;
 
+pub use builders::{
+    build_chat_system_prompt, build_chat_system_prompt_with_current_time,
+    build_chat_system_prompt_with_time_context, build_onboarding_system_prompt,
+    build_onboarding_system_prompt_with_time_context, build_pair_compose_system_prompt,
+    build_pair_topic_system_prompt_with_time_context, preview_system_prompt,
+    preview_system_prompt_with_context, requested_output_language, PromptTimeContext,
+};
 pub use drop_seed::{render_drop_definitions_for_locale, DropDefinition, DROP_DEFINITIONS};
 pub use pair_topic::{
     pair_normal_pair_chat_handoff_transition_note, pair_topic_initial_message_transition_note,
@@ -125,6 +133,18 @@ impl ShadowLocale {
             "fr" => Self::French,
             _ => Self::English,
         }
+    }
+
+    pub fn as_code(&self) -> &'static str {
+        match self {
+            Self::English => "en",
+            Self::Japanese => "ja",
+            Self::French => "fr",
+        }
+    }
+
+    pub fn resolve_code(locale: &str) -> &'static str {
+        Self::from_code(locale).as_code()
     }
 
     pub fn prompt_language_name(&self) -> &'static str {
@@ -302,6 +322,23 @@ mod tests {
             ShadowLocale::from_code("").prompt_language_name(),
             "English"
         );
+    }
+
+    #[test]
+    fn shadow_locale_as_code_returns_canonical_locale_string() {
+        assert_eq!(ShadowLocale::English.as_code(), "en");
+        assert_eq!(ShadowLocale::Japanese.as_code(), "ja");
+        assert_eq!(ShadowLocale::French.as_code(), "fr");
+    }
+
+    #[test]
+    fn shadow_locale_resolve_code_returns_supported_codes_and_falls_back_to_en() {
+        assert_eq!(ShadowLocale::resolve_code("en"), "en");
+        assert_eq!(ShadowLocale::resolve_code("ja"), "ja");
+        assert_eq!(ShadowLocale::resolve_code("fr"), "fr");
+        assert_eq!(ShadowLocale::resolve_code("de"), "en");
+        assert_eq!(ShadowLocale::resolve_code(""), "en");
+        assert_eq!(ShadowLocale::resolve_code("unknown"), "en");
     }
 
     #[test]
