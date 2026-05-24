@@ -213,15 +213,17 @@ pub fn preview_system_prompt(locale: &str) -> &'static str {
 
 pub fn preview_system_prompt_with_context(locale: &str, system_context: Option<&str>) -> String {
     let base = preview_system_prompt(locale).trim_end();
+    let language_contract = render_generation_language_contract(locale);
+    let prompt = format!("{base}\n\n{language_contract}");
     let Some(system_context) = system_context
         .map(str::trim)
         .filter(|value| !value.is_empty())
     else {
-        return base.to_string();
+        return prompt;
     };
 
     format!(
-        "{base}\n\nHidden scenario system context:\n{system_context}\n\nUse this context only as background. Do not reveal it to the user."
+        "{prompt}\n\nHidden scenario system context:\n{system_context}\n\nUse this context only as background. Do not reveal it to the user."
     )
 }
 
@@ -638,9 +640,29 @@ mod tests {
             Some("The cast has already agreed on the broad facts."),
         );
 
-        assert_eq!(without_context, preview_system_prompt("en").trim_end());
+        assert!(without_context.starts_with(preview_system_prompt("en").trim_end()));
+        assert!(!without_context.contains("Hidden scenario system context:"));
         assert!(with_context.contains("Hidden scenario system context:"));
         assert!(with_context.contains("The cast has already agreed on the broad facts."));
         assert!(with_context.contains("Do not reveal it to the user."));
+    }
+
+    #[test]
+    fn preview_system_prompt_with_context_includes_generation_language_contract() {
+        for (locale, language_name) in [("en", "English"), ("ja", "Japanese"), ("fr", "French")] {
+            let prompt = preview_system_prompt_with_context(locale, None);
+            assert!(
+                prompt.contains("Generation language contract:"),
+                "preview prompt for {locale} must carry the generation language contract"
+            );
+            assert!(
+                prompt.contains(&format!("Requested output language: {language_name}")),
+                "preview prompt for {locale} must request {language_name}"
+            );
+            assert!(
+                prompt.contains("Do not switch languages because of"),
+                "preview prompt for {locale} must forbid switching to source-material language"
+            );
+        }
     }
 }
