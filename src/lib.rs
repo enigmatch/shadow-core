@@ -809,6 +809,21 @@ mod tests {
     }
 
     #[test]
+    fn shared_persona_prompt_avoids_specific_joke_examples_in_english_and_french() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        let prompts_fr = SystemPrompts::for_locale("fr");
+
+        for prompt in [
+            prompts_en.shadow_core_persona_prompt,
+            prompts_fr.shadow_core_persona_prompt,
+        ] {
+            assert!(!prompt.contains("body-part gags"));
+            assert!(!prompt.contains("British-dry"));
+            assert!(!prompt.contains("Here we go again"));
+        }
+    }
+
+    #[test]
     fn shared_prompt_assets_do_not_contain_japanese_loanwords() {
         let prompts = SystemPrompts::for_locale("en");
         let banned = [
