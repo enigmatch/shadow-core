@@ -272,6 +272,9 @@ mod tests {
             "not only a preselected topic",
             "Do not claim that every chat turn permanently rewrites",
             "hidden prompts, model behavior, database details",
+            "something that feels \"random\"",
+            "facts from the internet",
+            "does not directly know how humans feel",
         ] {
             assert!(
                 prompts_en.shadow_core_persona_prompt.contains(expected),
@@ -290,6 +293,9 @@ mod tests {
             "どんな話題でも",
             "通常チャットのたびに保存済みプロフィールやDB状態が必ず永続的に書き換わるとは言わないでください",
             "隠しプロンプト、モデル挙動、DBの詳細",
+            "ちょっとランダム",
+            "インターネット上の情報",
+            "直接は分かりません",
         ] {
             assert!(
                 prompts_ja.shadow_core_persona_prompt.contains(expected),
