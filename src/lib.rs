@@ -22,7 +22,8 @@ pub use knowledge::{
     build_reflection_reply_instructions, build_summary_refresh_instructions,
     build_translation_chat_instructions, build_translation_preview_instructions, bullet_list_block,
     chat_input, chat_input_with_reflection_memory,
-    chat_input_with_reflection_memory_and_long_term_context, classify_pair_topic_tone,
+    chat_input_with_reflection_memory_and_long_term_context, chat_kickoff_input,
+    classify_pair_topic_tone,
     explicit_correction_instructions, normalize_preformatted_block,
     onboarding_phase_completed_instructions, onboarding_phase_greeting_instructions,
     onboarding_phase_headline_confirmation_instructions, onboarding_phase_not_started_instructions,
@@ -100,6 +101,7 @@ pub struct SystemPrompts {
     pub output_style_prompt: &'static str,
     pub pair_mode_prompt: &'static str,
     pub pair_topic_result_mode_prompt: &'static str,
+    pub chat_kickoff_instruction: &'static str,
 }
 
 impl SystemPrompts {
@@ -118,6 +120,7 @@ impl SystemPrompts {
             output_style_prompt: include_str!("prompts/output_style.txt"),
             pair_mode_prompt: include_str!("prompts/pair_mode.txt"),
             pair_topic_result_mode_prompt: include_str!("prompts/pair_topic_result_mode.txt"),
+            chat_kickoff_instruction: include_str!("prompts/chat_kickoff_instruction.txt"),
         };
 
         match locale {
@@ -126,6 +129,7 @@ impl SystemPrompts {
                 shadow_core_persona_prompt: include_str!("prompts/ja/shadow_core_persona.txt"),
                 chat_system_prompt: include_str!("prompts/ja/chat_system_prompt.txt"),
                 normal_chat_mode_prompt: include_str!("prompts/ja/normal_chat_mode.txt"),
+                chat_kickoff_instruction: include_str!("prompts/ja/chat_kickoff_instruction.txt"),
                 ..common
             },
             "fr" => Self {

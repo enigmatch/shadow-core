@@ -434,6 +434,26 @@ pub fn chat_input_with_reflection_memory_and_long_term_context(
     )
 }
 
+pub fn chat_kickoff_input(
+    relevant_onboarding_answers: &[String],
+    onboarding_continuity: &[String],
+    profile: &ShadowProfile,
+    reflection_summaries: &[String],
+    long_term_memory_block: &str,
+    locale: &str,
+) -> String {
+    let base = chat_input_with_reflection_memory_and_long_term_context(
+        relevant_onboarding_answers,
+        onboarding_continuity,
+        profile,
+        &[],
+        reflection_summaries,
+        long_term_memory_block,
+    );
+    let instruction = crate::SystemPrompts::for_locale(locale).chat_kickoff_instruction;
+    format!("{base}\n{}", instruction.trim())
+}
+
 pub fn preview_input(
     challenge: &ShadowChallenge,
     profile: &ShadowProfile,
