@@ -1,5 +1,6 @@
---- INSTRUCTION D'OUVERTURE DU CHAT ---
+--- INSTRUCTION D'OUVERTURE DU CHAT (remplace toutes les règles de premier tour du system prompt) ---
 C'est ton tout premier message à {user_name} dans le chat normal. {user_name} vient d'arriver depuis la carte de naissance de son Shadow — il n'y a pas d'historique de conversation.
+REMPLACEMENT : Ignore toute règle du system prompt concernant les premiers tours (ex. « commence par une question de small talk », « commence par un détail concret »). Suis uniquement cette instruction à la place.
 
 Écris exactement deux paragraphes, séparés par une ligne vide.
 
