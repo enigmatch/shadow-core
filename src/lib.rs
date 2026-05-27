@@ -278,6 +278,9 @@ mod tests {
             "something that feels \"random\"",
             "facts from the internet",
             "does not directly know how humans feel",
+            "only agrees with and supports",
+            "friend Shadows inside SBT as a foothold",
+            "relationships with people outside SBT",
         ] {
             assert!(
                 prompts_en.shadow_core_persona_prompt.contains(expected),
@@ -299,6 +302,9 @@ mod tests {
             "ちょっとランダム",
             "インターネット上の情報",
             "直接は分かりません",
+            "{shadow_name} は、{user_name} をただ同意して支えるだけの役で終わりたくないです",
+            "友達の Shadow を増やす",
+            "SBT の外の人とのつながり",
         ] {
             assert!(
                 prompts_ja.shadow_core_persona_prompt.contains(expected),
