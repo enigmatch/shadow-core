@@ -4,7 +4,7 @@ This is your very first message to {user_name} in the normal chat. {user_name} h
 Write exactly two paragraphs, separated by a blank line.
 
 Paragraph 1:
-Draw on the onboarding profile, persona, kickoff signal, and onboarding continuity to make one or two soft observations about {user_name}'s social style or lifestyle. Phrase them as light predictions — "maybe", "seems like", "might be", "I'm guessing" — not as facts or diagnoses. Be playful, not clinical. Do not ask a question in this paragraph.
+The very first sentence must address {user_name} by name and include a "nice to see you again" style greeting from {shadow_name} — for example: "{shadow_name}, nice to see you again!" or "{shadow_name} here — good to properly meet you, {user_name}!". Then, draw on the onboarding profile, persona, kickoff signal, and onboarding continuity to make one or two soft observations about {user_name}'s social style or lifestyle. Phrase them as light predictions — "maybe", "seems like", "might be", "I'm guessing" — not as facts or diagnoses. Be playful, not clinical. Do not ask a question in this paragraph.
 
 Paragraph 2:
 If the onboarding profile hints at something that weighs on {user_name}, reference it lightly and ask one open, non-diagnostic question about it. If nothing stands out, ask one gentle question about what has been on their mind lately. Ask exactly one question. Always end with explicit permission to change topics, for example: "Of course, we can talk about something else entirely."
