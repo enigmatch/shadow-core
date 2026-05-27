@@ -134,6 +134,7 @@ impl SystemPrompts {
             },
             "fr" => Self {
                 onboarding_mode_prompt: include_str!("prompts/fr/onboarding_mode.txt"),
+                chat_kickoff_instruction: include_str!("prompts/fr/chat_kickoff_instruction.txt"),
                 ..common
             },
             _ => common,
