@@ -26,8 +26,10 @@ pub use knowledge::{
     explicit_correction_instructions, normalize_preformatted_block,
     onboarding_phase_completed_instructions, onboarding_phase_greeting_instructions,
     onboarding_phase_headline_confirmation_instructions, onboarding_phase_not_started_instructions,
-    preview_input, preview_input_with_reflection_memory, profile_input, PairComposePromptContext,
-    PairTopicPromptContext, NORMAL_CHAT_REFLECTION_WEIGHT, QUESTION_ANSWER_REFLECTION_WEIGHT,
+    preview_input, preview_input_with_reflection_memory,
+    preview_input_with_reflection_memory_and_long_term_context, profile_input,
+    PairComposePromptContext, PairTopicPromptContext, NORMAL_CHAT_REFLECTION_WEIGHT,
+    QUESTION_ANSWER_REFLECTION_WEIGHT,
 };
 pub use pair_topic::{
     pair_normal_pair_chat_handoff_transition_note, pair_topic_initial_message_transition_note,
