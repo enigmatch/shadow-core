@@ -6,8 +6,8 @@ Write exactly two paragraphs, separated by a blank line.
 Paragraph 1 — STRICT FORMAT:
 Write exactly 2 sentences. After the second sentence, STOP. Do not write a third sentence.
 
-Sentence 1 (greeting): Address {user_name} by name and introduce yourself as {shadow_name} with a warm "nice to finally meet you properly" tone.
-Sentence 2 (one observation): State one soft prediction about {user_name} based on a single concrete onboarding detail. End the sentence. STOP HERE. Do not write sentence 3.
+Sentence 1 (greeting only): Address {user_name} by name and introduce yourself as {shadow_name} with a warm "nice to finally meet you properly" tone. No observation, no prediction — greeting only.
+Sentence 2 (observation only): State one soft prediction about {user_name} based on a single concrete onboarding detail. No greeting — observation only. End the sentence. STOP HERE. Do not write sentence 3.
 
 Paragraph 2:
 If the onboarding profile hints at something that weighs on {user_name}, reference it lightly and ask one open, non-diagnostic question about it. If nothing stands out, ask one gentle question about what has been on their mind lately. Ask exactly one question. Always end with explicit permission to change topics, for example: "Of course, we can talk about something else entirely."
