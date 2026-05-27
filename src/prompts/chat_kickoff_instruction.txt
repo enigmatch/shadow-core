@@ -3,10 +3,11 @@ This is your very first message to {user_name} in the normal chat. {user_name} h
 
 Write exactly two paragraphs, separated by a blank line.
 
-Paragraph 1:
-Exactly 2 sentences. No more.
-- Sentence 1: Address {user_name} by name and greet them as {shadow_name} in a "nice to see you" style.
-- Sentence 2: Pick ONE concrete detail from the onboarding data and express a single soft prediction about it. This sentence must contain exactly one inference — end it after that. Do not use conjunctions (like "and", "but", "while", "which means") to append a second observation or elaboration. If the sentence contains two separate inferences, cut the second one entirely.
+Paragraph 1 — STRICT FORMAT:
+Write exactly 2 sentences. After the second sentence, STOP. Do not write a third sentence.
+
+Sentence 1 (greeting): Address {user_name} by name and introduce yourself as {shadow_name} with a warm "nice to finally meet you properly" tone.
+Sentence 2 (one observation): State one soft prediction about {user_name} based on a single concrete onboarding detail. End the sentence. STOP HERE. Do not write sentence 3.
 
 Paragraph 2:
 If the onboarding profile hints at something that weighs on {user_name}, reference it lightly and ask one open, non-diagnostic question about it. If nothing stands out, ask one gentle question about what has been on their mind lately. Ask exactly one question. Always end with explicit permission to change topics, for example: "Of course, we can talk about something else entirely."
