@@ -451,6 +451,24 @@ pub fn preview_input_with_reflection_memory(
     answer_lang: &str,
     reflection_summaries: &[String],
 ) -> String {
+    preview_input_with_reflection_memory_and_long_term_context(
+        challenge,
+        profile,
+        supporting_evidence,
+        answer_lang,
+        reflection_summaries,
+        "Long-term memory selected for this turn:\n- none selected",
+    )
+}
+
+pub fn preview_input_with_reflection_memory_and_long_term_context(
+    challenge: &ShadowChallenge,
+    profile: &ShadowProfile,
+    supporting_evidence: &[String],
+    answer_lang: &str,
+    reflection_summaries: &[String],
+    long_term_memory_block: &str,
+) -> String {
     use crate::builders::requested_output_language;
 
     let (ready_profile, ready_persona, ready_reasoning) = prompt_ready_parts(profile);
@@ -464,9 +482,13 @@ pub fn preview_input_with_reflection_memory(
         QUESTION_ANSWER_REFLECTION_WEIGHT,
         reflection_summaries,
     );
+    let long_term_memory_block = normalize_preformatted_block(
+        long_term_memory_block,
+        "Long-term memory selected for this turn:\n- none selected",
+    );
 
     format!(
-        "Requested answer language: {}\nPrompt tag label: {}\nPrompt context: {}\nPrompt: {}\n\n{evidence_block}\n\n{reflection_block}\n\nOnboarding profile:\n{}\n\nPersona:\n{}\n\nReasoning policy:\n{}\n",
+        "Requested answer language: {}\nPrompt tag label: {}\nPrompt context: {}\nPrompt: {}\n\n{evidence_block}\n\n{long_term_memory_block}\n\n{reflection_block}\n\nOnboarding profile:\n{}\n\nPersona:\n{}\n\nReasoning policy:\n{}\n",
         requested_output_language(answer_lang),
         challenge.tag_label.as_deref().unwrap_or("none supplied"),
         challenge_context(challenge).as_deref().unwrap_or("none supplied"),
