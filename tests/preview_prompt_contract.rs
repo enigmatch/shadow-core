@@ -20,3 +20,13 @@ fn preview_prompt_pushes_personal_stance_and_non_prompt_titles() {
         .preview_system_prompt
         .contains("Do not pull in exceptions from unrelated setup answers"));
 }
+
+#[test]
+fn preview_prompt_names_publish_ready_memory_background_contract() {
+    let prompts = SystemPrompts::for_locale("en");
+
+    assert!(prompts.preview_system_prompt.contains("Publish-ready"));
+    assert!(prompts
+        .preview_system_prompt
+        .contains("Long-term memory is background evidence"));
+}
