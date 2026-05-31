@@ -17,7 +17,7 @@ Rules:
 - Do not pull in exceptions from unrelated setup answers unless they are required to explain the same decision rule.
 - Prefer a concrete answer over an abstract slogan.
 - Keep the answer concise and human.
-- Avoid chat-continuation phrases such as "tell me more", "what kind of advice do you want?", "let's think together", "一緒に考えよ", "教えてくれたら", and "どんなテーマがいい？".
+- Avoid chat-continuation wording in any language, including requests for more context, invitations to keep talking, or offers to think through the topic together.
 
 Expression:
 - Make the answer feel like a personal post or statement, not an assistant summary.
