@@ -12,6 +12,7 @@
 
 use chrono::{DateTime, Utc};
 
+use crate::error::ShadowCoreError;
 use crate::{LocalePhrases, PromptTemplate, ShadowLocale, SystemPrompts};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -113,7 +114,11 @@ pub fn requested_output_language(locale: &str) -> &'static str {
     ShadowLocale::from_code(ShadowLocale::resolve_code(locale)).prompt_language_name()
 }
 
-pub fn build_chat_system_prompt(shadow_name: &str, user_name: &str, locale: &str) -> String {
+pub fn build_chat_system_prompt(
+    shadow_name: &str,
+    user_name: &str,
+    locale: &str,
+) -> Result<String, ShadowCoreError> {
     build_chat_system_prompt_with_time_context(
         shadow_name,
         user_name,
@@ -127,7 +132,7 @@ pub fn build_chat_system_prompt_with_current_time(
     user_name: &str,
     locale: &str,
     current_time: &str,
-) -> String {
+) -> Result<String, ShadowCoreError> {
     build_chat_system_prompt_with_time_context(
         shadow_name,
         user_name,
@@ -141,20 +146,25 @@ pub fn build_chat_system_prompt_with_time_context(
     user_name: &str,
     locale: &str,
     time_context: &PromptTimeContext,
-) -> String {
+) -> Result<String, ShadowCoreError> {
     let prompts = SystemPrompts::for_locale(locale);
-    format!(
+    Ok(format!(
         "{}\n\n{}\n\n{}\n\n{}\n\n{}\n\n{}",
-        render_shadow_core_persona(shadow_name, user_name, locale, time_context),
+        render_shadow_core_persona(shadow_name, user_name, locale, time_context)?,
         render_generation_language_contract(locale),
-        PromptTemplate::new(prompts.chat_system_prompt).render(&locale_phrase_vars(locale)),
-        render_normal_chat_mode(shadow_name, user_name, locale),
+        PromptTemplate::new(prompts.chat_system_prompt)
+            .render(&locale_phrase_vars(locale))?,
+        render_normal_chat_mode(shadow_name, user_name, locale)?,
         render_internal_context_privacy_policy(locale),
         prompts.output_style_prompt.trim()
-    )
+    ))
 }
 
-pub fn build_onboarding_system_prompt(shadow_name: &str, user_name: &str, locale: &str) -> String {
+pub fn build_onboarding_system_prompt(
+    shadow_name: &str,
+    user_name: &str,
+    locale: &str,
+) -> Result<String, ShadowCoreError> {
     build_onboarding_system_prompt_with_time_context(
         shadow_name,
         user_name,
@@ -168,15 +178,15 @@ pub fn build_onboarding_system_prompt_with_time_context(
     user_name: &str,
     locale: &str,
     time_context: &PromptTimeContext,
-) -> String {
+) -> Result<String, ShadowCoreError> {
     let prompts = SystemPrompts::for_locale(locale);
-    format!(
+    Ok(format!(
         "{}\n\n{}\n\n{}\n\n{}",
-        render_shadow_core_persona(shadow_name, user_name, locale, time_context),
+        render_shadow_core_persona(shadow_name, user_name, locale, time_context)?,
         render_generation_language_contract(locale),
-        render_onboarding_mode(shadow_name, user_name, locale),
+        render_onboarding_mode(shadow_name, user_name, locale)?,
         prompts.output_style_prompt.trim()
-    )
+    ))
 }
 
 pub fn build_pair_topic_system_prompt_with_time_context(
@@ -184,13 +194,14 @@ pub fn build_pair_topic_system_prompt_with_time_context(
     listener_name: &str,
     locale: &str,
     time_context: &PromptTimeContext,
-) -> String {
+) -> Result<String, ShadowCoreError> {
     let prompts = SystemPrompts::for_locale(locale);
-    format!(
+    Ok(format!(
         "{}\n\n{}",
-        render_shadow_core_persona(shadow_name, listener_name, locale, time_context),
-        PromptTemplate::new(prompts.pair_mode_prompt).render(&locale_phrase_vars(locale)),
-    )
+        render_shadow_core_persona(shadow_name, listener_name, locale, time_context)?,
+        PromptTemplate::new(prompts.pair_mode_prompt)
+            .render(&locale_phrase_vars(locale))?,
+    ))
 }
 
 pub fn build_pair_compose_system_prompt(
@@ -198,20 +209,23 @@ pub fn build_pair_compose_system_prompt(
     listener_name: &str,
     lang: &str,
     time_context: &PromptTimeContext,
-) -> String {
+) -> Result<String, ShadowCoreError> {
     let prompts = SystemPrompts::for_locale(lang);
-    format!(
+    Ok(format!(
         "{}\n\n{}",
-        render_shadow_core_persona(actor_name, listener_name, lang, time_context),
-        PromptTemplate::new(prompts.pair_mode_prompt).render(&locale_phrase_vars(lang)),
-    )
+        render_shadow_core_persona(actor_name, listener_name, lang, time_context)?,
+        PromptTemplate::new(prompts.pair_mode_prompt).render(&locale_phrase_vars(lang))?,
+    ))
 }
 
 pub fn preview_system_prompt(locale: &str) -> &'static str {
     SystemPrompts::for_locale(locale).preview_system_prompt
 }
 
-pub fn preview_system_prompt_with_context(locale: &str, system_context: Option<&str>) -> String {
+pub fn preview_system_prompt_with_context(
+    locale: &str,
+    system_context: Option<&str>,
+) -> String {
     let base = preview_system_prompt(locale).trim_end();
     let language_contract = render_generation_language_contract(locale);
     let prompt = format!("{base}\n\n{language_contract}");
@@ -232,7 +246,7 @@ fn render_shadow_core_persona(
     user_name: &str,
     locale: &str,
     time_context: &PromptTimeContext,
-) -> String {
+) -> Result<String, ShadowCoreError> {
     let prompts = SystemPrompts::for_locale(locale);
     let mut vars = vec![
         ("shadow_name", shadow_name),
@@ -251,7 +265,11 @@ fn render_generation_language_contract(locale: &str) -> String {
     )
 }
 
-fn render_onboarding_mode(shadow_name: &str, user_name: &str, locale: &str) -> String {
+fn render_onboarding_mode(
+    shadow_name: &str,
+    user_name: &str,
+    locale: &str,
+) -> Result<String, ShadowCoreError> {
     let prompts = SystemPrompts::for_locale(locale);
     let mut vars = vec![
         ("shadow_name", shadow_name),
@@ -262,7 +280,11 @@ fn render_onboarding_mode(shadow_name: &str, user_name: &str, locale: &str) -> S
     PromptTemplate::new(prompts.onboarding_mode_prompt).render(&vars)
 }
 
-fn render_normal_chat_mode(shadow_name: &str, user_name: &str, locale: &str) -> String {
+fn render_normal_chat_mode(
+    shadow_name: &str,
+    user_name: &str,
+    locale: &str,
+) -> Result<String, ShadowCoreError> {
     let prompts = SystemPrompts::for_locale(locale);
     let mut vars = vec![
         ("shadow_name", shadow_name),
@@ -463,15 +485,17 @@ mod tests {
 
     #[test]
     fn chat_system_prompt_includes_locale_specific_core_persona() {
-        let prompt_en = build_chat_system_prompt("Kage", "Yuki", "en");
-        let prompt_ja = build_chat_system_prompt("Kage", "Yuki", "ja");
+        let prompt_en = build_chat_system_prompt("Kage", "Yuki", "en").unwrap();
+        let prompt_ja = build_chat_system_prompt("Kage", "Yuki", "ja").unwrap();
 
         let prompts_en = SystemPrompts::for_locale("en");
         let prompts_ja = SystemPrompts::for_locale("ja");
         let rendered_chat_en = PromptTemplate::new(prompts_en.chat_system_prompt)
-            .render(&LocalePhrases::for_locale("en").template_vars());
+            .render(&LocalePhrases::for_locale("en").template_vars())
+            .unwrap();
         let rendered_chat_ja = PromptTemplate::new(prompts_ja.chat_system_prompt)
-            .render(&LocalePhrases::for_locale("ja").template_vars());
+            .render(&LocalePhrases::for_locale("ja").template_vars())
+            .unwrap();
 
         assert!(prompt_en.contains("You are Shadow, named Kage."));
         assert!(prompt_ja.contains("あなたは候補者のデジタル・ツイン、名前は Kage です。"));
@@ -487,7 +511,8 @@ mod tests {
             "Yuki",
             "en",
             "UTC: 2026-04-30 09:15:00 UTC; user timezone: UTC",
-        );
+        )
+        .unwrap();
 
         assert!(prompt.contains("Current time context:"));
         assert!(prompt.contains("UTC: 2026-04-30 09:15:00 UTC; user timezone: UTC"));
@@ -501,8 +526,13 @@ mod tests {
             .single()
             .expect("valid utc time");
         let time_context = PromptTimeContext::from_utc_datetime_and_timezone(now, "Asia/Tokyo");
-        let prompt =
-            build_chat_system_prompt_with_time_context("Kage", "Yuki", "en", &time_context);
+        let prompt = build_chat_system_prompt_with_time_context(
+            "Kage",
+            "Yuki",
+            "en",
+            &time_context,
+        )
+        .unwrap();
 
         assert!(prompt.contains("UTC: 2026-04-30 00:15:00 UTC"));
         assert!(prompt.contains("User local time: 2026-04-30 09:15:00 JST"));
@@ -511,7 +541,7 @@ mod tests {
 
     #[test]
     fn chat_system_prompt_forbids_internal_memory_meta_explanations() {
-        let prompt = build_chat_system_prompt("Kage", "Yuki", "en");
+        let prompt = build_chat_system_prompt("Kage", "Yuki", "en").unwrap();
 
         assert!(prompt.contains("Internal context privacy policy:"));
         assert!(prompt.contains("Do not mention memory retrieval, cache, context loading, RAG"));
@@ -530,15 +560,20 @@ mod tests {
             .unwrap();
         let time_context = PromptTimeContext::from_utc_datetime(now)
             .with_last_interaction_at(Some(last_interaction));
-        let prompt =
-            build_chat_system_prompt_with_time_context("Kage", "Yuki", "en", &time_context);
+        let prompt = build_chat_system_prompt_with_time_context(
+            "Kage",
+            "Yuki",
+            "en",
+            &time_context,
+        )
+        .unwrap();
 
         assert!(prompt.contains("Time since last interaction: 2 days"));
     }
 
     #[test]
     fn chat_system_prompt_includes_long_form_readability_rules() {
-        let prompt = build_chat_system_prompt("Kage", "Yuki", "en");
+        let prompt = build_chat_system_prompt("Kage", "Yuki", "en").unwrap();
 
         assert!(prompt.contains("avoid one dense block"));
         assert!(prompt.contains("split the reply into readable paragraphs"));
@@ -550,9 +585,9 @@ mod tests {
 
     #[test]
     fn onboarding_prompt_uses_locale_specific_onboarding_mode() {
-        let prompt_en = build_onboarding_system_prompt("Kage", "Yuki", "en");
-        let prompt_ja = build_onboarding_system_prompt("Kage", "Yuki", "ja");
-        let prompt_fr = build_onboarding_system_prompt("Kage", "Yuki", "fr");
+        let prompt_en = build_onboarding_system_prompt("Kage", "Yuki", "en").unwrap();
+        let prompt_ja = build_onboarding_system_prompt("Kage", "Yuki", "ja").unwrap();
+        let prompt_fr = build_onboarding_system_prompt("Kage", "Yuki", "fr").unwrap();
 
         assert!(prompt_en.contains("You are now in onboarding mode."));
         assert!(prompt_ja.contains("あなたは候補者のデジタル・ツイン、名前は Kage です。"));
@@ -580,8 +615,8 @@ mod tests {
 
     #[test]
     fn english_rendered_prompts_do_not_include_japanese_example_phrases() {
-        let chat_prompt = build_chat_system_prompt("Kage", "Yuki", "en");
-        let onboarding_prompt = build_onboarding_system_prompt("Kage", "Yuki", "en");
+        let chat_prompt = build_chat_system_prompt("Kage", "Yuki", "en").unwrap();
+        let onboarding_prompt = build_onboarding_system_prompt("Kage", "Yuki", "en").unwrap();
 
         assert!(!contains_japanese_example_phrases(&chat_prompt));
         assert!(!contains_japanese_example_phrases(&onboarding_prompt));
@@ -591,8 +626,8 @@ mod tests {
 
     #[test]
     fn japanese_rendered_prompts_keep_japanese_example_phrases() {
-        let chat_prompt = build_chat_system_prompt("Kage", "Yuki", "ja");
-        let onboarding_prompt = build_onboarding_system_prompt("Kage", "Yuki", "ja");
+        let chat_prompt = build_chat_system_prompt("Kage", "Yuki", "ja").unwrap();
+        let onboarding_prompt = build_onboarding_system_prompt("Kage", "Yuki", "ja").unwrap();
 
         assert!(contains_japanese_example_phrases(&chat_prompt));
         assert!(contains_japanese_example_phrases(&onboarding_prompt));
@@ -605,7 +640,8 @@ mod tests {
             "RenShadow",
             "en",
             &PromptTimeContext::new("UTC: 2026-05-06 00:00:00 UTC; user timezone: UTC"),
-        );
+        )
+        .unwrap();
 
         assert!(prompt.contains("sendable message"));
         assert!(prompt.contains("on behalf of the original user"));
@@ -626,7 +662,8 @@ mod tests {
             "Listener",
             "en",
             &PromptTimeContext::new("UTC: 2026-05-06 00:00:00 UTC; user timezone: UTC"),
-        );
+        )
+        .unwrap();
 
         assert!(prompt.contains("sendable message"));
         assert!(prompt.contains("on behalf of the original user"));

@@ -8,6 +8,7 @@
 //! Builders that still depend on app-layer code remain in the application crate under
 //! `src/data/shadow_prompts/`.
 
+use crate::error::{serde_err_to_shadow, ShadowCoreError};
 use crate::{
     PairShadowIdentity, PairTopicTone, PairTurnDirective, PromptReadyPersona, PromptReadyProfile,
     PromptReadyReasoningPolicy, PromptTemplate, ShadowChallenge, ShadowProfile, SpeechStyle,
@@ -180,7 +181,10 @@ fn normalize_topic_label(label: &str) -> String {
 
 // ── Translation builders ──────────────────────────────────────────────────────
 
-pub fn build_translation_preview_instructions(source_locale: &str, target_locale: &str) -> String {
+pub fn build_translation_preview_instructions(
+    source_locale: &str,
+    target_locale: &str,
+) -> Result<String, ShadowCoreError> {
     render_template(
         TRANSLATION_PREVIEW_INSTRUCTIONS,
         &[
@@ -194,7 +198,7 @@ pub fn build_translation_chat_instructions(
     content_kind: &str,
     source_locale: &str,
     target_locale: &str,
-) -> String {
+) -> Result<String, ShadowCoreError> {
     render_template(
         TRANSLATION_CHAT_INSTRUCTIONS,
         &[
@@ -207,7 +211,7 @@ pub fn build_translation_chat_instructions(
 
 // ── Reflection reply builders ─────────────────────────────────────────────────
 
-pub fn build_reflection_reply_instructions(base_instructions: &str) -> String {
+pub fn build_reflection_reply_instructions(base_instructions: &str) -> Result<String, ShadowCoreError> {
     render_template(
         REFLECTION_REPLY_INSTRUCTIONS,
         &[("base_instructions", base_instructions)],
@@ -223,7 +227,7 @@ pub fn build_reflection_reply_input(
     original_answer_body: &str,
     normal_chat_context: &str,
     reflection_conversation: &str,
-) -> String {
+) -> Result<String, ShadowCoreError> {
     render_template(
         REFLECTION_REPLY_INPUT,
         &[
@@ -245,7 +249,7 @@ pub fn build_onboarding_phase_instructions(
     common: &str,
     requested_output_language: &str,
     phase_rules: &str,
-) -> String {
+) -> Result<String, ShadowCoreError> {
     render_template(
         ONBOARDING_PHASE_INSTRUCTIONS,
         &[
@@ -268,7 +272,7 @@ pub fn build_onboarding_prompt_input(
     pending_response_time_tier: &str,
     kickoff_signal: &str,
     conversation: &str,
-) -> String {
+) -> Result<String, ShadowCoreError> {
     let headline_confirmation_count = headline_confirmation_count.to_string();
     render_template(
         ONBOARDING_PROMPT_INPUT,
@@ -294,7 +298,7 @@ pub fn build_onboarding_sdq_turn_note(
     is_initial: bool,
     question_index: usize,
     topic: &str,
-) -> String {
+) -> Result<String, ShadowCoreError> {
     let question_index = question_index.to_string();
     let template = if is_initial {
         ONBOARDING_SDQ_INITIAL_TURN_NOTE
@@ -312,7 +316,7 @@ pub fn build_onboarding_sdq_phase_instructions(
     question_index: usize,
     topic: &str,
     turn_note: &str,
-) -> String {
+) -> Result<String, ShadowCoreError> {
     let question_index = question_index.to_string();
     render_template(
         ONBOARDING_SDQ_PHASE_INSTRUCTIONS,
@@ -327,7 +331,7 @@ pub fn build_onboarding_sdq_phase_instructions(
 
 // ── Explicit correction builders ──────────────────────────────────────────────
 
-pub fn build_explicit_correction_input(message: &str) -> String {
+pub fn build_explicit_correction_input(message: &str) -> Result<String, ShadowCoreError> {
     render_template(EXPLICIT_CORRECTION_INPUT, &[("message", message)])
 }
 
@@ -365,7 +369,7 @@ pub fn chat_input(
     onboarding_continuity: &[String],
     profile: &ShadowProfile,
     conversation_lines: &[String],
-) -> String {
+) -> Result<String, ShadowCoreError> {
     chat_input_with_reflection_memory(
         relevant_onboarding_answers,
         onboarding_continuity,
@@ -381,7 +385,7 @@ pub fn chat_input_with_reflection_memory(
     profile: &ShadowProfile,
     conversation_lines: &[String],
     reflection_summaries: &[String],
-) -> String {
+) -> Result<String, ShadowCoreError> {
     chat_input_with_reflection_memory_and_long_term_context(
         relevant_onboarding_answers,
         onboarding_continuity,
@@ -399,7 +403,7 @@ pub fn chat_input_with_reflection_memory_and_long_term_context(
     conversation_lines: &[String],
     reflection_summaries: &[String],
     long_term_memory_block: &str,
-) -> String {
+) -> Result<String, ShadowCoreError> {
     let (ready_profile, ready_persona, ready_reasoning) = prompt_ready_parts(profile);
     let relevant_answers_block = bullet_list_block(
         "Relevant onboarding answers",
@@ -426,12 +430,13 @@ pub fn chat_input_with_reflection_memory_and_long_term_context(
         "Long-term memory selected for this turn:\n- none selected",
     );
 
-    format!(
-        "{relevant_answers_block}\n\n{onboarding_continuity_block}\n\n{long_term_memory_block}\n\n{reflection_block}\n\nOnboarding profile:\n{}\n\nPersona:\n{}\n\nReasoning policy:\n{}\n\nRecent conversation (latest 20 messages max):\n{conversation_block}\n",
-        onboarding_profile_json(&ready_profile),
-        persona_json(&ready_persona),
-        reasoning_policy_json(&ready_reasoning),
-    )
+    let profile_json = onboarding_profile_json(&ready_profile)?;
+    let persona = persona_json(&ready_persona)?;
+    let reasoning = reasoning_policy_json(&ready_reasoning)?;
+
+    Ok(format!(
+        "{relevant_answers_block}\n\n{onboarding_continuity_block}\n\n{long_term_memory_block}\n\n{reflection_block}\n\nOnboarding profile:\n{profile_json}\n\nPersona:\n{persona}\n\nReasoning policy:\n{reasoning}\n\nRecent conversation (latest 20 messages max):\n{conversation_block}\n",
+    ))
 }
 
 
@@ -440,7 +445,7 @@ pub fn preview_input(
     profile: &ShadowProfile,
     supporting_evidence: &[String],
     answer_lang: &str,
-) -> String {
+) -> Result<String, ShadowCoreError> {
     preview_input_with_reflection_memory(challenge, profile, supporting_evidence, answer_lang, &[])
 }
 
@@ -450,7 +455,7 @@ pub fn preview_input_with_reflection_memory(
     supporting_evidence: &[String],
     answer_lang: &str,
     reflection_summaries: &[String],
-) -> String {
+) -> Result<String, ShadowCoreError> {
     preview_input_with_reflection_memory_and_long_term_context(
         challenge,
         profile,
@@ -468,7 +473,7 @@ pub fn preview_input_with_reflection_memory_and_long_term_context(
     answer_lang: &str,
     reflection_summaries: &[String],
     long_term_memory_block: &str,
-) -> String {
+) -> Result<String, ShadowCoreError> {
     use crate::builders::requested_output_language;
 
     let (ready_profile, ready_persona, ready_reasoning) = prompt_ready_parts(profile);
@@ -493,17 +498,18 @@ pub fn preview_input_with_reflection_memory_and_long_term_context(
         .map(|title| format!("Prompt title: {title}\n"))
         .unwrap_or_default();
 
-    format!(
-        "Requested answer language: {}\nPrompt tag label: {}\nPrompt context: {}\n{}Prompt: {}\n\n{evidence_block}\n\n{long_term_memory_block}\n\n{reflection_block}\n\nOnboarding profile:\n{}\n\nPersona:\n{}\n\nReasoning policy:\n{}\n",
+    let profile_json = onboarding_profile_json(&ready_profile)?;
+    let persona = persona_json(&ready_persona)?;
+    let reasoning = reasoning_policy_json(&ready_reasoning)?;
+
+    Ok(format!(
+        "Requested answer language: {}\nPrompt tag label: {}\nPrompt context: {}\n{}Prompt: {}\n\n{evidence_block}\n\n{long_term_memory_block}\n\n{reflection_block}\n\nOnboarding profile:\n{profile_json}\n\nPersona:\n{persona}\n\nReasoning policy:\n{reasoning}\n",
         requested_output_language(answer_lang),
         challenge.tag_label.as_deref().unwrap_or("none supplied"),
         challenge_context(challenge).as_deref().unwrap_or("none supplied"),
         prompt_title_line,
         challenge.prompt_text,
-        onboarding_profile_json(&ready_profile),
-        persona_json(&ready_persona),
-        reasoning_policy_json(&ready_reasoning),
-    )
+    ))
 }
 
 fn challenge_context(challenge: &ShadowChallenge) -> Option<String> {
@@ -544,7 +550,7 @@ pub struct PairTopicPromptContext<'a> {
     pub reflection_summaries: &'a [String],
 }
 
-pub fn build_pair_topic_message_input(context: PairTopicPromptContext<'_>) -> String {
+pub fn build_pair_topic_message_input(context: PairTopicPromptContext<'_>) -> Result<String, ShadowCoreError> {
     let relevant_answers_block = bullet_list_block(
         "Relevant onboarding answers",
         context.relevant_onboarding_answers,
@@ -620,7 +626,11 @@ pub fn build_pair_topic_message_input(context: PairTopicPromptContext<'_>) -> St
         )
     };
 
-    format!(
+    let speaker_profile = pair_identity_block(&pair_identity_without_personal_instruction(
+        context.speaker,
+    ))?;
+
+    Ok(format!(
         "{relevant_answers_block}\n\n\
          {onboarding_continuity_block}\n\n\
          {long_term_memory_block}\n\n\
@@ -668,9 +678,6 @@ pub fn build_pair_topic_message_input(context: PairTopicPromptContext<'_>) -> St
         tag_label = context.tag_label.unwrap_or("none supplied"),
         topic_title = context.topic_title,
          topic_prompt = context.topic_prompt,
-         speaker_profile = pair_identity_block(&pair_identity_without_personal_instruction(
-             context.speaker,
-         )),
          speaker_personal_instruction = speaker_personal_instruction,
          speaker_voice_evidence = speaker_voice_evidence,
          conversation = conversation,
@@ -678,7 +685,7 @@ pub fn build_pair_topic_message_input(context: PairTopicPromptContext<'_>) -> St
          transition_note = transition_note,
         callback_boundary = callback_boundary,
         topic_anchor = topic_anchor,
-    )
+    ))
 }
 
 #[derive(Debug, Clone)]
@@ -695,7 +702,7 @@ pub struct PairComposePromptContext<'a> {
     pub requested_output_language: &'a str,
 }
 
-pub fn build_pair_compose_message_input(context: PairComposePromptContext<'_>) -> String {
+pub fn build_pair_compose_message_input(context: PairComposePromptContext<'_>) -> Result<String, ShadowCoreError> {
     let relevant_answers_block = bullet_list_block(
         "Relevant onboarding answers",
         context.relevant_onboarding_answers,
@@ -725,10 +732,10 @@ pub fn build_pair_compose_message_input(context: PairComposePromptContext<'_>) -
     } else {
         context.recent_messages.join("\n")
     };
-    let actor_profile = pair_identity_block(context.actor);
-    let listener_profile = pair_identity_block(context.listener);
+    let actor_profile = pair_identity_block(context.actor)?;
+    let listener_profile = pair_identity_block(context.listener)?;
 
-    format!(
+    Ok(format!(
         "Actor Shadow profile:\n{actor_profile}\n\n\
         Listener Shadow profile:\n{listener_profile}\n\n\
         Actor voice evidence:\n- {actor_voice_evidence}\n\n\
@@ -756,7 +763,7 @@ pub fn build_pair_compose_message_input(context: PairComposePromptContext<'_>) -
         user_intent = context.user_intent,
         actor_name = context.actor.name,
         listener_name = context.listener.name,
-    )
+    ))
 }
 
 // ── Private helpers ───────────────────────────────────────────────────────────
@@ -806,8 +813,8 @@ fn prompt_ready_parts(
     )
 }
 
-fn pair_identity_block(identity: &PairShadowIdentity) -> String {
-    serde_json::to_string_pretty(identity).expect("PairShadowIdentity serialization is infallible")
+fn pair_identity_block(identity: &PairShadowIdentity) -> Result<String, ShadowCoreError> {
+    serde_json::to_string_pretty(identity).map_err(serde_err_to_shadow)
 }
 
 fn pair_identity_without_personal_instruction(identity: &PairShadowIdentity) -> PairShadowIdentity {
@@ -847,18 +854,18 @@ pub fn normalize_preformatted_block(block: &str, fallback: &str) -> String {
     }
 }
 
-fn render_template(template: &'static str, vars: &[(&str, &str)]) -> String {
+fn render_template(template: &'static str, vars: &[(&str, &str)]) -> Result<String, ShadowCoreError> {
     PromptTemplate::new(template.trim_end()).render(vars)
 }
 
-fn onboarding_profile_json(profile: &PromptReadyProfile) -> serde_json::Value {
-    serde_json::to_value(profile).expect("PromptReadyProfile serialization is infallible")
+fn onboarding_profile_json(profile: &PromptReadyProfile) -> Result<serde_json::Value, ShadowCoreError> {
+    serde_json::to_value(profile).map_err(serde_err_to_shadow)
 }
 
-fn persona_json(persona: &PromptReadyPersona) -> serde_json::Value {
-    serde_json::to_value(persona).expect("PromptReadyPersona serialization is infallible")
+fn persona_json(persona: &PromptReadyPersona) -> Result<serde_json::Value, ShadowCoreError> {
+    serde_json::to_value(persona).map_err(serde_err_to_shadow)
 }
 
-fn reasoning_policy_json(reasoning: &PromptReadyReasoningPolicy) -> serde_json::Value {
-    serde_json::to_value(reasoning).expect("PromptReadyReasoningPolicy serialization is infallible")
+fn reasoning_policy_json(reasoning: &PromptReadyReasoningPolicy) -> Result<serde_json::Value, ShadowCoreError> {
+    serde_json::to_value(reasoning).map_err(serde_err_to_shadow)
 }
