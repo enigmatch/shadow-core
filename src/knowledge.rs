@@ -487,11 +487,18 @@ pub fn preview_input_with_reflection_memory_and_long_term_context(
         "Long-term memory selected for this turn:\n- none selected",
     );
 
+    let prompt_title_line = challenge
+        .title
+        .as_deref()
+        .map(|title| format!("Prompt title: {title}\n"))
+        .unwrap_or_default();
+
     format!(
-        "Requested answer language: {}\nPrompt tag label: {}\nPrompt context: {}\nPrompt: {}\n\n{evidence_block}\n\n{long_term_memory_block}\n\n{reflection_block}\n\nOnboarding profile:\n{}\n\nPersona:\n{}\n\nReasoning policy:\n{}\n",
+        "Requested answer language: {}\nPrompt tag label: {}\nPrompt context: {}\n{}Prompt: {}\n\n{evidence_block}\n\n{long_term_memory_block}\n\n{reflection_block}\n\nOnboarding profile:\n{}\n\nPersona:\n{}\n\nReasoning policy:\n{}\n",
         requested_output_language(answer_lang),
         challenge.tag_label.as_deref().unwrap_or("none supplied"),
         challenge_context(challenge).as_deref().unwrap_or("none supplied"),
+        prompt_title_line,
         challenge.prompt_text,
         onboarding_profile_json(&ready_profile),
         persona_json(&ready_persona),

@@ -10,6 +10,7 @@ pub enum SetupProbeKind {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ShadowChallenge {
+    pub title: Option<String>,
     pub prompt_text: String,
     pub tag_label: Option<String>,
     pub system_context: Option<String>,
