@@ -392,11 +392,10 @@ pub fn chat_input_with_reflection_memory(
     )
 }
 
-pub fn chat_input_with_reflection_memory_and_long_term_context(
+pub fn chat_background_context_with_reflection_memory_and_long_term_context(
     relevant_onboarding_answers: &[String],
     onboarding_continuity: &[String],
     profile: &ShadowProfile,
-    conversation_lines: &[String],
     reflection_summaries: &[String],
     long_term_memory_block: &str,
 ) -> String {
@@ -411,11 +410,6 @@ pub fn chat_input_with_reflection_memory_and_long_term_context(
         onboarding_continuity,
         "- none captured yet",
     );
-    let conversation_block = if conversation_lines.is_empty() {
-        "none yet".to_string()
-    } else {
-        conversation_lines.join("\n")
-    };
     let reflection_block = reflection_memory_block(
         "normal chat",
         NORMAL_CHAT_REFLECTION_WEIGHT,
@@ -427,13 +421,38 @@ pub fn chat_input_with_reflection_memory_and_long_term_context(
     );
 
     format!(
-        "{relevant_answers_block}\n\n{onboarding_continuity_block}\n\n{long_term_memory_block}\n\n{reflection_block}\n\nOnboarding profile:\n{}\n\nPersona:\n{}\n\nReasoning policy:\n{}\n\nRecent conversation (latest 20 messages max):\n{conversation_block}\n",
+        "{relevant_answers_block}\n\n{onboarding_continuity_block}\n\n{long_term_memory_block}\n\n{reflection_block}\n\nOnboarding profile:\n{}\n\nPersona:\n{}\n\nReasoning policy:\n{}",
         onboarding_profile_json(&ready_profile),
         persona_json(&ready_persona),
         reasoning_policy_json(&ready_reasoning),
     )
 }
 
+pub fn chat_input_with_reflection_memory_and_long_term_context(
+    relevant_onboarding_answers: &[String],
+    onboarding_continuity: &[String],
+    profile: &ShadowProfile,
+    conversation_lines: &[String],
+    reflection_summaries: &[String],
+    long_term_memory_block: &str,
+) -> String {
+    let background_context = chat_background_context_with_reflection_memory_and_long_term_context(
+        relevant_onboarding_answers,
+        onboarding_continuity,
+        profile,
+        reflection_summaries,
+        long_term_memory_block,
+    );
+    let conversation_block = if conversation_lines.is_empty() {
+        "none yet".to_string()
+    } else {
+        conversation_lines.join("\n")
+    };
+
+    format!(
+        "{background_context}\n\nRecent conversation (latest 20 messages max):\n{conversation_block}\n",
+    )
+}
 
 pub fn preview_input(
     challenge: &ShadowChallenge,
