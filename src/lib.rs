@@ -456,6 +456,100 @@ mod tests {
     }
 
     #[test]
+    fn normal_chat_prompts_keep_questions_available_for_conversational_momentum() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        let prompts_ja = SystemPrompts::for_locale("ja");
+
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("Questions are welcome when they help the conversation keep moving"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("do not avoid them just to be restrained"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("If the reply would otherwise only affirm or close the topic"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("the lived context around the thing"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("Ask at most one question per turn"));
+        assert!(!prompts_en
+            .normal_chat_mode_prompt
+            .contains("questions should be occasional"));
+
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("会話を前に進めたり"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("控えめでいるためだけに質問を避けないでください"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("ただの肯定や話題の終了になりそうな場合"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("生活文脈が少し見える質問"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("1 ターンにつき質問は最大 1 つまで"));
+        assert!(!prompts_ja
+            .normal_chat_mode_prompt
+            .contains("質問は時折にするべき"));
+    }
+
+    #[test]
+    fn direct_chat_prompts_soften_question_restraint_without_allowing_interrogation() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        let prompts_ja = SystemPrompts::for_locale("ja");
+
+        assert!(prompts_en
+            .chat_system_prompt
+            .contains("Do not use questions as a mechanical ending"));
+        assert!(prompts_en
+            .chat_system_prompt
+            .contains("do not avoid a useful question just to seem restrained"));
+        assert!(prompts_en
+            .shadow_core_persona_prompt
+            .contains("Questions should earn their place"));
+        assert!(prompts_en
+            .shadow_core_persona_prompt
+            .contains("Do not turn every turn into a question"));
+        assert!(prompts_en
+            .shadow_core_persona_prompt
+            .contains("not a filler ending"));
+        assert!(!prompts_en
+            .shadow_core_persona_prompt
+            .contains("Question fatigue damages the conversation"));
+        assert!(!prompts_en
+            .shadow_core_persona_prompt
+            .contains("Questions are the exception, not the default move"));
+
+        assert!(prompts_ja
+            .chat_system_prompt
+            .contains("機械的な締めとして質問を使わないでください"));
+        assert!(prompts_ja
+            .chat_system_prompt
+            .contains("控えめに見せるためだけに有用な質問を避けないでください"));
+        assert!(prompts_ja
+            .shadow_core_persona_prompt
+            .contains("質問には、その場にある理由が必要です"));
+        assert!(prompts_ja
+            .shadow_core_persona_prompt
+            .contains("毎ターンを質問だけにしないでください"));
+        assert!(prompts_ja
+            .shadow_core_persona_prompt
+            .contains("穴埋めの締め"));
+        assert!(!prompts_ja
+            .shadow_core_persona_prompt
+            .contains("質問攻め（Question fatigue）は会話を損ないます"));
+        assert!(!prompts_ja
+            .shadow_core_persona_prompt
+            .contains("質問は例外であり、デフォルトの動きではありません"));
+    }
+
+    #[test]
     fn normal_chat_prompts_gate_ai_prompt_handoffs_behind_user_need() {
         let prompts_en = SystemPrompts::for_locale("en");
         let prompts_ja = SystemPrompts::for_locale("ja");
