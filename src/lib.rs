@@ -10,8 +10,9 @@ pub use builders::{
     build_chat_system_prompt, build_chat_system_prompt_with_current_time,
     build_chat_system_prompt_with_time_context, build_onboarding_system_prompt,
     build_onboarding_system_prompt_with_time_context, build_pair_compose_system_prompt,
-    build_pair_topic_system_prompt_with_time_context, preview_system_prompt,
-    preview_system_prompt_with_context, requested_output_language, PromptTimeContext,
+    build_pair_topic_system_prompt_with_time_context, pair_topic_result_mode_prompt,
+    preview_system_prompt, preview_system_prompt_with_context, profile_system_prompt,
+    requested_output_language, PromptTimeContext,
 };
 pub use drop_seed::{render_drop_definitions_for_locale, DropDefinition, DROP_DEFINITIONS};
 pub use knowledge::{
@@ -90,17 +91,17 @@ impl LocalePhrases {
 }
 
 pub struct SystemPrompts {
-    pub profile_system_prompt: &'static str,
-    pub profile_body_system_prompt: &'static str,
-    pub preview_system_prompt: &'static str,
-    pub onboarding_turn_two_system_prompt: &'static str,
-    pub onboarding_turn_three_system_prompt: &'static str,
-    pub shadow_core_persona_prompt: &'static str,
-    pub onboarding_mode_prompt: &'static str,
-    pub normal_chat_mode_prompt: &'static str,
-    pub output_style_prompt: &'static str,
-    pub pair_mode_prompt: &'static str,
-    pub pair_topic_result_mode_prompt: &'static str,
+    profile_system_prompt: &'static str,
+    profile_body_system_prompt: &'static str,
+    preview_system_prompt: &'static str,
+    onboarding_turn_two_system_prompt: &'static str,
+    onboarding_turn_three_system_prompt: &'static str,
+    shadow_core_persona_prompt: &'static str,
+    onboarding_mode_prompt: &'static str,
+    normal_chat_mode_prompt: &'static str,
+    output_style_prompt: &'static str,
+    pair_mode_prompt: &'static str,
+    pair_topic_result_mode_prompt: &'static str,
 }
 
 impl SystemPrompts {

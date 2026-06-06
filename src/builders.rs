@@ -113,6 +113,15 @@ pub fn requested_output_language(locale: &str) -> &'static str {
     ShadowLocale::from_code(ShadowLocale::resolve_code(locale)).prompt_language_name()
 }
 
+pub fn profile_system_prompt(locale: &str) -> &'static str {
+    SystemPrompts::for_locale(locale).profile_system_prompt
+}
+
+pub fn pair_topic_result_mode_prompt(locale: &str) -> &'static str {
+    SystemPrompts::for_locale(locale).pair_topic_result_mode_prompt
+}
+
+
 pub fn build_chat_system_prompt(shadow_name: &str, user_name: &str, locale: &str) -> String {
     build_chat_system_prompt_with_time_context(
         shadow_name,
@@ -300,8 +309,8 @@ mod tests {
         build_chat_system_prompt, build_chat_system_prompt_with_current_time,
         build_chat_system_prompt_with_time_context, build_onboarding_system_prompt,
         build_pair_compose_system_prompt, build_pair_topic_system_prompt_with_time_context,
-        preview_system_prompt, preview_system_prompt_with_context, requested_output_language,
-        PromptTimeContext,
+        pair_topic_result_mode_prompt, preview_system_prompt, preview_system_prompt_with_context,
+        profile_system_prompt, requested_output_language, PromptTimeContext,
     };
     use crate::LocalePhrases;
     use chrono::TimeZone;
@@ -651,6 +660,26 @@ mod tests {
             assert!(
                 prompt.contains("Do not switch languages because of"),
                 "preview prompt for {locale} must forbid switching to source-material language"
+            );
+        }
+    }
+
+    #[test]
+    fn profile_system_prompt_returns_non_empty_string_for_each_locale() {
+        for locale in ["en", "ja", "fr"] {
+            assert!(
+                !profile_system_prompt(locale).trim().is_empty(),
+                "profile_system_prompt must not be empty for locale '{locale}'"
+            );
+        }
+    }
+
+    #[test]
+    fn pair_topic_result_mode_prompt_returns_non_empty_string_for_each_locale() {
+        for locale in ["en", "ja", "fr"] {
+            assert!(
+                !pair_topic_result_mode_prompt(locale).trim().is_empty(),
+                "pair_topic_result_mode_prompt must not be empty for locale '{locale}'"
             );
         }
     }
