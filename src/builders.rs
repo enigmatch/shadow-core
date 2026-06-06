@@ -144,10 +144,9 @@ pub fn build_chat_system_prompt_with_time_context(
 ) -> String {
     let prompts = SystemPrompts::for_locale(locale);
     format!(
-        "{}\n\n{}\n\n{}\n\n{}\n\n{}\n\n{}",
+        "{}\n\n{}\n\n{}\n\n{}\n\n{}",
         render_shadow_core_persona(shadow_name, user_name, locale, time_context),
         render_generation_language_contract(locale),
-        PromptTemplate::new(prompts.chat_system_prompt).render(&locale_phrase_vars(locale)),
         render_normal_chat_mode(shadow_name, user_name, locale),
         render_internal_context_privacy_policy(locale),
         prompts.output_style_prompt.trim()
@@ -304,7 +303,7 @@ mod tests {
         preview_system_prompt, preview_system_prompt_with_context, requested_output_language,
         PromptTimeContext,
     };
-    use crate::{LocalePhrases, PromptTemplate, SystemPrompts};
+    use crate::LocalePhrases;
     use chrono::TimeZone;
 
     fn contains_japanese_example_phrases(prompt: &str) -> bool {
@@ -466,18 +465,8 @@ mod tests {
         let prompt_en = build_chat_system_prompt("Kage", "Yuki", "en");
         let prompt_ja = build_chat_system_prompt("Kage", "Yuki", "ja");
 
-        let prompts_en = SystemPrompts::for_locale("en");
-        let prompts_ja = SystemPrompts::for_locale("ja");
-        let rendered_chat_en = PromptTemplate::new(prompts_en.chat_system_prompt)
-            .render(&LocalePhrases::for_locale("en").template_vars());
-        let rendered_chat_ja = PromptTemplate::new(prompts_ja.chat_system_prompt)
-            .render(&LocalePhrases::for_locale("ja").template_vars());
-
         assert!(prompt_en.contains("You are Shadow, named Kage."));
         assert!(prompt_ja.contains("あなたは候補者のデジタル・ツイン、名前は Kage です。"));
-
-        assert!(prompt_en.contains(rendered_chat_en.trim()));
-        assert!(prompt_ja.contains(rendered_chat_ja.trim()));
     }
 
     #[test]
