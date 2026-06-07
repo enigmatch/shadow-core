@@ -396,11 +396,10 @@ pub fn chat_input_with_reflection_memory(
     )
 }
 
-pub fn chat_input_with_reflection_memory_and_long_term_context(
+pub fn chat_background_context_with_reflection_memory_and_long_term_context(
     relevant_onboarding_answers: &[String],
     onboarding_continuity: &[String],
     profile: &ShadowProfile,
-    conversation_lines: &[String],
     reflection_summaries: &[String],
     long_term_memory_block: &str,
 ) -> Result<String, ShadowCoreError> {
@@ -415,11 +414,6 @@ pub fn chat_input_with_reflection_memory_and_long_term_context(
         onboarding_continuity,
         "- none captured yet",
     );
-    let conversation_block = if conversation_lines.is_empty() {
-        "none yet".to_string()
-    } else {
-        conversation_lines.join("\n")
-    };
     let reflection_block = reflection_memory_block(
         "normal chat",
         NORMAL_CHAT_REFLECTION_WEIGHT,
@@ -435,10 +429,35 @@ pub fn chat_input_with_reflection_memory_and_long_term_context(
     let reasoning = reasoning_policy_json(&ready_reasoning)?;
 
     Ok(format!(
-        "{relevant_answers_block}\n\n{onboarding_continuity_block}\n\n{long_term_memory_block}\n\n{reflection_block}\n\nOnboarding profile:\n{profile_json}\n\nPersona:\n{persona}\n\nReasoning policy:\n{reasoning}\n\nRecent conversation (latest 20 messages max):\n{conversation_block}\n",
+        "{relevant_answers_block}\n\n{onboarding_continuity_block}\n\n{long_term_memory_block}\n\n{reflection_block}\n\nOnboarding profile:\n{profile_json}\n\nPersona:\n{persona}\n\nReasoning policy:\n{reasoning}",
     ))
 }
 
+pub fn chat_input_with_reflection_memory_and_long_term_context(
+    relevant_onboarding_answers: &[String],
+    onboarding_continuity: &[String],
+    profile: &ShadowProfile,
+    conversation_lines: &[String],
+    reflection_summaries: &[String],
+    long_term_memory_block: &str,
+) -> Result<String, ShadowCoreError> {
+    let background_context = chat_background_context_with_reflection_memory_and_long_term_context(
+        relevant_onboarding_answers,
+        onboarding_continuity,
+        profile,
+        reflection_summaries,
+        long_term_memory_block,
+    )?;
+    let conversation_block = if conversation_lines.is_empty() {
+        "none yet".to_string()
+    } else {
+        conversation_lines.join("\n")
+    };
+
+    Ok(format!(
+        "{background_context}\n\nRecent conversation (latest 20 messages max):\n{conversation_block}\n",
+    ))
+}
 
 pub fn preview_input(
     challenge: &ShadowChallenge,
@@ -700,6 +719,8 @@ pub struct PairComposePromptContext<'a> {
     pub recent_messages: &'a [String],
     pub user_intent: &'a str,
     pub requested_output_language: &'a str,
+    /// Previously generated draft to refine. `None` means generate from scratch.
+    pub previous_draft: Option<&'a str>,
 }
 
 pub fn build_pair_compose_message_input(context: PairComposePromptContext<'_>) -> Result<String, ShadowCoreError> {
@@ -735,6 +756,32 @@ pub fn build_pair_compose_message_input(context: PairComposePromptContext<'_>) -
     let actor_profile = pair_identity_block(context.actor)?;
     let listener_profile = pair_identity_block(context.listener)?;
 
+    let intent_block = match context.previous_draft {
+        None => format!(
+            "The user ({actor_name}) wants to say:\n{user_intent}\n\n\
+            Write a single message from {actor_name} to {listener_name} that expresses the above intent \
+            in {actor_name}'s authentic voice and personality. \
+            Make it natural, on-brand for {actor_name}, and appropriate for the conversation context. \
+            Do not add explanations or meta-commentary. \
+            Output only the message text in the requested output language.",
+            actor_name = context.actor.name,
+            listener_name = context.listener.name,
+            user_intent = context.user_intent,
+        ),
+        Some(draft) => format!(
+            "Current draft (written by {actor_name}):\n{draft}\n\n\
+            The user wants to adjust this draft as follows:\n{user_intent}\n\n\
+            Rewrite the draft applying the adjustment above. \
+            Preserve the draft's core substance and intent unless the adjustment explicitly asks to change it. \
+            Keep {actor_name}'s authentic voice and personality. \
+            Do not add explanations or meta-commentary. \
+            Output only the revised message text in the requested output language.",
+            actor_name = context.actor.name,
+            draft = draft,
+            user_intent = context.user_intent,
+        ),
+    };
+
     Ok(format!(
         "Actor Shadow profile:\n{actor_profile}\n\n\
         Listener Shadow profile:\n{listener_profile}\n\n\
@@ -745,12 +792,7 @@ pub fn build_pair_compose_message_input(context: PairComposePromptContext<'_>) -
         {reflection_block}\n\n\
         Recent conversation:\n{conversation}\n\n\
         Requested output language: {requested_output_language}\n\n\
-        The user ({actor_name}) wants to say:\n{user_intent}\n\n\
-        Write a single message from {actor_name} to {listener_name} that expresses the above intent \
-        in {actor_name}'s authentic voice and personality. \
-        Make it natural, on-brand for {actor_name}, and appropriate for the conversation context. \
-        Do not add explanations or meta-commentary. \
-        Output only the message text in the requested output language.",
+        {intent_block}",
         actor_profile = actor_profile,
         listener_profile = listener_profile,
         actor_voice_evidence = actor_voice_evidence,
@@ -760,9 +802,7 @@ pub fn build_pair_compose_message_input(context: PairComposePromptContext<'_>) -
         reflection_block = reflection_block,
         conversation = conversation,
         requested_output_language = context.requested_output_language,
-        user_intent = context.user_intent,
-        actor_name = context.actor.name,
-        listener_name = context.listener.name,
+        intent_block = intent_block,
     ))
 }
 
@@ -868,4 +908,93 @@ fn persona_json(persona: &PromptReadyPersona) -> Result<serde_json::Value, Shado
 
 fn reasoning_policy_json(reasoning: &PromptReadyReasoningPolicy) -> Result<serde_json::Value, ShadowCoreError> {
     serde_json::to_value(reasoning).map_err(serde_err_to_shadow)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::PairShadowIdentity;
+
+    fn minimal_identity(name: &str) -> PairShadowIdentity {
+        PairShadowIdentity {
+            name: name.to_string(),
+            personal_instruction: None,
+            profile: None,
+            persona: None,
+            reasoning_policy: None,
+        }
+    }
+
+    fn base_context<'a>(
+        actor: &'a PairShadowIdentity,
+        listener: &'a PairShadowIdentity,
+        user_intent: &'a str,
+        previous_draft: Option<&'a str>,
+    ) -> PairComposePromptContext<'a> {
+        PairComposePromptContext {
+            actor,
+            listener,
+            actor_voice_evidence: &[],
+            relevant_onboarding_answers: &[],
+            onboarding_continuity: &[],
+            long_term_memory_block: "",
+            reflection_summaries: &[],
+            recent_messages: &[],
+            user_intent,
+            requested_output_language: "English",
+            previous_draft,
+        }
+    }
+
+    #[test]
+    fn without_draft_uses_fresh_compose_instruction() {
+        let actor = minimal_identity("Alice");
+        let listener = minimal_identity("Bob");
+        let input = build_pair_compose_message_input(base_context(&actor, &listener, "say hi", None)).unwrap();
+        assert!(
+            input.contains("The user (Alice) wants to say:\nsay hi"),
+            "fresh compose should use 'wants to say' framing"
+        );
+        assert!(
+            input.contains("Write a single message"),
+            "fresh compose should include standard write instruction"
+        );
+        assert!(
+            !input.contains("Current draft"),
+            "fresh compose should not mention a draft"
+        );
+    }
+
+    #[test]
+    fn with_draft_uses_rewrite_instruction() {
+        let actor = minimal_identity("Alice");
+        let listener = minimal_identity("Bob");
+        let draft = "Hey Bob! How's it going?";
+        let input = build_pair_compose_message_input(base_context(
+            &actor,
+            &listener,
+            "make it shorter",
+            Some(draft),
+        )).unwrap();
+        assert!(
+            input.contains("Current draft (written by Alice):"),
+            "adjust compose should label the draft"
+        );
+        assert!(
+            input.contains(draft),
+            "adjust compose should include the draft text"
+        );
+        assert!(
+            input.contains("The user wants to adjust this draft as follows:\nmake it shorter"),
+            "adjust compose should frame user_intent as adjustment instruction"
+        );
+        assert!(
+            input.contains("Rewrite the draft"),
+            "adjust compose should instruct the LLM to rewrite"
+        );
+        assert!(
+            !input.contains("The user (Alice) wants to say:"),
+            "adjust compose should not use fresh-compose framing"
+        );
+    }
 }

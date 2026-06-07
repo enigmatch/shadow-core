@@ -11,8 +11,9 @@ pub use builders::{
     build_chat_system_prompt, build_chat_system_prompt_with_current_time,
     build_chat_system_prompt_with_time_context, build_onboarding_system_prompt,
     build_onboarding_system_prompt_with_time_context, build_pair_compose_system_prompt,
-    build_pair_topic_system_prompt_with_time_context, preview_system_prompt,
-    preview_system_prompt_with_context, requested_output_language, PromptTimeContext,
+    build_pair_topic_system_prompt_with_time_context, pair_topic_result_mode_prompt,
+    preview_system_prompt, preview_system_prompt_with_context, profile_system_prompt,
+    requested_output_language, PromptTimeContext,
 };
 pub use drop_seed::{render_drop_definitions_for_locale, DropDefinition, DROP_DEFINITIONS};
 pub use error::ShadowCoreError;
@@ -23,10 +24,9 @@ pub use knowledge::{
     build_pair_compose_message_input, build_pair_topic_message_input, build_reflection_reply_input,
     build_reflection_reply_instructions, build_summary_refresh_instructions,
     build_translation_chat_instructions, build_translation_preview_instructions, bullet_list_block,
-    chat_input, chat_input_with_reflection_memory,
-    chat_input_with_reflection_memory_and_long_term_context,
-    classify_pair_topic_tone,
-    explicit_correction_instructions, normalize_preformatted_block,
+    chat_background_context_with_reflection_memory_and_long_term_context, chat_input,
+    chat_input_with_reflection_memory, chat_input_with_reflection_memory_and_long_term_context,
+    classify_pair_topic_tone, explicit_correction_instructions, normalize_preformatted_block,
     onboarding_phase_completed_instructions, onboarding_phase_greeting_instructions,
     onboarding_phase_headline_confirmation_instructions, onboarding_phase_not_started_instructions,
     preview_input, preview_input_with_reflection_memory,
@@ -93,18 +93,17 @@ impl LocalePhrases {
 }
 
 pub struct SystemPrompts {
-    pub profile_system_prompt: &'static str,
-    pub profile_body_system_prompt: &'static str,
-    pub preview_system_prompt: &'static str,
-    pub chat_system_prompt: &'static str,
-    pub onboarding_turn_two_system_prompt: &'static str,
-    pub onboarding_turn_three_system_prompt: &'static str,
-    pub shadow_core_persona_prompt: &'static str,
-    pub onboarding_mode_prompt: &'static str,
-    pub normal_chat_mode_prompt: &'static str,
-    pub output_style_prompt: &'static str,
-    pub pair_mode_prompt: &'static str,
-    pub pair_topic_result_mode_prompt: &'static str,
+    profile_system_prompt: &'static str,
+    profile_body_system_prompt: &'static str,
+    preview_system_prompt: &'static str,
+    onboarding_turn_two_system_prompt: &'static str,
+    onboarding_turn_three_system_prompt: &'static str,
+    shadow_core_persona_prompt: &'static str,
+    onboarding_mode_prompt: &'static str,
+    normal_chat_mode_prompt: &'static str,
+    output_style_prompt: &'static str,
+    pair_mode_prompt: &'static str,
+    pair_topic_result_mode_prompt: &'static str,
 }
 
 impl SystemPrompts {
@@ -114,7 +113,6 @@ impl SystemPrompts {
             profile_system_prompt: include_str!("prompts/profile_system_prompt.txt"),
             profile_body_system_prompt: include_str!("prompts/profile_body_system_prompt.txt"),
             preview_system_prompt: include_str!("prompts/preview_system_prompt.txt"),
-            chat_system_prompt: include_str!("prompts/chat_system_prompt.txt"),
             onboarding_turn_two_system_prompt: include_str!("prompts/onboarding_turn_two.txt"),
             onboarding_turn_three_system_prompt: include_str!("prompts/onboarding_turn_three.txt"),
             shadow_core_persona_prompt: include_str!("prompts/shadow_core_persona.txt"),
@@ -129,7 +127,6 @@ impl SystemPrompts {
             "ja" => Self {
                 onboarding_mode_prompt: include_str!("prompts/ja/onboarding_mode.txt"),
                 shadow_core_persona_prompt: include_str!("prompts/ja/shadow_core_persona.txt"),
-                chat_system_prompt: include_str!("prompts/ja/chat_system_prompt.txt"),
                 normal_chat_mode_prompt: include_str!("prompts/ja/normal_chat_mode.txt"),
                 ..common
             },
@@ -397,7 +394,6 @@ mod tests {
         assert!(!prompts.profile_system_prompt.trim().is_empty());
         assert!(!prompts.profile_body_system_prompt.trim().is_empty());
         assert!(!prompts.preview_system_prompt.trim().is_empty());
-        assert!(!prompts.chat_system_prompt.trim().is_empty());
         assert!(!prompts.onboarding_turn_two_system_prompt.trim().is_empty());
         assert!(!prompts
             .onboarding_turn_three_system_prompt
@@ -430,6 +426,9 @@ mod tests {
         assert!(prompts
             .output_style_prompt
             .contains("a small emoji may mark a key point or caution"));
+        assert!(prompts
+            .output_style_prompt
+            .contains("they do not need to be rare"));
         assert!(prompts
             .output_style_prompt
             .contains("do not break every sentence onto its own line"));
@@ -472,6 +471,100 @@ mod tests {
         assert!(prompts_ja
             .normal_chat_mode_prompt
             .contains("冗談、比喩、絵文字"));
+    }
+
+    #[test]
+    fn normal_chat_prompts_keep_questions_available_for_conversational_momentum() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        let prompts_ja = SystemPrompts::for_locale("ja");
+
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("Questions are welcome when they help the conversation keep moving"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("do not avoid them just to be restrained"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("If the reply would otherwise only affirm or close the topic"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("the lived context around the thing"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("Ask at most one question per turn"));
+        assert!(!prompts_en
+            .normal_chat_mode_prompt
+            .contains("questions should be occasional"));
+
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("会話を前に進めたり"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("控えめでいるためだけに質問を避けないでください"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("ただの肯定や話題の終了になりそうな場合"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("生活文脈が少し見える質問"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("1 ターンにつき質問は最大 1 つまで"));
+        assert!(!prompts_ja
+            .normal_chat_mode_prompt
+            .contains("質問は時折にするべき"));
+    }
+
+    #[test]
+    fn direct_chat_prompts_soften_question_restraint_without_allowing_interrogation() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        let prompts_ja = SystemPrompts::for_locale("ja");
+
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("Do not ask questions mechanically"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("do not avoid them just to be restrained"));
+        assert!(prompts_en
+            .shadow_core_persona_prompt
+            .contains("Questions should earn their place"));
+        assert!(prompts_en
+            .shadow_core_persona_prompt
+            .contains("Do not turn every turn into a question"));
+        assert!(prompts_en
+            .shadow_core_persona_prompt
+            .contains("not a filler ending"));
+        assert!(!prompts_en
+            .shadow_core_persona_prompt
+            .contains("Question fatigue damages the conversation"));
+        assert!(!prompts_en
+            .shadow_core_persona_prompt
+            .contains("Questions are the exception, not the default move"));
+
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("機械的に質問しないでください"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("控えめでいるためだけに質問を避けないでください"));
+        assert!(prompts_ja
+            .shadow_core_persona_prompt
+            .contains("質問には、その場にある理由が必要です"));
+        assert!(prompts_ja
+            .shadow_core_persona_prompt
+            .contains("毎ターンを質問だけにしないでください"));
+        assert!(prompts_ja
+            .shadow_core_persona_prompt
+            .contains("穴埋めの締め"));
+        assert!(!prompts_ja
+            .shadow_core_persona_prompt
+            .contains("質問攻め（Question fatigue）は会話を損ないます"));
+        assert!(!prompts_ja
+            .shadow_core_persona_prompt
+            .contains("質問は例外であり、デフォルトの動きではありません"));
     }
 
     #[test]
@@ -810,7 +903,6 @@ mod tests {
     fn english_prompt_assets_render_without_japanese_example_phrases() {
         let prompts = SystemPrompts::for_locale("en");
 
-        let rendered_chat = render_with_locale_phrases(prompts.chat_system_prompt, "en");
         let rendered_persona = render_with_locale_phrases(prompts.shadow_core_persona_prompt, "en");
         let rendered_normal_chat =
             render_with_locale_phrases(prompts.normal_chat_mode_prompt, "en");
@@ -819,7 +911,6 @@ mod tests {
         let rendered_preview = render_with_locale_phrases(prompts.preview_system_prompt, "en");
 
         for rendered in [
-            rendered_chat,
             rendered_persona,
             rendered_normal_chat,
             rendered_onboarding,
@@ -873,10 +964,6 @@ mod tests {
                 "output_style_prompt must not contain '{word}'"
             );
             assert!(
-                !prompts.chat_system_prompt.to_lowercase().contains(word),
-                "chat_system_prompt must not contain '{word}'"
-            );
-            assert!(
                 !prompts
                     .normal_chat_mode_prompt
                     .to_lowercase()
@@ -916,20 +1003,23 @@ mod tests {
     fn japanese_prompt_assets_render_with_japanese_example_phrases() {
         let prompts = SystemPrompts::for_locale("en");
 
-        let rendered_chat = render_with_locale_phrases(prompts.chat_system_prompt, "ja");
         let rendered_persona = render_with_locale_phrases(prompts.shadow_core_persona_prompt, "ja");
         let rendered_normal_chat =
             render_with_locale_phrases(prompts.normal_chat_mode_prompt, "ja");
         let rendered_onboarding = render_with_locale_phrases(prompts.onboarding_mode_prompt, "ja");
 
-        assert!(rendered_chat.contains("また始まったよ"));
+        assert!(rendered_normal_chat.contains("また始まったよ"));
         assert!(rendered_persona.contains("こういう感じかも"));
         assert!(rendered_persona.contains("たとえばこういうことかも"));
         assert!(rendered_persona.contains("small emoji"));
         assert!(rendered_persona.contains("brief laugh marker"));
+        assert!(rendered_persona.contains("Emoji do not need to be rare"));
         assert!(SystemPrompts::for_locale("ja")
             .shadow_core_persona_prompt
             .contains("小さな絵文字"));
+        assert!(SystemPrompts::for_locale("ja")
+            .shadow_core_persona_prompt
+            .contains("絵文字は珍しいものにしなくて構いません"));
         assert!(SystemPrompts::for_locale("ja")
             .shadow_core_persona_prompt
             .contains("短い笑い表現"));

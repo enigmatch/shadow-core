@@ -114,6 +114,14 @@ pub fn requested_output_language(locale: &str) -> &'static str {
     ShadowLocale::from_code(ShadowLocale::resolve_code(locale)).prompt_language_name()
 }
 
+pub fn profile_system_prompt(locale: &str) -> &'static str {
+    SystemPrompts::for_locale(locale).profile_system_prompt
+}
+
+pub fn pair_topic_result_mode_prompt(locale: &str) -> &'static str {
+    SystemPrompts::for_locale(locale).pair_topic_result_mode_prompt
+}
+
 pub fn build_chat_system_prompt(
     shadow_name: &str,
     user_name: &str,
@@ -149,11 +157,9 @@ pub fn build_chat_system_prompt_with_time_context(
 ) -> Result<String, ShadowCoreError> {
     let prompts = SystemPrompts::for_locale(locale);
     Ok(format!(
-        "{}\n\n{}\n\n{}\n\n{}\n\n{}\n\n{}",
+        "{}\n\n{}\n\n{}\n\n{}\n\n{}",
         render_shadow_core_persona(shadow_name, user_name, locale, time_context)?,
         render_generation_language_contract(locale),
-        PromptTemplate::new(prompts.chat_system_prompt)
-            .render(&locale_phrase_vars(locale))?,
         render_normal_chat_mode(shadow_name, user_name, locale)?,
         render_internal_context_privacy_policy(locale),
         prompts.output_style_prompt.trim()
@@ -323,10 +329,10 @@ mod tests {
         build_chat_system_prompt, build_chat_system_prompt_with_current_time,
         build_chat_system_prompt_with_time_context, build_onboarding_system_prompt,
         build_pair_compose_system_prompt, build_pair_topic_system_prompt_with_time_context,
-        preview_system_prompt, preview_system_prompt_with_context, requested_output_language,
-        PromptTimeContext,
+        pair_topic_result_mode_prompt, preview_system_prompt, preview_system_prompt_with_context,
+        profile_system_prompt, requested_output_language, PromptTimeContext,
     };
-    use crate::{LocalePhrases, PromptTemplate, SystemPrompts};
+    use crate::LocalePhrases;
     use chrono::TimeZone;
 
     fn contains_japanese_example_phrases(prompt: &str) -> bool {
@@ -488,20 +494,9 @@ mod tests {
         let prompt_en = build_chat_system_prompt("Kage", "Yuki", "en").unwrap();
         let prompt_ja = build_chat_system_prompt("Kage", "Yuki", "ja").unwrap();
 
-        let prompts_en = SystemPrompts::for_locale("en");
-        let prompts_ja = SystemPrompts::for_locale("ja");
-        let rendered_chat_en = PromptTemplate::new(prompts_en.chat_system_prompt)
-            .render(&LocalePhrases::for_locale("en").template_vars())
-            .unwrap();
-        let rendered_chat_ja = PromptTemplate::new(prompts_ja.chat_system_prompt)
-            .render(&LocalePhrases::for_locale("ja").template_vars())
-            .unwrap();
 
         assert!(prompt_en.contains("You are Shadow, named Kage."));
         assert!(prompt_ja.contains("あなたは候補者のデジタル・ツイン、名前は Kage です。"));
-
-        assert!(prompt_en.contains(rendered_chat_en.trim()));
-        assert!(prompt_ja.contains(rendered_chat_ja.trim()));
     }
 
     #[test]
@@ -699,6 +694,26 @@ mod tests {
             assert!(
                 prompt.contains("Do not switch languages because of"),
                 "preview prompt for {locale} must forbid switching to source-material language"
+            );
+        }
+    }
+
+    #[test]
+    fn profile_system_prompt_returns_non_empty_string_for_each_locale() {
+        for locale in ["en", "ja", "fr"] {
+            assert!(
+                !profile_system_prompt(locale).trim().is_empty(),
+                "profile_system_prompt must not be empty for locale '{locale}'"
+            );
+        }
+    }
+
+    #[test]
+    fn pair_topic_result_mode_prompt_returns_non_empty_string_for_each_locale() {
+        for locale in ["en", "ja", "fr"] {
+            assert!(
+                !pair_topic_result_mode_prompt(locale).trim().is_empty(),
+                "pair_topic_result_mode_prompt must not be empty for locale '{locale}'"
             );
         }
     }
