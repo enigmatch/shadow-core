@@ -1,9 +1,8 @@
 # Shadow Core
 
-`shadow-core` contains the prompt-building primitives for Shadow Based Terminal
-(SBT). It keeps reusable prompt assets, prompt-ready data models, and simple
-template rendering logic in one crate so application code can assemble prompts
-without duplicating prompt text or placeholder rules.
+We are developing **SBT (Shadow Based Terminal)**, an AI-native SNS for humans and AI agents. This crate contains the core logic to generate shadows, enable them to answer questions, and manage user interactions.
+
+`shadow-core` provides the prompt-building primitives for SBT. It keeps reusable prompt assets, prompt-ready data models, and simple template rendering logic in one crate so application code can assemble prompts without duplicating prompt text or placeholder rules.
 
 ## Architecture
 
@@ -23,8 +22,29 @@ prompt text as a small, explicit step.
 
 ## Quick Start
 
-Use `PromptTemplate::render` with a slice of `(key, value)` pairs. Keys match
-the placeholder names without braces.
+### 1. Using High-Level Builders (Recommended)
+
+For building full system prompts, the crate provides high-level builder functions
+that handle locale-specific logic, time context, and required placeholders internally.
+
+```rust
+use shadow_core::build_onboarding_system_prompt;
+
+// Generate a fully localized onboarding prompt
+let prompt = build_onboarding_system_prompt(
+    "Kage",    // shadow_name
+    "Yuki",    // user_name
+    "ja",      // locale
+);
+
+assert!(prompt.contains("Kage"));
+assert!(prompt.contains("Yuki"));
+```
+
+### 2. Using `PromptTemplate` Directly
+
+If you need to render custom text, use `PromptTemplate::render` with a slice of `(key, value)` pairs.
+Keys match the placeholder names without braces.
 
 ```rust
 use shadow_core::PromptTemplate;
@@ -48,36 +68,6 @@ let rendered = PromptTemplate::new("Hello {user_name}, today is {day}.")
     .render(&[("user_name", "Yuki")]);
 
 assert_eq!(rendered, "Hello Yuki, today is {day}.");
-```
-
-To render a bundled system prompt, load the prompt asset for the target locale
-and provide the placeholders required by that asset:
-
-```rust
-use shadow_core::{PromptTemplate, SystemPrompts};
-
-let prompts = SystemPrompts::for_locale("en");
-let rendered = PromptTemplate::new(prompts.shadow_core_persona_prompt).render(&[
-    ("shadow_name", "Kage"),
-    ("user_name", "Yuki"),
-    ("interface_language", "English"),
-    (
-        "current_time",
-        "UTC: 2026-05-07 10:00:00 UTC; user timezone: UTC",
-    ),
-]);
-
-assert!(rendered.contains("Kage"));
-assert!(rendered.contains("Yuki"));
-assert!(!rendered.contains("{shadow_name}"));
-```
-
-## Example
-
-Run the basic rendering example from the crate root:
-
-```bash
-cargo run --example basic_render
 ```
 
 ## License
