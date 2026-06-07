@@ -538,12 +538,12 @@ mod tests {
     fn chat_system_prompt_includes_long_form_readability_rules() {
         let prompt = build_chat_system_prompt("Kage", "Yuki", "en");
 
-        assert!(prompt.contains("avoid one dense block"));
-        assert!(prompt.contains("split the reply into readable paragraphs"));
-        assert!(prompt.contains("a small emoji may mark a key point or caution"));
-        assert!(prompt.contains("do not break every sentence onto its own line"));
+        assert!(prompt.contains("rather than one dense block"));
+        assert!(prompt.contains("break it into shorter paragraphs"));
+        assert!(prompt.contains("small emoji may mark a key point or caution"));
+        assert!(prompt.contains("Do not break every sentence onto its own line"));
         assert!(prompt.contains("keep the reply conversational"));
-        assert!(prompt.contains("do not force this on short casual replies"));
+        assert!(prompt.contains("do not apply this to short casual replies"));
     }
 
     #[test]
