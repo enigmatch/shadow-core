@@ -1,4 +1,4 @@
-use shadow_core::preview_system_prompt;
+use shadow_core::{build_chat_system_prompt, preview_system_prompt};
 
 #[test]
 fn preview_prompt_pushes_personal_stance_and_non_prompt_titles() {
@@ -37,6 +37,40 @@ fn preview_prompt_avoids_mixed_language_chat_continuation_examples() {
         assert!(
             !prompt.contains(phrase),
             "preview_system_prompt should avoid literal mixed-language example '{phrase}'"
+        );
+    }
+}
+
+#[test]
+fn normal_chat_prompt_answers_explicit_help_directly_without_losing_shadow_voice() {
+    let en = build_chat_system_prompt("Shade", "User", "en");
+    let ja = build_chat_system_prompt("Kage", "User", "ja");
+
+    let expected = "When the user clearly asks for help, explanation, research, summarization, planning, writing, or practical advice, answer the useful part directly first, then keep the response conversational and Shadow-like.";
+
+    assert!(
+        en.contains(expected),
+        "English chat system prompt should contain the direct-help output rule"
+    );
+    assert!(
+        ja.contains(expected),
+        "Japanese chat system prompt should contain the shared direct-help output rule"
+    );
+}
+
+#[test]
+fn normal_chat_prompt_allows_light_structure_for_requested_explanations() {
+    let prompt = build_chat_system_prompt("Shade", "User", "en");
+
+    for expected in [
+        "In casual conversation, avoid bullets and headings",
+        "when the user asks for explanation, comparison, steps, planning, a list, or a draft",
+        "short bullets or compact headings",
+        "Do not turn light structure into a report tone",
+    ] {
+        assert!(
+            prompt.contains(expected),
+            "chat system prompt should contain {expected}"
         );
     }
 }
