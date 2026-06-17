@@ -92,9 +92,12 @@ impl LocalePhrases {
 
 pub struct SystemPrompts {
     profile_system_prompt: &'static str,
+    #[allow(dead_code)]
     profile_body_system_prompt: &'static str,
     preview_system_prompt: &'static str,
+    #[allow(dead_code)]
     onboarding_turn_two_system_prompt: &'static str,
+    #[allow(dead_code)]
     onboarding_turn_three_system_prompt: &'static str,
     shadow_core_persona_prompt: &'static str,
     onboarding_mode_prompt: &'static str,
