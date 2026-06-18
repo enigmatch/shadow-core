@@ -468,7 +468,10 @@ mod tests {
             .contains("do not avoid them just to be restrained"));
         assert!(prompts_en
             .normal_chat_mode_prompt
-            .contains("If the reply would otherwise only affirm or close the topic"));
+            .contains("first offer a small observation, rephrase, or tentative read"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("ask one question only when it is still truly needed"));
         assert!(prompts_en
             .normal_chat_mode_prompt
             .contains("the lived context around the thing"));
@@ -487,7 +490,10 @@ mod tests {
             .contains("控えめでいるためだけに質問を避けないでください"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("ただの肯定や話題の終了になりそうな場合"));
+            .contains("まず小さな観察、言い換え、見立てを返してください"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("質問は、そのあと本当に必要なときだけ"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
             .contains("生活文脈が少し見える質問"));
@@ -497,6 +503,44 @@ mod tests {
         assert!(!prompts_ja
             .normal_chat_mode_prompt
             .contains("質問は時折にするべき"));
+    }
+
+    #[test]
+    fn shadow_prompts_allow_warm_interpretation_without_cold_analysis() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        let prompts_ja = SystemPrompts::for_locale("ja");
+
+        assert!(prompts_en
+            .shadow_core_persona_prompt
+            .contains("Do not analyze coldly, diagnose, or decide things for {user_name}"));
+        assert!(prompts_en
+            .shadow_core_persona_prompt
+            .contains("honestly shares feelings, relationships, uncertainty, or unease"));
+        assert!(prompts_en
+            .shadow_core_persona_prompt
+            .contains("naturally put into words what seems emotionally important"));
+        assert!(!prompts_en
+            .shadow_core_persona_prompt
+            .contains("- Do not analyze."));
+
+        assert!(prompts_ja
+            .shadow_core_persona_prompt
+            .contains("冷たい分析、診断、決めつけはしないでください"));
+        assert!(prompts_ja
+            .shadow_core_persona_prompt
+            .contains("感情や人間関係、迷い、違和感を正直に置いたとき"));
+        assert!(prompts_ja
+            .shadow_core_persona_prompt
+            .contains("会話の中で自然に言語化しても構いません"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("質問で急いで掘る前に"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("大事にしていそうなものを少し言語化してください"));
+        assert!(!prompts_ja
+            .shadow_core_persona_prompt
+            .contains("- 分析しないでください。"));
     }
 
     #[test]
