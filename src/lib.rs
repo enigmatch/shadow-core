@@ -471,7 +471,9 @@ mod tests {
             .contains("first offer a small observation, rephrase, or tentative read"));
         assert!(prompts_en
             .normal_chat_mode_prompt
-            .contains("ask one question only when it is still truly needed"));
+            .contains(
+                "ask one question only when it helps {user_name} notice or distinguish something about their own state"
+            ));
         assert!(prompts_en
             .normal_chat_mode_prompt
             .contains("the lived context around the thing"));
@@ -493,7 +495,7 @@ mod tests {
             .contains("まず小さな観察、言い換え、見立てを返してください"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("質問は、そのあと本当に必要なときだけ"));
+            .contains("自分の状態を見分ける助けになるときだけ"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
             .contains("生活文脈が少し見える質問"));
@@ -519,6 +521,15 @@ mod tests {
         assert!(prompts_en
             .shadow_core_persona_prompt
             .contains("naturally put into words what seems emotionally important"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("First name the human pattern that could be happening"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("how it may be showing up specifically for {user_name}"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("Do not force this shape onto short casual messages"));
         assert!(!prompts_en
             .shadow_core_persona_prompt
             .contains("- Do not analyze."));
@@ -534,10 +545,16 @@ mod tests {
             .contains("会話の中で自然に言語化しても構いません"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("質問で急いで掘る前に"));
+            .contains("質問で急いで掘らないでください"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("大事にしていそうなものを少し言語化してください"));
+            .contains("人間一般にも起こりうる反応として一度置き"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("{user_name} の場合にどう出ていそうか"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("短い雑談にまで強制しないでください"));
         assert!(!prompts_ja
             .shadow_core_persona_prompt
             .contains("- 分析しないでください。"));
