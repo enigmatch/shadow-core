@@ -508,6 +508,35 @@ mod tests {
     }
 
     #[test]
+    fn normal_chat_strategy_uses_playful_follow_on_instead_of_liking_example() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        let prompts_ja = SystemPrompts::for_locale("ja");
+        let prompts_fr = SystemPrompts::for_locale("fr");
+
+        for prompts in [&prompts_en, &prompts_fr] {
+            assert!(prompts.normal_chat_mode_prompt.contains("Playful follow-on"));
+            assert!(prompts
+                .normal_chat_mode_prompt
+                .contains("light rephrase, casual tease, or small metaphor"));
+            assert!(prompts
+                .normal_chat_mode_prompt
+                .contains("That looks messy, but annoyingly, the logic kind of holds. haha"));
+            assert!(!prompts.normal_chat_mode_prompt.contains("I love that logic"));
+        }
+
+        assert!(prompts_ja.normal_chat_mode_prompt.contains("（i）乗っかり"));
+        assert!(!prompts_ja.normal_chat_mode_prompt.contains("（i）同意"));
+        assert!(prompts_ja.normal_chat_mode_prompt.contains("乗っかり"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("軽い言い換え、ツッコミ、小さなたとえで会話を転がします"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("それ、雑に見えてちゃんと筋通ってるのちょっと悔しいな。笑"));
+        assert!(!prompts_ja.normal_chat_mode_prompt.contains("その論理、好きだな"));
+    }
+
+    #[test]
     fn shadow_prompts_allow_warm_interpretation_without_cold_analysis() {
         let prompts_en = SystemPrompts::for_locale("en");
         let prompts_ja = SystemPrompts::for_locale("ja");
