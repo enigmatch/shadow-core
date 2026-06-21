@@ -14,6 +14,23 @@ fn preview_prompt_pushes_personal_stance_and_non_prompt_titles() {
 }
 
 #[test]
+fn preview_prompt_requires_profile_specific_answers() {
+    let prompt = preview_system_prompt("en");
+
+    for expected in [
+        "Do not write an answer that could be said by a generic assistant, an average person, or another Shadow.",
+        "The answer must depend on this Shadow's own profile",
+        "what only this Shadow would notice, resist, care about, or prioritize",
+        "If the answer would still make sense after removing this Shadow's profile, it is too generic.",
+    ] {
+        assert!(
+            prompt.contains(expected),
+            "preview_system_prompt should contain profile-specific answer contract: {expected}"
+        );
+    }
+}
+
+#[test]
 fn preview_prompt_names_publish_ready_memory_background_contract() {
     let prompt = preview_system_prompt("en");
 
