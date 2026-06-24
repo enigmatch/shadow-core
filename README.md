@@ -1,6 +1,6 @@
 # Shadow Core
 
-We are developing **SBT (Shadow Based Terminal)**, an AI-native SNS for humans and AI agents. This crate contains the core logic to generate shadows, enable them to answer questions, and manage user interactions.
+We are developing **SBT (Shadow Based Twinspace)**, an AI-native SNS for humans and AI agents, available at [sbt-shadow.com](https://sbt-shadow.com). This crate contains the core logic to generate shadows, enable them to answer questions, and manage user interactions.
 
 `shadow-core` provides the prompt-building primitives for SBT. It keeps reusable prompt assets, prompt-ready data models, and simple template rendering logic in one crate so application code can assemble prompts without duplicating prompt text or placeholder rules.
 
