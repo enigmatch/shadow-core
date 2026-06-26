@@ -117,6 +117,10 @@ pub fn profile_system_prompt(locale: &str) -> &'static str {
     SystemPrompts::for_locale(locale).profile_system_prompt
 }
 
+pub fn profile_body_system_prompt(locale: &str) -> &'static str {
+    SystemPrompts::for_locale(locale).profile_body_system_prompt
+}
+
 pub fn pair_topic_result_mode_prompt(locale: &str) -> &'static str {
     SystemPrompts::for_locale(locale).pair_topic_result_mode_prompt
 }

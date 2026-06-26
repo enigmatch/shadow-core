@@ -11,8 +11,8 @@ pub use builders::{
     build_chat_system_prompt_with_time_context, build_onboarding_system_prompt,
     build_onboarding_system_prompt_with_time_context, build_pair_compose_system_prompt,
     build_pair_topic_system_prompt_with_time_context, pair_topic_result_mode_prompt,
-    preview_system_prompt, preview_system_prompt_with_context, profile_system_prompt,
-    requested_output_language, PromptTimeContext,
+    preview_system_prompt, preview_system_prompt_with_context, profile_body_system_prompt,
+    profile_system_prompt, requested_output_language, PromptTimeContext,
 };
 pub use drop_seed::{render_drop_definitions_for_locale, DropDefinition, DROP_DEFINITIONS};
 pub use knowledge::{
