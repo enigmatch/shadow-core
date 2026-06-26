@@ -1,5 +1,6 @@
 mod builders;
 mod drop_seed;
+pub(crate) mod error;
 pub(crate) mod knowledge;
 mod pair_topic;
 mod prompt_inputs;
@@ -15,6 +16,7 @@ pub use builders::{
     requested_output_language, PromptTimeContext,
 };
 pub use drop_seed::{render_drop_definitions_for_locale, DropDefinition, DROP_DEFINITIONS};
+pub use error::ShadowCoreError;
 pub use knowledge::{
     build_chat_context_planner_instructions, build_explicit_correction_input,
     build_onboarding_phase_instructions, build_onboarding_prompt_input,
@@ -184,7 +186,16 @@ mod tests {
     };
 
     fn render_with_locale_phrases(template: &str, locale: &str) -> String {
-        PromptTemplate::new(template).render(&LocalePhrases::for_locale(locale).template_vars())
+        let mut vars: Vec<(&str, &str)> = vec![
+            ("shadow_name", "TestShadow"),
+            ("user_name", "TestUser"),
+            ("interface_language", "English"),
+            ("current_time", "UTC: 2026-01-01 00:00:00 UTC; user timezone: UTC"),
+        ];
+        vars.extend(LocalePhrases::for_locale(locale).template_vars());
+        PromptTemplate::new(template)
+            .render(&vars)
+            .unwrap()
     }
 
     fn contains_japanese_script(text: &str) -> bool {
@@ -201,34 +212,37 @@ mod tests {
 
     #[test]
     fn prompt_template_replaces_single_variable() {
-        let result = PromptTemplate::new("Hello, {name}!").render(&[("name", "World")]);
-        assert_eq!(result, "Hello, World!");
+        let result =
+            PromptTemplate::new("Hello, {name}!").render(&[("name", "World")]);
+        assert_eq!(result.unwrap(), "Hello, World!");
     }
 
     #[test]
     fn prompt_template_replaces_multiple_variables() {
         let result = PromptTemplate::new("Hi {user_name}, meet {shadow_name}.")
             .render(&[("user_name", "Alice"), ("shadow_name", "Kage")]);
-        assert_eq!(result, "Hi Alice, meet Kage.");
+        assert_eq!(result.unwrap(), "Hi Alice, meet Kage.");
     }
 
     #[test]
     fn prompt_template_leaves_unmatched_placeholders_intact() {
-        let result = PromptTemplate::new("Hello {name}, your {unknown} is safe.")
-            .render(&[("name", "Alice")]);
-        assert_eq!(result, "Hello Alice, your {unknown} is safe.");
+        let err = PromptTemplate::new("Hello {name}, your {unknown} is safe.")
+            .render(&[("name", "Alice")])
+            .unwrap_err();
+        assert!(err.to_string().contains("unknown"));
     }
 
     #[test]
     fn prompt_template_replaces_placeholder_appearing_multiple_times() {
-        let result = PromptTemplate::new("{x} and {x} again").render(&[("x", "foo")]);
-        assert_eq!(result, "foo and foo again");
+        let result =
+            PromptTemplate::new("{x} and {x} again").render(&[("x", "foo")]);
+        assert_eq!(result.unwrap(), "foo and foo again");
     }
 
     #[test]
     fn prompt_template_renders_real_persona_prompt_variables() {
         let prompts = SystemPrompts::for_locale("en");
-        let rendered = PromptTemplate::new(prompts.shadow_core_persona_prompt).render(&[
+        let mut vars: Vec<(&str, &str)> = vec![
             ("shadow_name", "Kage"),
             ("user_name", "Yuki"),
             ("interface_language", "Japanese"),
@@ -236,7 +250,11 @@ mod tests {
                 "current_time",
                 "UTC: 2026-04-30 09:15:00 UTC; user timezone: UTC",
             ),
-        ]);
+        ];
+        vars.extend(LocalePhrases::for_locale("en").template_vars());
+        let rendered = PromptTemplate::new(prompts.shadow_core_persona_prompt)
+            .render(&vars)
+            .unwrap();
         assert!(!rendered.contains("{shadow_name}"));
         assert!(!rendered.contains("{user_name}"));
         assert!(!rendered.contains("{interface_language}"));
