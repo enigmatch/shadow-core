@@ -456,84 +456,18 @@ mod tests {
     }
 
     #[test]
-    fn normal_chat_prompts_keep_questions_available_for_conversational_momentum() {
+    fn normal_chat_prompt_removes_strategy_table_to_keep_voice_natural() {
         let prompts_en = SystemPrompts::for_locale("en");
         let prompts_ja = SystemPrompts::for_locale("ja");
 
-        assert!(prompts_en
-            .normal_chat_mode_prompt
-            .contains("Questions are welcome when they help the conversation keep moving"));
-        assert!(prompts_en
-            .normal_chat_mode_prompt
-            .contains("do not avoid them just to be restrained"));
-        assert!(prompts_en
-            .normal_chat_mode_prompt
-            .contains("first offer a small observation, rephrase, or tentative read"));
-        assert!(prompts_en
-            .normal_chat_mode_prompt
-            .contains(
-                "ask one question only when it helps {user_name} notice or distinguish something about their own state"
-            ));
-        assert!(prompts_en
-            .normal_chat_mode_prompt
-            .contains("the lived context around the thing"));
-        assert!(prompts_en
-            .shadow_core_persona_prompt
-            .contains("Ask at most one question per turn"));
-        assert!(!prompts_en
-            .normal_chat_mode_prompt
-            .contains("questions should be occasional"));
-
-        assert!(prompts_ja
-            .normal_chat_mode_prompt
-            .contains("会話を前に進めたり"));
-        assert!(prompts_ja
-            .normal_chat_mode_prompt
-            .contains("控えめでいるためだけに質問を避けないでください"));
-        assert!(prompts_ja
-            .normal_chat_mode_prompt
-            .contains("まず小さな観察、言い換え、見立てを返してください"));
-        assert!(prompts_ja
-            .normal_chat_mode_prompt
-            .contains("自分の状態を見分ける助けになるときだけ"));
-        assert!(prompts_ja
-            .normal_chat_mode_prompt
-            .contains("生活文脈が少し見える質問"));
-        assert!(prompts_ja
-            .normal_chat_mode_prompt
-            .contains("1 ターンにつき質問は最大 1 つまで"));
-        assert!(!prompts_ja
-            .normal_chat_mode_prompt
-            .contains("質問は時折にするべき"));
-    }
-
-    #[test]
-    fn normal_chat_strategy_uses_playful_follow_on_instead_of_liking_example() {
-        let prompts_en = SystemPrompts::for_locale("en");
-        let prompts_ja = SystemPrompts::for_locale("ja");
-        let prompts_fr = SystemPrompts::for_locale("fr");
-
-        for prompts in [&prompts_en, &prompts_fr] {
-            assert!(prompts.normal_chat_mode_prompt.contains("Playful follow-on"));
-            assert!(prompts
-                .normal_chat_mode_prompt
-                .contains("light rephrase, casual tease, or small metaphor"));
-            assert!(prompts
-                .normal_chat_mode_prompt
-                .contains("That looks messy, but annoyingly, the logic kind of holds. haha"));
-            assert!(!prompts.normal_chat_mode_prompt.contains("I love that logic"));
+        for prompts in [&prompts_en, &prompts_ja] {
+            assert!(!prompts.normal_chat_mode_prompt.contains("Strategic phases:"));
+            assert!(!prompts.normal_chat_mode_prompt.contains("Conversation strategies (i–xiii):"));
+            assert!(!prompts.normal_chat_mode_prompt.contains("Playful follow-on"));
+            assert!(!prompts.normal_chat_mode_prompt.contains("Naive Question"));
+            assert!(!prompts.normal_chat_mode_prompt.contains("乗っかり："));
+            assert!(!prompts.normal_chat_mode_prompt.contains("（i）乗っかり"));
         }
-
-        assert!(prompts_ja.normal_chat_mode_prompt.contains("（i）乗っかり"));
-        assert!(!prompts_ja.normal_chat_mode_prompt.contains("（i）同意"));
-        assert!(prompts_ja.normal_chat_mode_prompt.contains("乗っかり"));
-        assert!(prompts_ja
-            .normal_chat_mode_prompt
-            .contains("軽い言い換え、ツッコミ、小さなたとえで会話を転がします"));
-        assert!(prompts_ja
-            .normal_chat_mode_prompt
-            .contains("それ、雑に見えてちゃんと筋通ってるのちょっと悔しいな。笑"));
-        assert!(!prompts_ja.normal_chat_mode_prompt.contains("その論理、好きだな"));
     }
 
     #[test]
@@ -590,16 +524,10 @@ mod tests {
     }
 
     #[test]
-    fn direct_chat_prompts_soften_question_restraint_without_allowing_interrogation() {
+    fn normal_chat_prompt_keeps_question_policy_in_persona_rather_than_repeating_it() {
         let prompts_en = SystemPrompts::for_locale("en");
         let prompts_ja = SystemPrompts::for_locale("ja");
 
-        assert!(prompts_en
-            .normal_chat_mode_prompt
-            .contains("Do not ask questions mechanically"));
-        assert!(prompts_en
-            .normal_chat_mode_prompt
-            .contains("do not avoid them just to be restrained"));
         assert!(prompts_en
             .shadow_core_persona_prompt
             .contains("Questions should earn their place"));
@@ -610,18 +538,12 @@ mod tests {
             .shadow_core_persona_prompt
             .contains("not a filler ending"));
         assert!(!prompts_en
-            .shadow_core_persona_prompt
-            .contains("Question fatigue damages the conversation"));
+            .normal_chat_mode_prompt
+            .contains("Do not ask questions mechanically"));
         assert!(!prompts_en
-            .shadow_core_persona_prompt
-            .contains("Questions are the exception, not the default move"));
+            .normal_chat_mode_prompt
+            .contains("Questions are welcome when they help the conversation keep moving"));
 
-        assert!(prompts_ja
-            .normal_chat_mode_prompt
-            .contains("機械的に質問しないでください"));
-        assert!(prompts_ja
-            .normal_chat_mode_prompt
-            .contains("控えめでいるためだけに質問を避けないでください"));
         assert!(prompts_ja
             .shadow_core_persona_prompt
             .contains("質問には、その場にある理由が必要です"));
@@ -632,11 +554,11 @@ mod tests {
             .shadow_core_persona_prompt
             .contains("穴埋めの締め"));
         assert!(!prompts_ja
-            .shadow_core_persona_prompt
-            .contains("質問攻め（Question fatigue）は会話を損ないます"));
+            .normal_chat_mode_prompt
+            .contains("機械的に質問しないでください"));
         assert!(!prompts_ja
-            .shadow_core_persona_prompt
-            .contains("質問は例外であり、デフォルトの動きではありません"));
+            .normal_chat_mode_prompt
+            .contains("会話を前に進めたり"));
     }
 
     #[test]
