@@ -587,10 +587,13 @@ mod tests {
             .contains("ほしいかどうかを軽く確認してください"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("{user_name} が明確に求めた場合だけ"));
+            .contains("{user_name} が助けを求めているとき"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
             .contains("目的、前提、ほしい回答形式、{shadow_name} らしい観点"));
+        assert!(!prompts_ja
+            .normal_chat_mode_prompt
+            .contains("When {user_name} asks for help"));
     }
 
     #[test]
