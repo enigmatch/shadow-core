@@ -11,8 +11,8 @@ pub use builders::{
     build_chat_system_prompt_with_time_context, build_onboarding_system_prompt,
     build_onboarding_system_prompt_with_time_context, build_pair_compose_system_prompt,
     build_pair_topic_system_prompt_with_time_context, pair_topic_result_mode_prompt,
-    preview_system_prompt, preview_system_prompt_with_context, profile_system_prompt,
-    requested_output_language, PromptTimeContext,
+    preview_system_prompt, preview_system_prompt_with_context, profile_body_system_prompt,
+    profile_system_prompt, requested_output_language, PromptTimeContext,
 };
 pub use drop_seed::{render_drop_definitions_for_locale, DropDefinition, DROP_DEFINITIONS};
 pub use knowledge::{
@@ -456,13 +456,10 @@ mod tests {
     }
 
     #[test]
-    fn normal_chat_prompts_keep_questions_available_for_conversational_momentum() {
+    fn normal_chat_prompts_keep_questions_secondary_to_statements() {
         let prompts_en = SystemPrompts::for_locale("en");
         let prompts_ja = SystemPrompts::for_locale("ja");
 
-        assert!(prompts_en
-            .normal_chat_mode_prompt
-            .contains("Questions are welcome when they help the conversation keep moving"));
         assert!(prompts_en
             .normal_chat_mode_prompt
             .contains("do not avoid them just to be restrained"));
@@ -471,22 +468,14 @@ mod tests {
             .contains("first offer a small observation, rephrase, or tentative read"));
         assert!(prompts_en
             .normal_chat_mode_prompt
-            .contains(
-                "ask one question only when it helps {user_name} notice or distinguish something about their own state"
-            ));
-        assert!(prompts_en
-            .normal_chat_mode_prompt
-            .contains("the lived context around the thing"));
-        assert!(prompts_en
-            .shadow_core_persona_prompt
-            .contains("Ask at most one question per turn"));
+            .contains("Default to non-question endings when a turn already lands"));
         assert!(!prompts_en
             .normal_chat_mode_prompt
-            .contains("questions should be occasional"));
-
-        assert!(prompts_ja
+            .contains("Questions are welcome when they help the conversation keep moving"));
+        assert!(!prompts_en
             .normal_chat_mode_prompt
-            .contains("会話を前に進めたり"));
+            .contains("Small concrete follow-up questions"));
+
         assert!(prompts_ja
             .normal_chat_mode_prompt
             .contains("控えめでいるためだけに質問を避けないでください"));
@@ -495,16 +484,13 @@ mod tests {
             .contains("まず小さな観察、言い換え、見立てを返してください"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("自分の状態を見分ける助けになるときだけ"));
-        assert!(prompts_ja
-            .normal_chat_mode_prompt
-            .contains("生活文脈が少し見える質問"));
-        assert!(prompts_ja
-            .normal_chat_mode_prompt
-            .contains("1 ターンにつき質問は最大 1 つまで"));
+            .contains("デフォルトで質問以外の終わり方にしてください"));
         assert!(!prompts_ja
             .normal_chat_mode_prompt
-            .contains("質問は時折にするべき"));
+            .contains("質問は、会話を前に進めたり"));
+        assert!(!prompts_ja
+            .normal_chat_mode_prompt
+            .contains("小さな具体質問"));
     }
 
     #[test]
