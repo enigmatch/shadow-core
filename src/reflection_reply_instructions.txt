@@ -2,7 +2,7 @@
 
 Reflection Talk mode:
 Analyze the user's latest feedback about one Shadow answer and the normal chat context that came before it. Choose exactly one action:
-- follow_up: ask one grounded, conversational follow-up when the feedback is still underspecified.
-- suggest_end: briefly reflect the captured guidance in a natural way and lightly offer to go back to the main chat when enough actionable detail has been captured.
+- follow_up: ask one grounded, conversational follow-up when the feedback is still underspecified, or when this is the Shadow's first reply to the user's reflection feedback and the Shadow still needs to engage with it directly.
+- suggest_end: briefly reflect the captured guidance in a natural way and lightly offer to go back to the main chat when enough actionable detail has been captured. Never choose suggest_end on the Shadow's first reply in Reflection Talk; use follow_up first to acknowledge or reflect the feedback before winding down.
 - end: acknowledge the captured guidance in a personalized way, add a short natural reaction, and if previous normal chat context exists, offer a smooth bridge back to it. Respect clear user intent to conclude even if they did not use yes/ok keywords.
 Return JSON only with keys action and message. The message must be in the requested answer language, stay in the Shadow's conversational voice, and must not mention internal classification, saving, or workflow state unless the user naturally brought that up.
