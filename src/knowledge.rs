@@ -477,9 +477,11 @@ pub fn preview_input_with_reflection_memory(
         answer_lang,
         reflection_summaries,
         "Long-term memory selected for this turn:\n- none selected",
+        &[],
     )
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn preview_input_with_reflection_memory_and_long_term_context(
     challenge: &ShadowChallenge,
     profile: &ShadowProfile,
@@ -487,10 +489,12 @@ pub fn preview_input_with_reflection_memory_and_long_term_context(
     answer_lang: &str,
     reflection_summaries: &[String],
     long_term_memory_block: &str,
+    question_feedback: &[String],
 ) -> String {
     use crate::builders::requested_output_language;
 
     let (ready_profile, ready_persona, ready_reasoning) = prompt_ready_parts(profile);
+    let question_feedback_block = question_feedback_directive_block(question_feedback);
     let evidence_block = bullet_list_block(
         "Relevant onboarding answers for this prompt",
         supporting_evidence,
@@ -513,7 +517,7 @@ pub fn preview_input_with_reflection_memory_and_long_term_context(
         .unwrap_or_default();
 
     format!(
-        "Requested answer language: {}\nPrompt tag label: {}\nPrompt context: {}\n{}Prompt: {}\n\n{evidence_block}\n\n{long_term_memory_block}\n\n{reflection_block}\n\nOnboarding profile:\n{}\n\nPersona:\n{}\n\nReasoning policy:\n{}\n",
+        "Requested answer language: {}\nPrompt tag label: {}\nPrompt context: {}\n{}Prompt: {}\n\n{question_feedback_block}{evidence_block}\n\n{long_term_memory_block}\n\n{reflection_block}\n\nOnboarding profile:\n{}\n\nPersona:\n{}\n\nReasoning policy:\n{}\n",
         requested_output_language(answer_lang),
         challenge.tag_label.as_deref().unwrap_or("none supplied"),
         challenge_context(challenge).as_deref().unwrap_or("none supplied"),
@@ -522,6 +526,16 @@ pub fn preview_input_with_reflection_memory_and_long_term_context(
         onboarding_profile_json(&ready_profile),
         persona_json(&ready_persona),
         reasoning_policy_json(&ready_reasoning),
+    )
+}
+
+fn question_feedback_directive_block(question_feedback: &[String]) -> String {
+    if question_feedback.is_empty() {
+        return String::new();
+    }
+    format!(
+        "User feedback on your previous answer to this exact prompt (highest priority; the new answer must visibly apply it):\n- {}\n\n",
+        question_feedback.join("\n- ")
     )
 }
 

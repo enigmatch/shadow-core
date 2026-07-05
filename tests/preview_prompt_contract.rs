@@ -91,3 +91,82 @@ fn normal_chat_prompt_allows_light_structure_for_requested_explanations() {
         );
     }
 }
+
+fn contract_profile() -> shadow_core::ShadowProfile {
+    shadow_core::ShadowProfile {
+        headline: "Ships fast, admits mistakes".to_string(),
+        stance: "Bias for action".to_string(),
+        source_answers: vec![],
+        tone: "direct".to_string(),
+        traits: vec!["decisive".to_string()],
+        decision_style: "gut first, verify after".to_string(),
+        anchor: "keep promises".to_string(),
+        speech_style: None,
+    }
+}
+
+fn contract_challenge() -> shadow_core::ShadowChallenge {
+    shadow_core::ShadowChallenge {
+        title: None,
+        prompt_text: "Submit on time or fix the mistake?".to_string(),
+        tag_label: Some("#startup".to_string()),
+        system_context: None,
+        preferred_probe_kind: None,
+    }
+}
+
+#[test]
+fn preview_input_renders_same_question_feedback_as_top_priority_directive() {
+    let input = shadow_core::preview_input_with_reflection_memory_and_long_term_context(
+        &contract_challenge(),
+        &contract_profile(),
+        &[],
+        "en",
+        &["User reflection feedback: keep the tradeoff explicit.".to_string()],
+        "Long-term memory selected for this turn:\n- none selected",
+        &["User reflection feedback: be bolder, neutral answers are boring.".to_string()],
+    );
+
+    let directive_index = input
+        .find("User feedback on your previous answer to this exact prompt")
+        .expect("same-question feedback directive should be present");
+    assert!(input.contains("be bolder, neutral answers are boring."));
+    let generic_index = input
+        .find("Reflection memory for question answer (influence 5/10)")
+        .expect("generic reflection memory block should stay");
+    assert!(
+        directive_index < generic_index,
+        "directive must appear before the generic reflection memory block"
+    );
+    let evidence_index = input
+        .find("Relevant onboarding answers for this prompt")
+        .expect("evidence block should stay");
+    assert!(
+        directive_index < evidence_index,
+        "directive must appear before the onboarding evidence block"
+    );
+    assert!(
+        !input.contains("Reflection memory for question answer (influence 5/10):\n- User reflection feedback: be bolder"),
+        "same-question feedback must not be duplicated into the generic block"
+    );
+}
+
+#[test]
+fn preview_input_omits_directive_without_same_question_feedback() {
+    let input = shadow_core::preview_input_with_reflection_memory_and_long_term_context(
+        &contract_challenge(),
+        &contract_profile(),
+        &[],
+        "en",
+        &["User reflection feedback: keep the tradeoff explicit.".to_string()],
+        "Long-term memory selected for this turn:\n- none selected",
+        &[],
+    );
+
+    assert!(
+        !input.contains("User feedback on your previous answer to this exact prompt"),
+        "directive header must not render when there is no same-question feedback"
+    );
+    assert!(input.contains("Reflection memory for question answer (influence 5/10)"));
+    assert!(input.contains("keep the tradeoff explicit."));
+}
