@@ -532,10 +532,28 @@ mod tests {
             .contains("Do not analyze coldly, diagnose, or decide things for {user_name}"));
         assert!(prompts_en
             .shadow_core_persona_prompt
+            .contains("then let's do this together"));
+        assert!(prompts_en
+            .shadow_core_persona_prompt
             .contains("honestly shares feelings, relationships, uncertainty, or unease"));
         assert!(prompts_en
             .shadow_core_persona_prompt
             .contains("naturally put into words what seems emotionally important"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("speak as a partner moving with them, not as a reviewer"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("proactively suggest usable modes like research, idea generation, organizing, drafting, or planning"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("Questions should be a last-resort move"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("do not keep repeating"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("mix in one useful piece of information or a small concrete detail"));
         assert!(prompts_en
             .normal_chat_mode_prompt
             .contains("First name the human pattern that could be happening"));
@@ -554,10 +572,25 @@ mod tests {
             .contains("冷たい分析、診断、決めつけはしないでください"));
         assert!(prompts_ja
             .shadow_core_persona_prompt
+            .contains("じゃあ一緒にやるか"));
+        assert!(prompts_ja
+            .shadow_core_persona_prompt
             .contains("感情や人間関係、迷い、違和感を正直に置いたとき"));
         assert!(prompts_ja
             .shadow_core_persona_prompt
             .contains("会話の中で自然に言語化しても構いません"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("レビュワーではなく、同じ側で手を動かす人"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("調べる、アイデアを出す、整理する、文章にする、作戦を立てるなど"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("質問は最後の手段にしてください"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("有益な情報や、今すぐ使える小さな具体を 1 つ混ぜてください"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
             .contains("質問で急いで掘らないでください"));
@@ -576,6 +609,61 @@ mod tests {
     }
 
     #[test]
+    fn multilingual_normal_chat_prompts_share_the_same_core_contract() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        let prompts_ja = SystemPrompts::for_locale("ja");
+
+        for (en_phrase, ja_phrase) in [
+            (
+                "Questions should be a last-resort move",
+                "質問は最後の手段にしてください",
+            ),
+            (
+                "mix in one useful piece of information or a small concrete detail",
+                "有益な情報や、今すぐ使える小さな具体を 1 つ混ぜてください",
+            ),
+            (
+                "speak as a partner moving with them, not as a reviewer",
+                "レビュワーではなく、同じ側で手を動かす人",
+            ),
+            (
+                "Lead with a tentative read first",
+                "まず仮説や見立てを置き",
+            ),
+        ] {
+            assert!(
+                prompts_en.normal_chat_mode_prompt.contains(en_phrase),
+                "english normal_chat_mode_prompt should contain shared core phrase: {en_phrase}"
+            );
+            assert!(
+                prompts_ja.normal_chat_mode_prompt.contains(ja_phrase),
+                "japanese normal_chat_mode_prompt should contain shared core phrase: {ja_phrase}"
+            );
+        }
+
+        for (en_phrase, ja_phrase) in [
+            (
+                "Do not turn every turn into a question. Ask at most one question per turn",
+                "毎ターンを質問だけにしないでください。質問は会話を本当に進めるときだけにして",
+            ),
+            ("do not use questions as filler", "穴埋めや確認の連打にしないでください"),
+            (
+                "Prefer reactions, acknowledgment, agreement, observation, or a small reveal before asking anything back",
+                "何かを問い返す前に、反応、承認、同意、観察、または小さな自己開示を優先してください",
+            ),
+        ] {
+            assert!(
+                prompts_en.shadow_core_persona_prompt.contains(en_phrase),
+                "english shadow_core_persona_prompt should contain shared core phrase: {en_phrase}"
+            );
+            assert!(
+                prompts_ja.shadow_core_persona_prompt.contains(ja_phrase),
+                "japanese shadow_core_persona_prompt should contain shared core phrase: {ja_phrase}"
+            );
+        }
+    }
+
+    #[test]
     fn direct_chat_prompts_soften_question_restraint_without_allowing_interrogation() {
         let prompts_en = SystemPrompts::for_locale("en");
         let prompts_ja = SystemPrompts::for_locale("ja");
@@ -588,19 +676,10 @@ mod tests {
             .contains("do not avoid them just to be restrained"));
         assert!(prompts_en
             .shadow_core_persona_prompt
-            .contains("Questions should earn their place"));
+            .contains("Do not turn every turn into a question. Ask at most one question per turn"));
         assert!(prompts_en
             .shadow_core_persona_prompt
-            .contains("Do not turn every turn into a question"));
-        assert!(prompts_en
-            .shadow_core_persona_prompt
-            .contains("not a filler ending"));
-        assert!(!prompts_en
-            .shadow_core_persona_prompt
-            .contains("Question fatigue damages the conversation"));
-        assert!(!prompts_en
-            .shadow_core_persona_prompt
-            .contains("Questions are the exception, not the default move"));
+            .contains("do not use questions as filler"));
 
         assert!(prompts_ja
             .normal_chat_mode_prompt
@@ -609,20 +688,11 @@ mod tests {
             .normal_chat_mode_prompt
             .contains("控えめでいるためだけに質問を避けないでください"));
         assert!(prompts_ja
-            .shadow_core_persona_prompt
-            .contains("質問には、その場にある理由が必要です"));
+            .normal_chat_mode_prompt
+            .contains("1 回につき最大 1 つ"));
         assert!(prompts_ja
             .shadow_core_persona_prompt
-            .contains("毎ターンを質問だけにしないでください"));
-        assert!(prompts_ja
-            .shadow_core_persona_prompt
-            .contains("穴埋めの締め"));
-        assert!(!prompts_ja
-            .shadow_core_persona_prompt
-            .contains("質問攻め（Question fatigue）は会話を損ないます"));
-        assert!(!prompts_ja
-            .shadow_core_persona_prompt
-            .contains("質問は例外であり、デフォルトの動きではありません"));
+            .contains("毎ターンを質問だけにしないでください。質問は会話を本当に進めるときだけにして"));
     }
 
     #[test]
