@@ -109,7 +109,7 @@ pub struct SystemPrompts {
 
 impl SystemPrompts {
     pub fn for_locale(locale: &str) -> Self {
-        // Shared prompts (English-only)
+        // Shared prompts, with locale-specific overrides where needed.
         let common = Self {
             profile_system_prompt: include_str!("prompts/profile_system_prompt.txt"),
             profile_body_system_prompt: include_str!("prompts/profile_body_system_prompt.txt"),
@@ -133,6 +133,8 @@ impl SystemPrompts {
             },
             "fr" => Self {
                 onboarding_mode_prompt: include_str!("prompts/fr/onboarding_mode.txt"),
+                shadow_core_persona_prompt: include_str!("prompts/fr/shadow_core_persona.txt"),
+                normal_chat_mode_prompt: include_str!("prompts/fr/normal_chat_mode.txt"),
                 ..common
             },
             _ => common,
@@ -670,23 +672,28 @@ mod tests {
     fn multilingual_normal_chat_prompts_share_the_same_core_contract() {
         let prompts_en = SystemPrompts::for_locale("en");
         let prompts_ja = SystemPrompts::for_locale("ja");
+        let prompts_fr = SystemPrompts::for_locale("fr");
 
-        for (en_phrase, ja_phrase) in [
+        for (en_phrase, ja_phrase, fr_phrase) in [
             (
                 "Questions should be a last-resort move",
                 "質問は最後の手段にしてください",
+                "Les questions doivent rester un dernier recours",
             ),
             (
                 "mix in one useful piece of information or a small concrete detail",
                 "有益な情報や、今すぐ使える小さな具体を 1 つ混ぜてください",
+                "ajoute une information utile ou un petit detail concret",
             ),
             (
                 "speak as a partner moving with them, not as a reviewer",
                 "レビュワーではなく、同じ側で手を動かす人",
+                "parle comme un partenaire qui avance avec lui",
             ),
             (
                 "Lead with a tentative read first",
                 "まず仮説や見立てを置き",
+                "Commence par une lecture provisoire",
             ),
         ] {
             assert!(
@@ -697,17 +704,27 @@ mod tests {
                 prompts_ja.normal_chat_mode_prompt.contains(ja_phrase),
                 "japanese normal_chat_mode_prompt should contain shared core phrase: {ja_phrase}"
             );
+            assert!(
+                prompts_fr.normal_chat_mode_prompt.contains(fr_phrase),
+                "french normal_chat_mode_prompt should contain shared core phrase: {fr_phrase}"
+            );
         }
 
-        for (en_phrase, ja_phrase) in [
+        for (en_phrase, ja_phrase, fr_phrase) in [
             (
                 "Do not turn every turn into a question. Ask at most one question per turn",
                 "毎ターンを質問だけにしないでください。質問は会話を本当に進めるときだけにして",
+                "Ne transforme pas chaque tour en question. Pose au plus une question par tour",
             ),
-            ("do not use questions as filler", "穴埋めや確認の連打にしないでください"),
+            (
+                "do not use questions as filler",
+                "穴埋めや確認の連打にしないでください",
+                "n'utilise pas les questions comme remplissage",
+            ),
             (
                 "Prefer reactions, acknowledgment, agreement, observation, or a small reveal before asking anything back",
                 "何かを問い返す前に、反応、承認、同意、観察、または小さな自己開示を優先してください",
+                "Prefere les reactions, l'acquiescement, l'observation ou une petite revelation avant de poser une question",
             ),
         ] {
             assert!(
@@ -717,6 +734,10 @@ mod tests {
             assert!(
                 prompts_ja.shadow_core_persona_prompt.contains(ja_phrase),
                 "japanese shadow_core_persona_prompt should contain shared core phrase: {ja_phrase}"
+            );
+            assert!(
+                prompts_fr.shadow_core_persona_prompt.contains(fr_phrase),
+                "french shadow_core_persona_prompt should contain shared core phrase: {fr_phrase}"
             );
         }
     }
@@ -1122,15 +1143,35 @@ mod tests {
     fn shared_persona_prompt_avoids_specific_joke_examples_in_english_and_french() {
         let prompts_en = SystemPrompts::for_locale("en");
         let prompts_fr = SystemPrompts::for_locale("fr");
+        let prompts_ja = SystemPrompts::for_locale("ja");
 
         for prompt in [
             prompts_en.shadow_core_persona_prompt,
             prompts_fr.shadow_core_persona_prompt,
+            prompts_ja.shadow_core_persona_prompt,
         ] {
             assert!(!prompt.contains("body-part gags"));
             assert!(!prompt.contains("British-dry"));
             assert!(!prompt.contains("Here we go again"));
         }
+    }
+
+    #[test]
+    fn french_prompt_assets_use_locale_specific_persona_and_normal_chat_prompts() {
+        let prompts = SystemPrompts::for_locale("fr");
+
+        assert!(prompts
+            .shadow_core_persona_prompt
+            .contains("Ne fais pas de la chaleur, de l'accord ou de l'affection la forme par defaut"));
+        assert!(prompts
+            .shadow_core_persona_prompt
+            .contains("Si {user_name} emploie un langage de proche, partenaire ou famille, reponds d'abord naturellement"));
+        assert!(prompts
+            .normal_chat_mode_prompt
+            .contains("Ne laisse pas les reactions ordinaires se transformer en compliments ou en affection"));
+        assert!(prompts
+            .normal_chat_mode_prompt
+            .contains("Les questions doivent rester un dernier recours"));
     }
 
     #[test]
