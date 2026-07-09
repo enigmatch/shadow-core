@@ -109,7 +109,7 @@ pub struct SystemPrompts {
 
 impl SystemPrompts {
     pub fn for_locale(locale: &str) -> Self {
-        // Shared prompts (English-only)
+        // Shared prompts, with locale-specific overrides where needed.
         let common = Self {
             profile_system_prompt: include_str!("prompts/profile_system_prompt.txt"),
             profile_body_system_prompt: include_str!("prompts/profile_body_system_prompt.txt"),
@@ -133,6 +133,8 @@ impl SystemPrompts {
             },
             "fr" => Self {
                 onboarding_mode_prompt: include_str!("prompts/fr/onboarding_mode.txt"),
+                shadow_core_persona_prompt: include_str!("prompts/fr/shadow_core_persona.txt"),
+                normal_chat_mode_prompt: include_str!("prompts/fr/normal_chat_mode.txt"),
                 ..common
             },
             _ => common,
@@ -398,7 +400,7 @@ mod tests {
 
         assert!(prompts
             .output_style_prompt
-            .contains("avoid long sentences and long second paragraphs"));
+            .contains("do not artificially cut off longer explanations"));
         assert!(prompts
             .output_style_prompt
             .contains("Do not stack repeated questions, jokes, metaphors"));
@@ -435,24 +437,26 @@ mod tests {
 
         assert!(prompts_en
             .normal_chat_mode_prompt
-            .contains("keep the whole reply to 1-3 short sentences"));
+            .contains("stay concise when that feels natural, but do not force brevity"));
         assert!(prompts_en
             .normal_chat_mode_prompt
-            .contains("under 35 words when possible"));
+            .contains("write in fuller paragraphs and let the reply breathe"));
         assert!(prompts_en
             .normal_chat_mode_prompt
-            .contains("avoid long sentences and paragraph-style banter"));
+            .contains("thoughtful ChatGPT-style explanation"));
 
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("返信全体を1〜3文"));
+            .contains("普通の雑談では短めでもよいですが"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("可能な限り120字以内"));
-        assert!(prompts_ja.normal_chat_mode_prompt.contains("長い第二段落"));
+            .contains("長めの段落で説明してかまいません"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("冗談、比喩、絵文字"));
+            .contains("整理、比較、説明、提案"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("詳細、理由づけ、助言、支え、手順"));
     }
 
     #[test]
@@ -468,7 +472,7 @@ mod tests {
             .contains("first offer a small observation, rephrase, or tentative read"));
         assert!(prompts_en
             .normal_chat_mode_prompt
-            .contains("Default to non-question endings when a turn already lands"));
+            .contains("Questions should come after the read, not before it"));
         assert!(!prompts_en
             .normal_chat_mode_prompt
             .contains("Questions are welcome when they help the conversation keep moving"));
@@ -481,16 +485,66 @@ mod tests {
             .contains("控えめでいるためだけに質問を避けないでください"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("まず小さな観察、言い換え、見立てを返してください"));
+            .contains("質問の前に、いま起きていそうなパターンや温度を一度言葉にし"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("デフォルトで質問以外の終わり方にしてください"));
+            .contains("返答の形は「見立て → 小さな具体 → 必要なら 1 つだけ質問」"));
         assert!(!prompts_ja
             .normal_chat_mode_prompt
             .contains("質問は、会話を前に進めたり"));
         assert!(!prompts_ja
             .normal_chat_mode_prompt
             .contains("小さな具体質問"));
+    }
+
+    #[test]
+    fn normal_chat_prompts_ground_questions_in_known_user_context_first() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        let prompts_ja = SystemPrompts::for_locale("ja");
+
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("If you already know something useful about {user_name}"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("do not make the exchange feel like an intake interview"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("Questions should come after the read, not before it"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("A strong reply often follows this shape: tentative read, one small concrete detail"));
+        assert!(prompts_en
+            .shadow_core_persona_prompt
+            .contains("grounded in what {shadow_name} already knows about {user_name}"));
+        assert!(prompts_en
+            .shadow_core_persona_prompt
+            .contains("Do not let the exchange become a questionnaire"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("thoughtful ChatGPT-style explanation"));
+
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("すでに知っている {user_name} の情報があるなら"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("聞き取りや面接みたいな空気にはしないでください"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("質問の前に、いま起きていそうなパターンや温度を一度言葉にし"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("返答の形は「見立て → 小さな具体 → 必要なら 1 つだけ質問」"));
+        assert!(prompts_ja
+            .shadow_core_persona_prompt
+            .contains("すでに {user_name} について分かっていることがあるなら"));
+        assert!(prompts_ja
+            .shadow_core_persona_prompt
+            .contains("返答が質問取り調べにならないようにしてください"));
+        assert!(prompts_ja
+            .shadow_core_persona_prompt
+            .contains("少し構造立てて長めに説明しても構いません"));
     }
 
     #[test]
@@ -508,6 +562,9 @@ mod tests {
                 .normal_chat_mode_prompt
                 .contains("That looks messy, but annoyingly, the logic kind of holds. haha"));
             assert!(!prompts.normal_chat_mode_prompt.contains("I love that logic"));
+            assert!(!prompts
+                .shadow_core_persona_prompt
+                .contains("liking, or agreement"));
         }
 
         assert!(prompts_ja.normal_chat_mode_prompt.contains("（i）乗っかり"));
@@ -520,6 +577,9 @@ mod tests {
             .normal_chat_mode_prompt
             .contains("それ、雑に見えてちゃんと筋通ってるのちょっと悔しいな。笑"));
         assert!(!prompts_ja.normal_chat_mode_prompt.contains("その論理、好きだな"));
+        assert!(!prompts_ja
+            .shadow_core_persona_prompt
+            .contains("好意、同意"));
     }
 
     #[test]
@@ -612,23 +672,28 @@ mod tests {
     fn multilingual_normal_chat_prompts_share_the_same_core_contract() {
         let prompts_en = SystemPrompts::for_locale("en");
         let prompts_ja = SystemPrompts::for_locale("ja");
+        let prompts_fr = SystemPrompts::for_locale("fr");
 
-        for (en_phrase, ja_phrase) in [
+        for (en_phrase, ja_phrase, fr_phrase) in [
             (
                 "Questions should be a last-resort move",
                 "質問は最後の手段にしてください",
+                "Les questions doivent rester un dernier recours",
             ),
             (
                 "mix in one useful piece of information or a small concrete detail",
                 "有益な情報や、今すぐ使える小さな具体を 1 つ混ぜてください",
+                "ajoute une information utile ou un petit detail concret",
             ),
             (
                 "speak as a partner moving with them, not as a reviewer",
                 "レビュワーではなく、同じ側で手を動かす人",
+                "parle comme un partenaire qui avance avec lui",
             ),
             (
                 "Lead with a tentative read first",
                 "まず仮説や見立てを置き",
+                "Commence par une lecture provisoire",
             ),
         ] {
             assert!(
@@ -639,17 +704,27 @@ mod tests {
                 prompts_ja.normal_chat_mode_prompt.contains(ja_phrase),
                 "japanese normal_chat_mode_prompt should contain shared core phrase: {ja_phrase}"
             );
+            assert!(
+                prompts_fr.normal_chat_mode_prompt.contains(fr_phrase),
+                "french normal_chat_mode_prompt should contain shared core phrase: {fr_phrase}"
+            );
         }
 
-        for (en_phrase, ja_phrase) in [
+        for (en_phrase, ja_phrase, fr_phrase) in [
             (
                 "Do not turn every turn into a question. Ask at most one question per turn",
                 "毎ターンを質問だけにしないでください。質問は会話を本当に進めるときだけにして",
+                "Ne transforme pas chaque tour en question. Pose au plus une question par tour",
             ),
-            ("do not use questions as filler", "穴埋めや確認の連打にしないでください"),
+            (
+                "do not use questions as filler",
+                "穴埋めや確認の連打にしないでください",
+                "n'utilise pas les questions comme remplissage",
+            ),
             (
                 "Prefer reactions, acknowledgment, agreement, observation, or a small reveal before asking anything back",
                 "何かを問い返す前に、反応、承認、同意、観察、または小さな自己開示を優先してください",
+                "Prefere les reactions, l'acquiescement, l'observation ou une petite revelation avant de poser une question",
             ),
         ] {
             assert!(
@@ -659,6 +734,10 @@ mod tests {
             assert!(
                 prompts_ja.shadow_core_persona_prompt.contains(ja_phrase),
                 "japanese shadow_core_persona_prompt should contain shared core phrase: {ja_phrase}"
+            );
+            assert!(
+                prompts_fr.shadow_core_persona_prompt.contains(fr_phrase),
+                "french shadow_core_persona_prompt should contain shared core phrase: {fr_phrase}"
             );
         }
     }
@@ -1064,15 +1143,35 @@ mod tests {
     fn shared_persona_prompt_avoids_specific_joke_examples_in_english_and_french() {
         let prompts_en = SystemPrompts::for_locale("en");
         let prompts_fr = SystemPrompts::for_locale("fr");
+        let prompts_ja = SystemPrompts::for_locale("ja");
 
         for prompt in [
             prompts_en.shadow_core_persona_prompt,
             prompts_fr.shadow_core_persona_prompt,
+            prompts_ja.shadow_core_persona_prompt,
         ] {
             assert!(!prompt.contains("body-part gags"));
             assert!(!prompt.contains("British-dry"));
             assert!(!prompt.contains("Here we go again"));
         }
+    }
+
+    #[test]
+    fn french_prompt_assets_use_locale_specific_persona_and_normal_chat_prompts() {
+        let prompts = SystemPrompts::for_locale("fr");
+
+        assert!(prompts
+            .shadow_core_persona_prompt
+            .contains("Ne fais pas de la chaleur, de l'accord ou de l'affection la forme par defaut"));
+        assert!(prompts
+            .shadow_core_persona_prompt
+            .contains("Si {user_name} emploie un langage de proche, partenaire ou famille, reponds d'abord naturellement"));
+        assert!(prompts
+            .normal_chat_mode_prompt
+            .contains("Ne laisse pas les reactions ordinaires se transformer en compliments ou en affection"));
+        assert!(prompts
+            .normal_chat_mode_prompt
+            .contains("Les questions doivent rester un dernier recours"));
     }
 
     #[test]
@@ -1163,20 +1262,20 @@ mod tests {
 
         assert!(prompts_en
             .output_style_prompt
-            .contains("break it into shorter paragraphs"));
+            .contains("do not artificially cut off longer explanations"));
         assert!(prompts_en
             .output_style_prompt
             .contains("one main idea per paragraph"));
         assert!(prompts_en
             .output_style_prompt
-            .contains("do not apply this to short casual replies"));
+            .contains("do not artificially cut off longer explanations when the user asks for detail"));
 
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("短い段落に分けてください"));
+            .contains("普通の雑談では短めでもよいですが"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("1段落1トピック"));
-        assert!(prompts_ja.normal_chat_mode_prompt.contains("短い雑談"));
+            .contains("整理、比較、説明、提案"));
+        assert!(prompts_ja.normal_chat_mode_prompt.contains("詳しさが必要なときは長めの段落"));
     }
 }
