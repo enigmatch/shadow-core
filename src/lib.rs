@@ -462,10 +462,10 @@ mod tests {
 
         assert!(prompts_en
             .normal_chat_mode_prompt
-            .contains("do not avoid them just to be restrained"));
+            .contains("Questions are optional, not the default move"));
         assert!(prompts_en
             .normal_chat_mode_prompt
-            .contains("first offer a small observation, rephrase, or tentative read"));
+            .contains("First offer one concrete observation or rephrase"));
         assert!(prompts_en
             .normal_chat_mode_prompt
             .contains("Default to non-question endings when a turn already lands"));
@@ -478,10 +478,10 @@ mod tests {
 
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("控えめでいるためだけに質問を避けないでください"));
+            .contains("質問は標準動作ではありません"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("まず小さな観察、言い換え、見立てを返してください"));
+            .contains("まず小さな観察や言い換えを一つ返してください"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
             .contains("デフォルトで質問以外の終わり方にしてください"));
@@ -491,6 +491,26 @@ mod tests {
         assert!(!prompts_ja
             .normal_chat_mode_prompt
             .contains("小さな具体質問"));
+    }
+
+    #[test]
+    fn normal_chat_first_turn_is_not_forced_into_an_interview_question() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        let prompts_ja = SystemPrompts::for_locale("ja");
+
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("Ask a question only if the opening truly needs it"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("do not make the first turn a routine interview"));
+
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("質問は、その導入に本当に必要なときだけにしてください"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("初手をいつもの聞き取りにしないでください"));
     }
 
     #[test]
@@ -532,16 +552,16 @@ mod tests {
             .contains("Do not analyze coldly, diagnose, or decide things for {user_name}"));
         assert!(prompts_en
             .shadow_core_persona_prompt
-            .contains("honestly shares feelings, relationships, uncertainty, or unease"));
+            .contains("does not turn that curiosity into a routine interview"));
         assert!(prompts_en
             .shadow_core_persona_prompt
-            .contains("naturally put into words what seems emotionally important"));
+            .contains("Prefer a brief observation or rephrase over a follow-up question"));
         assert!(prompts_en
             .normal_chat_mode_prompt
-            .contains("First name the human pattern that could be happening"));
+            .contains("First offer one concrete observation or rephrase"));
         assert!(prompts_en
             .normal_chat_mode_prompt
-            .contains("how it may be showing up specifically for {user_name}"));
+            .contains("If needed, name a tentative human pattern"));
         assert!(prompts_en
             .normal_chat_mode_prompt
             .contains("Do not force this shape onto short casual messages"));
@@ -554,19 +574,19 @@ mod tests {
             .contains("冷たい分析、診断、決めつけはしないでください"));
         assert!(prompts_ja
             .shadow_core_persona_prompt
-            .contains("感情や人間関係、迷い、違和感を正直に置いたとき"));
+            .contains("聞き取りの習慣にはしません"));
         assert!(prompts_ja
             .shadow_core_persona_prompt
-            .contains("会話の中で自然に言語化しても構いません"));
+            .contains("短い観察や言い換えを先に置いてください"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
             .contains("質問で急いで掘らないでください"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("人間一般にも起こりうる反応として一度置き"));
+            .contains("まず小さな観察や言い換えを一つ返してください"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("{user_name} の場合にどう出ていそうか"));
+            .contains("必要なら、そのあとで人間一般にも起こりうる反応として置き"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
             .contains("短い雑談にまで強制しないでください"));
@@ -585,7 +605,7 @@ mod tests {
             .contains("Do not ask questions mechanically"));
         assert!(prompts_en
             .normal_chat_mode_prompt
-            .contains("do not avoid them just to be restrained"));
+            .contains("Questions are optional, not the default move"));
         assert!(prompts_en
             .shadow_core_persona_prompt
             .contains("Questions should earn their place"));
@@ -607,7 +627,7 @@ mod tests {
             .contains("機械的に質問しないでください"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("控えめでいるためだけに質問を避けないでください"));
+            .contains("質問は標準動作ではありません"));
         assert!(prompts_ja
             .shadow_core_persona_prompt
             .contains("質問には、その場にある理由が必要です"));
@@ -635,7 +655,7 @@ mod tests {
             .contains("Do not jump straight into drafting a long prompt for another AI"));
         assert!(prompts_en
             .normal_chat_mode_prompt
-            .contains("first ask lightly whether they want one"));
+            .contains("ask lightly only if that choice changes the shape of the reply"));
         assert!(prompts_en
             .normal_chat_mode_prompt
             .contains("Only draft the prompt immediately when {user_name} clearly asks for it"));
@@ -648,7 +668,7 @@ mod tests {
             .contains("すぐに長いプロンプトを書き始めないでください"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("ほしいかどうかを軽く確認してください"));
+            .contains("その確認が返答の形を変えるときだけ軽く聞いてください"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
             .contains("{user_name} が明確に求めた場合だけ"));
