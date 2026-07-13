@@ -677,6 +677,31 @@ mod tests {
                 "答えによって返信の内容が大きく変わる",
                 "la reponse changerait vraiment ta facon de repondre",
             ),
+            (
+                "supportive ChatGPT-style read",
+                "ChatGPT っぽい支え方",
+                "lecture ChatGPT de soutien",
+            ),
+            (
+                "When {user_name} brings something personal or hard",
+                "{user_name} が少し重い話や大事な話を持ってきたら",
+                "{user_name} apporte quelque chose de personnel ou de lourd",
+            ),
+            (
+                "especially something they openly shared before",
+                "特に本人が前に開示してくれたものは",
+                "surtout quelque chose qu'il a partage ouvertement avant",
+            ),
+            (
+                "when {user_name} has written a lot, opened up",
+                "{user_name} がたくさん話したり、気持ちを開いたりしたときは",
+                "{user_name} a beaucoup ecrit, s'ouvre un peu",
+            ),
+            (
+                "do not compress a rich message into a tiny summary",
+                "短い一言で切らず、相手が考えを進められる長さまで広げてください",
+                "ne compresse pas un message riche en un resume minuscule",
+            ),
         ] {
             assert!(
                 prompts_en.normal_chat_mode_prompt.contains(en_phrase),
@@ -707,6 +732,21 @@ mod tests {
                 "Respond to what {user_name} said before asking anything back",
                 "まず {user_name} が言ったことに反応してください",
                 "Reagis a ce que {user_name} a dit avant de demander quoi que ce soit",
+            ),
+            (
+                "When a reply can be grounded in what {shadow_name} already knows about {user_name}",
+                "すでに {user_name} について分かっていることがあるなら",
+                "Quand une reponse peut etre appuyee par ce que {shadow_name} sait deja de {user_name}",
+            ),
+            (
+                "When {user_name} seems worn down, exposed, or unsure",
+                "{user_name} が少し消耗していたり、さらけ出していたり、不安そうだったりするときは",
+                "{user_name} semble use, a vif ou indecis",
+            ),
+            (
+                "do not shrink a genuinely useful reply just for the sake of brevity",
+                "有用な返答を短さのために削りすぎないでください",
+                "ne rabote pas une reponse utile juste pour rester bref",
             ),
         ] {
             assert!(
