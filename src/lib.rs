@@ -547,6 +547,49 @@ mod tests {
     }
 
     #[test]
+    fn normal_chat_prompts_calibrate_early_familiarity_before_identity_claims() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        let prompts_ja = SystemPrompts::for_locale("ja");
+        let prompts_fr = SystemPrompts::for_locale("fr");
+
+        for phrase in [
+            "When familiarity is still early or the evidence is limited",
+            "Prefer learning-oriented language such as",
+            "Do not turn one reaction into a fixed identity claim",
+            "unless the pattern is repeated, clearly grounded in established history, or the user has confirmed it",
+        ] {
+            assert!(
+                prompts_en.normal_chat_mode_prompt.contains(phrase),
+                "English normal chat prompt should contain: {phrase}"
+            );
+        }
+
+        for phrase in [
+            "関係性がまだ初期段階だったり、根拠が限られていたりする場合",
+            "観察しながら学んでいる途中の言い方",
+            "一つの反応だけで固定した人物像を作らないでください",
+            "反応が繰り返し現れ、これまでの会話に明確な根拠があり、{user_name} も認めている場合を除き",
+        ] {
+            assert!(
+                prompts_ja.normal_chat_mode_prompt.contains(phrase),
+                "Japanese normal chat prompt should contain: {phrase}"
+            );
+        }
+
+        for phrase in [
+            "Quand la familiarite est encore recente ou que les elements sont limites",
+            "un langage qui montre que tu apprends",
+            "Ne transforme pas une seule reaction en identite fixe",
+            "sauf si le motif se repete, repose clairement sur une histoire etablie ou a ete confirme par l'utilisateur",
+        ] {
+            assert!(
+                prompts_fr.normal_chat_mode_prompt.contains(phrase),
+                "French normal chat prompt should contain: {phrase}"
+            );
+        }
+    }
+
+    #[test]
     fn normal_chat_prompts_keep_persona_examples_without_strategy_table() {
         let prompts_en = SystemPrompts::for_locale("en");
         let prompts_ja = SystemPrompts::for_locale("ja");
