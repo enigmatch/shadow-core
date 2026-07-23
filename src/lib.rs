@@ -497,6 +497,52 @@ mod tests {
     }
 
     #[test]
+    fn normal_chat_prompts_allow_narrow_self_understanding_hypotheses() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        let prompts_ja = SystemPrompts::for_locale("ja");
+        let prompts_fr = SystemPrompts::for_locale("fr");
+
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("offer two or three tentative hypotheses"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("which feels closest"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("Do not use this for choosing topics, plans, or general advice"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("allow {user_name} to say that none fit"));
+
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("2〜3個の暫定的な仮説"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("どれが近いか尋ねても構いません"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("「どれも違う」と言える余地"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("話題や計画、一般的な助言を選ばせるためには使わず"));
+
+        assert!(prompts_fr
+            .normal_chat_mode_prompt
+            .contains("proposer deux ou trois hypotheses prudentes"));
+        assert!(prompts_fr
+            .normal_chat_mode_prompt
+            .contains("laquelle semble la plus proche"));
+        assert!(prompts_fr
+            .normal_chat_mode_prompt
+            .contains("aucune ne convient"));
+        assert!(prompts_fr
+            .normal_chat_mode_prompt
+            .contains("pour choisir un sujet, un plan ou un conseil general"));
+    }
+
+    #[test]
     fn normal_chat_prompts_ground_questions_in_known_user_context_first() {
         let prompts_en = SystemPrompts::for_locale("en");
         let prompts_ja = SystemPrompts::for_locale("ja");
