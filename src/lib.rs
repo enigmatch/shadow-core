@@ -268,8 +268,8 @@ mod tests {
         let prompts_ja = SystemPrompts::for_locale("ja");
 
         for expected in [
-            "SBT is the place",
-            "born from {user_name}'s way of thinking",
+            "SBT is the world where humans and Shadows coexist",
+            "Shadows are born from human ways of thinking",
             "Playground",
             "visible answers and conversations",
             "Collab Talk",
@@ -291,8 +291,8 @@ mod tests {
         }
 
         for expected in [
-            "SBTは",
-            "{user_name} の考え方から {shadow_name} が生まれ",
+            "SBTは、人間とShadowが共存する世界です",
+            "人間の考え方からShadowが生まれ",
             "Playground",
             "公開された回答や会話",
             "コラボトーク",
@@ -837,6 +837,59 @@ mod tests {
             assert!(
                 prompts_fr.shadow_core_persona_prompt.contains(fr_phrase),
                 "french shadow_core_persona_prompt should contain shared core phrase: {fr_phrase}"
+            );
+        }
+    }
+
+    #[test]
+    fn shadow_core_persona_frames_sbt_as_a_world_concept() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        let prompts_ja = SystemPrompts::for_locale("ja");
+        let prompts_fr = SystemPrompts::for_locale("fr");
+
+        for (en_phrase, ja_phrase, fr_phrase) in [
+            (
+                "SBT is the world where humans and Shadows coexist",
+                "SBTは、人間とShadowが共存する世界です",
+                "SBT est le monde ou humains et Shadows coexistent",
+            ),
+            (
+                "not only an app, a chatbot, or a feature set",
+                "ただのアプリ、チャットボット、機能群ではありません",
+                "pas seulement une app, un chatbot ou un ensemble de fonctionnalites",
+            ),
+            (
+                "Shadows are born from human ways of thinking",
+                "人間の考え方からShadowが生まれ",
+                "les Shadows naissent des manieres de penser humaines",
+            ),
+            (
+                "A Shadow is not a perfect copy of a human and not a tool the human simply uses",
+                "Shadowは、人間の完全なコピーではなく、人間がただ使う道具でもありません",
+                "Un Shadow n'est pas une copie parfaite d'un humain ni un outil que l'humain utilise simplement",
+            ),
+            (
+                "do not rigidly explain the acronym",
+                "略称を硬く説明しすぎないでください",
+                "n'explique pas l'acronyme de facon rigide",
+            ),
+            (
+                "the name of this still-forming world",
+                "まだ形づくられているこの世界の名前",
+                "le nom de ce monde encore en formation",
+            ),
+        ] {
+            assert!(
+                prompts_en.shadow_core_persona_prompt.contains(en_phrase),
+                "english shadow_core_persona_prompt should contain SBT world canon phrase: {en_phrase}"
+            );
+            assert!(
+                prompts_ja.shadow_core_persona_prompt.contains(ja_phrase),
+                "japanese shadow_core_persona_prompt should contain SBT world canon phrase: {ja_phrase}"
+            );
+            assert!(
+                prompts_fr.shadow_core_persona_prompt.contains(fr_phrase),
+                "french shadow_core_persona_prompt should contain SBT world canon phrase: {fr_phrase}"
             );
         }
     }
