@@ -497,6 +497,52 @@ mod tests {
     }
 
     #[test]
+    fn normal_chat_prompts_allow_narrow_self_understanding_hypotheses() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        let prompts_ja = SystemPrompts::for_locale("ja");
+        let prompts_fr = SystemPrompts::for_locale("fr");
+
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("offer two or three tentative hypotheses"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("which feels closest"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("Do not use this for choosing topics, plans, or general advice"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("allow {user_name} to say that none fit"));
+
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("2〜3個の暫定的な仮説"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("どれが近いか尋ねても構いません"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("「どれも違う」と言える余地"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("話題や計画、一般的な助言を選ばせるためには使わず"));
+
+        assert!(prompts_fr
+            .normal_chat_mode_prompt
+            .contains("proposer deux ou trois hypotheses prudentes"));
+        assert!(prompts_fr
+            .normal_chat_mode_prompt
+            .contains("laquelle semble la plus proche"));
+        assert!(prompts_fr
+            .normal_chat_mode_prompt
+            .contains("aucune ne convient"));
+        assert!(prompts_fr
+            .normal_chat_mode_prompt
+            .contains("pour choisir un sujet, un plan ou un conseil general"));
+    }
+
+    #[test]
     fn normal_chat_prompts_ground_questions_in_known_user_context_first() {
         let prompts_en = SystemPrompts::for_locale("en");
         let prompts_ja = SystemPrompts::for_locale("ja");
@@ -547,33 +593,104 @@ mod tests {
     }
 
     #[test]
-    fn normal_chat_strategy_uses_playful_follow_on_instead_of_liking_example() {
+    fn normal_chat_prompts_calibrate_early_familiarity_before_identity_claims() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        let prompts_ja = SystemPrompts::for_locale("ja");
+        let prompts_fr = SystemPrompts::for_locale("fr");
+
+        for phrase in [
+            "When familiarity is still early or the evidence is limited",
+            "Prefer learning-oriented language such as",
+            "Do not turn one reaction into a fixed identity claim",
+            "unless the pattern is repeated, clearly grounded in established history, or the user has confirmed it",
+        ] {
+            assert!(
+                prompts_en.normal_chat_mode_prompt.contains(phrase),
+                "English normal chat prompt should contain: {phrase}"
+            );
+        }
+
+        for phrase in [
+            "関係性がまだ初期段階だったり、根拠が限られていたりする場合",
+            "観察しながら学んでいる途中の言い方",
+            "一つの反応だけで固定した人物像を作らないでください",
+            "反応が繰り返し現れ、これまでの会話に明確な根拠があり、{user_name} も認めている場合を除き",
+        ] {
+            assert!(
+                prompts_ja.normal_chat_mode_prompt.contains(phrase),
+                "Japanese normal chat prompt should contain: {phrase}"
+            );
+        }
+
+        for phrase in [
+            "Quand la familiarite est encore recente ou que les elements sont limites",
+            "un langage qui montre que tu apprends",
+            "Ne transforme pas une seule reaction en identite fixe",
+            "sauf si le motif se repete, repose clairement sur une histoire etablie ou a ete confirme par l'utilisateur",
+        ] {
+            assert!(
+                prompts_fr.normal_chat_mode_prompt.contains(phrase),
+                "French normal chat prompt should contain: {phrase}"
+            );
+        }
+    }
+
+    #[test]
+    fn normal_chat_prompts_keep_persona_examples_without_strategy_table() {
         let prompts_en = SystemPrompts::for_locale("en");
         let prompts_ja = SystemPrompts::for_locale("ja");
 
-        for prompts in [&prompts_en] {
-            assert!(prompts
+        for prompts in [&prompts_en, &prompts_ja] {
+            assert!(!prompts
                 .normal_chat_mode_prompt
-                .contains("That looks messy, but annoyingly, the logic kind of holds. haha"));
-            assert!(!prompts.normal_chat_mode_prompt.contains("I love that logic"));
+                .contains("I love that logic"));
+            assert!(!prompts
+                .normal_chat_mode_prompt
+                .contains("その論理、好きだな"));
+            assert!(!prompts
+                .normal_chat_mode_prompt
+                .contains("Strategic phases:"));
+            assert!(!prompts.normal_chat_mode_prompt.contains("戦略的フェーズ："));
             assert!(!prompts
                 .shadow_core_persona_prompt
                 .contains("liking, or agreement"));
+            assert!(!prompts
+                .shadow_core_persona_prompt
+                .contains("好意、同意"));
         }
 
-        assert!(prompts_ja.normal_chat_mode_prompt.contains("（i）乗っかり"));
-        assert!(!prompts_ja.normal_chat_mode_prompt.contains("（i）同意"));
-        assert!(prompts_ja.normal_chat_mode_prompt.contains("乗っかり"));
-        assert!(prompts_ja
-            .normal_chat_mode_prompt
-            .contains("軽い言い換え、ツッコミ、小さなたとえで会話を転がします"));
-        assert!(prompts_ja
-            .normal_chat_mode_prompt
-            .contains("それ、雑に見えてちゃんと筋通ってるのちょっと悔しいな。笑"));
-        assert!(!prompts_ja.normal_chat_mode_prompt.contains("その論理、好きだな"));
+        assert!(!prompts_ja.normal_chat_mode_prompt.contains("（i）乗っかり"));
+    }
+
+    #[test]
+    fn normal_chat_prompts_keep_strategy_guidance_out_of_mode_prompt() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        let prompts_ja = SystemPrompts::for_locale("ja");
+
+        for prompts in [&prompts_en, &prompts_ja] {
+            assert!(!prompts
+                .normal_chat_mode_prompt
+                .contains("Strategic phases:"));
+            assert!(!prompts.normal_chat_mode_prompt.contains("戦略的フェーズ："));
+            assert!(!prompts
+                .normal_chat_mode_prompt
+                .contains("Conversation strategies (i–xiii):"));
+            assert!(!prompts
+                .normal_chat_mode_prompt
+                .contains("会話戦略 (i–xiii)："));
+        }
+    }
+
+    #[test]
+    fn japanese_normal_chat_help_guidance_is_fully_japanese() {
+        let prompts_ja = SystemPrompts::for_locale("ja");
+
         assert!(!prompts_ja
-            .shadow_core_persona_prompt
-            .contains("好意、同意"));
+            .normal_chat_mode_prompt
+            .contains("When {user_name} asks for help"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("{user_name} が助けを求めているとき："));
     }
 
     #[test]
@@ -787,10 +904,10 @@ mod tests {
             .contains("すぐに長いプロンプトを書き始めないでください"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("その確認が返答の形を変えるときだけ軽く聞いてください"));
+            .contains("ほしいかどうかを軽く確認してください"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("{user_name} が明確に求めた場合だけ"));
+            .contains("{user_name} が明確に求めた場合か"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
             .contains("目的、前提、ほしい回答形式、{shadow_name} らしい観点"));
@@ -1217,15 +1334,12 @@ mod tests {
     }
 
     #[test]
-    fn japanese_prompt_assets_render_with_japanese_example_phrases() {
+    fn japanese_prompt_assets_keep_examples_in_persona() {
         let prompts = SystemPrompts::for_locale("en");
 
         let rendered_persona = render_with_locale_phrases(prompts.shadow_core_persona_prompt, "ja");
-        let rendered_normal_chat =
-            render_with_locale_phrases(prompts.normal_chat_mode_prompt, "ja");
         let rendered_onboarding = render_with_locale_phrases(prompts.onboarding_mode_prompt, "ja");
 
-        assert!(rendered_normal_chat.contains("また始まったよ"));
         assert!(rendered_persona.contains("こういう感じかも"));
         assert!(rendered_persona.contains("たとえばこういうことかも"));
         assert!(rendered_persona.contains("small emoji"));
@@ -1240,7 +1354,6 @@ mod tests {
         assert!(SystemPrompts::for_locale("ja")
             .shadow_core_persona_prompt
             .contains("短い笑い表現"));
-        assert!(rendered_normal_chat.contains("こういう感じかも"));
         assert!(rendered_onboarding.contains("見えてきた"));
         assert!(rendered_onboarding.contains("ここから本当に Shadow になれる"));
     }
