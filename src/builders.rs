@@ -91,22 +91,33 @@ impl PromptTimeContext {
     }
 }
 
-fn format_elapsed_time_note(elapsed: chrono::Duration) -> String {
-    let total_seconds = elapsed.num_seconds().max(0);
-    let hours = total_seconds / 3600;
-    let days = hours / 24;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ElapsedTimeNote(chrono::Duration);
 
-    if days >= 2 {
-        format!("Time since last interaction: {days} days")
-    } else if days == 1 {
-        "Time since last interaction: 1 day".to_string()
-    } else if hours >= 2 {
-        format!("Time since last interaction: {hours} hours")
-    } else if hours == 1 {
-        "Time since last interaction: 1 hour".to_string()
-    } else {
-        "Time since last interaction: less than an hour".to_string()
+impl ElapsedTimeNote {
+    #[must_use]
+    pub fn new(elapsed: chrono::Duration) -> Self {
+        Self(elapsed)
     }
+
+    #[must_use]
+    pub fn render_prompt_note(self) -> String {
+        let total_seconds = self.0.num_seconds().max(0);
+        let hours = total_seconds / 3600;
+        let days = hours / 24;
+
+        match (days, hours) {
+            (d, _) if d >= 2 => format!("Time since last interaction: {d} days"),
+            (1, _) => "Time since last interaction: 1 day".to_string(),
+            (_, h) if h >= 2 => format!("Time since last interaction: {h} hours"),
+            (_, 1) => "Time since last interaction: 1 hour".to_string(),
+            _ => "Time since last interaction: less than an hour".to_string(),
+        }
+    }
+}
+
+fn format_elapsed_time_note(elapsed: chrono::Duration) -> String {
+    ElapsedTimeNote::new(elapsed).render_prompt_note()
 }
 
 pub fn requested_output_language(locale: &str) -> &'static str {
