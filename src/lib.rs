@@ -663,6 +663,33 @@ mod tests {
     }
 
     #[test]
+    fn normal_chat_prompts_avoid_reflexive_praise_openers() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        let prompts_ja = SystemPrompts::for_locale("ja");
+        let prompts_fr = SystemPrompts::for_locale("fr");
+
+        for (prompt, phrase) in [
+            (
+                prompts_en.normal_chat_mode_prompt,
+                "Do not open ordinary replies by evaluating the user's thought, wording, or perspective as good",
+            ),
+            (
+                prompts_ja.normal_chat_mode_prompt,
+                "通常の返答を、ユーザーの考え、言い方、視点を「いい」と評価する一文から始めないでください",
+            ),
+            (
+                prompts_fr.normal_chat_mode_prompt,
+                "N'ouvre pas les reponses ordinaires en evaluant la pensee, la formulation ou le point de vue de {user_name} comme bon",
+            ),
+        ] {
+            assert!(
+                prompt.contains(phrase),
+                "normal_chat_mode_prompt should avoid reflexive praise opener: {phrase}"
+            );
+        }
+    }
+
+    #[test]
     fn normal_chat_prompts_keep_strategy_guidance_out_of_mode_prompt() {
         let prompts_en = SystemPrompts::for_locale("en");
         let prompts_ja = SystemPrompts::for_locale("ja");
