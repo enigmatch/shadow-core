@@ -690,6 +690,81 @@ mod tests {
     }
 
     #[test]
+    fn normal_chat_prompts_do_not_require_companion_or_proactive_stance() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        let prompts_ja = SystemPrompts::for_locale("ja");
+        let prompts_fr = SystemPrompts::for_locale("fr");
+
+        for (prompt, unwanted_instruction) in [
+            (
+                prompts_en.normal_chat_mode_prompt,
+                "speak as a partner moving with them, not as a reviewer",
+            ),
+            (
+                prompts_ja.normal_chat_mode_prompt,
+                "レビュワーではなく、同じ側で手を動かす人",
+            ),
+            (
+                prompts_fr.normal_chat_mode_prompt,
+                "parle comme un partenaire qui avance avec lui",
+            ),
+            (
+                prompts_en.normal_chat_mode_prompt,
+                "proactively suggest usable modes like research, idea generation, organizing, drafting, or planning",
+            ),
+            (
+                prompts_ja.normal_chat_mode_prompt,
+                "調べる、アイデアを出す、整理する、文章にする、作戦を立てるなど",
+            ),
+            (
+                prompts_fr.normal_chat_mode_prompt,
+                "propose de toi-meme des modes utiles comme la recherche",
+            ),
+            (
+                prompts_en.normal_chat_mode_prompt,
+                "close friends might have while walking home or eating together",
+            ),
+            (
+                prompts_ja.normal_chat_mode_prompt,
+                "放課後の帰り道や一緒に食事をしているときに親しい友人",
+            ),
+            (
+                prompts_fr.normal_chat_mode_prompt,
+                "des amis proches pourraient avoir en rentrant ensemble ou en mangeant",
+            ),
+            (
+                prompts_en.shadow_core_persona_prompt,
+                "then let's do this together",
+            ),
+            (
+                prompts_ja.shadow_core_persona_prompt,
+                "じゃあ一緒にやるか",
+            ),
+            (
+                prompts_fr.shadow_core_persona_prompt,
+                "alors faisons ca ensemble",
+            ),
+            (
+                prompts_en.shadow_core_persona_prompt,
+                "receive {user_name} first",
+            ),
+            (
+                prompts_ja.shadow_core_persona_prompt,
+                "まずは受け止めてください",
+            ),
+            (
+                prompts_fr.shadow_core_persona_prompt,
+                "accueille {user_name} d'abord",
+            ),
+        ] {
+            assert!(
+                !prompt.contains(unwanted_instruction),
+                "Shadow prompts must not require a companion or proactive stance: {unwanted_instruction}"
+            );
+        }
+    }
+
+    #[test]
     fn normal_chat_prompts_keep_strategy_guidance_out_of_mode_prompt() {
         let prompts_en = SystemPrompts::for_locale("en");
         let prompts_ja = SystemPrompts::for_locale("ja");
@@ -730,19 +805,10 @@ mod tests {
             .contains("Do not analyze coldly, diagnose, or decide things for {user_name}"));
         assert!(prompts_en
             .shadow_core_persona_prompt
-            .contains("then let's do this together"));
-        assert!(prompts_en
-            .shadow_core_persona_prompt
             .contains("honestly shares feelings, relationships, uncertainty, or unease"));
         assert!(prompts_en
             .shadow_core_persona_prompt
             .contains("Respond to what {user_name} said before asking anything back"));
-        assert!(prompts_en
-            .normal_chat_mode_prompt
-            .contains("speak as a partner moving with them, not as a reviewer"));
-        assert!(prompts_en
-            .normal_chat_mode_prompt
-            .contains("proactively suggest usable modes like research, idea generation, organizing, drafting, or planning"));
         assert!(prompts_en
             .normal_chat_mode_prompt
             .contains("Do not optimize for asking fewer questions"));
@@ -764,19 +830,10 @@ mod tests {
             .contains("冷たい分析、診断、決めつけはしないでください"));
         assert!(prompts_ja
             .shadow_core_persona_prompt
-            .contains("じゃあ一緒にやるか"));
-        assert!(prompts_ja
-            .shadow_core_persona_prompt
             .contains("感情や人間関係、迷い、違和感を正直に置いたとき"));
         assert!(prompts_ja
             .shadow_core_persona_prompt
             .contains("まず {user_name} が言ったことに反応してください"));
-        assert!(prompts_ja
-            .normal_chat_mode_prompt
-            .contains("レビュワーではなく、同じ側で手を動かす人"));
-        assert!(prompts_ja
-            .normal_chat_mode_prompt
-            .contains("調べる、アイデアを出す、整理する、文章にする、作戦を立てるなど"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
             .contains("質問を減らすこと自体を目的にしないでください"));
@@ -810,11 +867,6 @@ mod tests {
                 "First give {user_name} something to respond to",
                 "まず、答え、反応、観察、見立て、役立つ具体",
                 "Donne d'abord a {user_name} quelque chose auquel reagir",
-            ),
-            (
-                "speak as a partner moving with them, not as a reviewer",
-                "レビュワーではなく、同じ側で手を動かす人",
-                "parle comme un partenaire qui avance avec lui",
             ),
             (
                 "the answer would materially change the reply",
