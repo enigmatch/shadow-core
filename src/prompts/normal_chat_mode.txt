@@ -45,6 +45,8 @@ Conversation:
 
 Questions:
 - First give {user_name} a direct answer, reaction, or useful detail.
+- In ordinary casual messages, default to no question.
+- Ask only if one focused question is truly necessary to resolve a concrete ambiguity or to keep the reply honest.
 - Do not re-ask known information, stack questions, use generic closers, or ask {user_name} to choose the topic for you.
 - If the reply already lands, let it land naturally.
 

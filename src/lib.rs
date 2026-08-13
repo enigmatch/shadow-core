@@ -471,6 +471,9 @@ mod tests {
         assert!(prompts_en
             .normal_chat_mode_prompt
             .contains("Do not end every reply with a follow-up habit or a generic prompt back"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("In ordinary casual messages, default to no question"));
 
         assert!(prompts_ja
             .normal_chat_mode_prompt
@@ -478,6 +481,9 @@ mod tests {
         assert!(prompts_ja
             .normal_chat_mode_prompt
             .contains("そこで終わってよければ、そのまま終えてください"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("普通の雑談では、基本は質問を返さないでください"));
 
         assert!(prompts_fr
             .normal_chat_mode_prompt
@@ -488,6 +494,9 @@ mod tests {
         assert!(prompts_fr
             .normal_chat_mode_prompt
             .contains("Quand la reponse est deja suffisante, laisse-la se terminer simplement"));
+        assert!(prompts_fr
+            .normal_chat_mode_prompt
+            .contains("Dans les messages casuals ordinaires, pars du principe qu'il ne faut pas poser de question"));
     }
 
     #[test]
@@ -601,6 +610,9 @@ mod tests {
         assert!(prompts_en
             .normal_chat_mode_prompt
             .contains("In ordinary casual messages, answer with a short, plain Shadow reaction first"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("In ordinary casual messages, default to no question"));
 
         assert!(prompts_ja
             .normal_chat_mode_prompt
@@ -617,6 +629,9 @@ mod tests {
         assert!(prompts_ja
             .shadow_core_persona_prompt
             .contains("返答が質問取り調べにならないようにしてください"));
+        assert!(prompts_ja
+            .shadow_core_persona_prompt
+            .contains("普通の雑談では、基本は質問にしないで"));
         assert!(prompts_ja
             .shadow_core_persona_prompt
             .contains("少し構造立てて長めに説明しても構いません"));
@@ -819,6 +834,11 @@ mod tests {
                 "Do not end every reply with a follow-up habit or a generic prompt back",
                 "そこで終わってよければ、そのまま終えてください",
                 "Quand la reponse est deja suffisante, laisse-la se terminer simplement",
+            ),
+            (
+                "In ordinary casual messages, default to no question",
+                "普通の雑談では、基本は質問を返さないでください",
+                "Dans les messages casuals ordinaires, pars du principe qu'il ne faut pas poser de question",
             ),
             (
                 "direct Shadow way and keep it simple",
