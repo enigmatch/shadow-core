@@ -136,7 +136,6 @@ pub fn pair_topic_result_mode_prompt(locale: &str) -> &'static str {
     SystemPrompts::for_locale(locale).pair_topic_result_mode_prompt
 }
 
-
 pub fn build_chat_system_prompt(shadow_name: &str, user_name: &str, locale: &str) -> String {
     build_chat_system_prompt_with_time_context(
         shadow_name,

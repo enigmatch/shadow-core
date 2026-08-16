@@ -957,7 +957,8 @@ mod tests {
     fn without_draft_uses_fresh_compose_instruction() {
         let actor = minimal_identity("Alice");
         let listener = minimal_identity("Bob");
-        let input = build_pair_compose_message_input(base_context(&actor, &listener, "say hi", None));
+        let input =
+            build_pair_compose_message_input(base_context(&actor, &listener, "say hi", None));
         assert!(
             input.contains("The user (Alice) wants to say:\nsay hi"),
             "fresh compose should use 'wants to say' framing"
