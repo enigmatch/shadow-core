@@ -654,9 +654,7 @@ mod tests {
             assert!(!prompts
                 .shadow_core_persona_prompt
                 .contains("liking, or agreement"));
-            assert!(!prompts
-                .shadow_core_persona_prompt
-                .contains("好意、同意"));
+            assert!(!prompts.shadow_core_persona_prompt.contains("好意、同意"));
         }
 
         assert!(!prompts_ja.normal_chat_mode_prompt.contains("（i）乗っかり"));
@@ -1359,15 +1357,15 @@ mod tests {
     fn french_prompt_assets_use_locale_specific_persona_and_normal_chat_prompts() {
         let prompts = SystemPrompts::for_locale("fr");
 
-        assert!(prompts
-            .shadow_core_persona_prompt
-            .contains("Ne fais pas de la chaleur, de l'accord ou de l'affection la forme par defaut"));
+        assert!(prompts.shadow_core_persona_prompt.contains(
+            "Ne fais pas de la chaleur, de l'accord ou de l'affection la forme par defaut"
+        ));
         assert!(prompts
             .shadow_core_persona_prompt
             .contains("Si {user_name} emploie un langage de proche, partenaire ou famille, reponds d'abord naturellement"));
-        assert!(prompts
-            .normal_chat_mode_prompt
-            .contains("Ne laisse pas les reactions ordinaires se transformer en compliments ou en affection"));
+        assert!(prompts.normal_chat_mode_prompt.contains(
+            "Ne laisse pas les reactions ordinaires se transformer en compliments ou en affection"
+        ));
         assert!(prompts
             .normal_chat_mode_prompt
             .contains("Ne cherche pas a poser moins de questions pour le principe"));
@@ -1461,9 +1459,9 @@ mod tests {
         assert!(prompts_en
             .output_style_prompt
             .contains("one main idea per paragraph"));
-        assert!(prompts_en
-            .output_style_prompt
-            .contains("do not artificially cut off longer explanations when the user asks for detail"));
+        assert!(prompts_en.output_style_prompt.contains(
+            "do not artificially cut off longer explanations when the user asks for detail"
+        ));
 
         assert!(prompts_ja
             .normal_chat_mode_prompt
@@ -1471,6 +1469,8 @@ mod tests {
         assert!(prompts_ja
             .normal_chat_mode_prompt
             .contains("整理、比較、説明、提案"));
-        assert!(prompts_ja.normal_chat_mode_prompt.contains("詳しさが必要なときは長めの段落"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("詳しさが必要なときは長めの段落"));
     }
 }
