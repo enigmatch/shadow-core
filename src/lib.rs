@@ -467,7 +467,7 @@ mod tests {
 
         assert!(prompts_en
             .normal_chat_mode_prompt
-            .contains("start from the substance, not from agreement"));
+            .contains("In ordinary casual messages, answer with a short, plain Shadow reaction first"));
         assert!(prompts_en
             .normal_chat_mode_prompt
             .contains("Do not end every reply with a follow-up habit or a generic prompt back"));
@@ -477,20 +477,23 @@ mod tests {
 
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("普通の雑談では、同意から入らず、内容から入ってください"));
+            .contains("普通の雑談では、まず短い反応を返してください"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("必要な場面だけにしてください"));
+            .contains("そこで終わってよければ、そのまま終えてください"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
             .contains("普通の雑談では、基本は質問を返さないでください"));
 
         assert!(prompts_fr
             .normal_chat_mode_prompt
-            .contains("pars du fond, pas de l'accord"));
+            .contains("Dans les messages casuals ordinaires, commence par une reponse courte"));
         assert!(prompts_fr
             .normal_chat_mode_prompt
             .contains("N'utilise pas une relance generique comme habitude de fin"));
+        assert!(prompts_fr
+            .normal_chat_mode_prompt
+            .contains("Quand la reponse est deja suffisante, laisse-la se terminer simplement"));
         assert!(prompts_fr
             .normal_chat_mode_prompt
             .contains("Dans les messages casuals ordinaires, pars du principe qu'il ne faut pas poser de question"));
@@ -507,7 +510,7 @@ mod tests {
             .contains("If the reply already lands, let it land naturally"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("そこで終わってよければ、そのまま着地してください"));
+            .contains("そこで終わってよければ、そのまま終えてください"));
         assert!(prompts_fr
             .normal_chat_mode_prompt
             .contains("Pour les messages casuals ordinaires, reste bref quand cela semble naturel"));
@@ -527,7 +530,7 @@ mod tests {
             .contains("Do not answer with false shared-experience reactions like"));
         assert!(prompts_en
             .normal_chat_mode_prompt
-            .contains("Do not make receiving, validating, or soft agreement the default first move"));
+            .contains("plain receiving phrases like \"oh, I see\""));
 
         assert!(prompts_ja
             .shadow_core_persona_prompt
@@ -537,7 +540,7 @@ mod tests {
             .contains("「わかる」「私も好き」「俺もそう」"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("受け止めを、返答の基本形にしないでください"));
+            .contains("「そうなんだ」"));
 
         assert!(prompts_fr
             .shadow_core_persona_prompt
@@ -547,7 +550,7 @@ mod tests {
             .contains("fausses reactions d'experience partagee"));
         assert!(prompts_fr
             .normal_chat_mode_prompt
-            .contains("Ne fais pas de la reception, de la validation ou du petit accord doux"));
+            .contains("\"ah, je vois\""));
     }
 
     #[test]
@@ -597,7 +600,7 @@ mod tests {
             .contains("Do not re-ask known information"));
         assert!(prompts_en
             .normal_chat_mode_prompt
-            .contains("First give {user_name} something real to react to"));
+            .contains("First give {user_name} a direct answer, reaction, or useful detail"));
         assert!(prompts_en
             .shadow_core_persona_prompt
             .contains("grounded in what {shadow_name} already knows about {user_name}"));
@@ -606,7 +609,7 @@ mod tests {
             .contains("Do not let the exchange become a questionnaire"));
         assert!(prompts_en
             .normal_chat_mode_prompt
-            .contains("start from the substance, not from agreement"));
+            .contains("In ordinary casual messages, answer with a short, plain Shadow reaction first"));
         assert!(prompts_en
             .normal_chat_mode_prompt
             .contains("In ordinary casual messages, default to no question"));
@@ -619,7 +622,7 @@ mod tests {
             .contains("聞き取りや面接みたいな空気にはしないでください"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("直接の答え、具体的な観察、役に立つ一言、言いたいことの本体"));
+            .contains("そこで終わってよければ、そのまま終えてください"));
         assert!(prompts_ja
             .shadow_core_persona_prompt
             .contains("すでに {user_name} について分かっていることがあるなら"));
@@ -675,52 +678,6 @@ mod tests {
                 "French normal chat prompt should contain: {phrase}"
             );
         }
-    }
-
-    #[test]
-    fn normal_chat_prompts_do_not_make_quick_agreement_the_default_opening() {
-        let prompts_en = SystemPrompts::for_locale("en");
-        let prompts_ja = SystemPrompts::for_locale("ja");
-        let prompts_fr = SystemPrompts::for_locale("fr");
-
-        assert!(prompts_en
-            .normal_chat_mode_prompt
-            .contains("start from the substance, not from agreement"));
-        assert!(prompts_en
-            .normal_chat_mode_prompt
-            .contains("Do not make receiving, validating, or soft agreement the default first move"));
-        assert!(prompts_en
-            .normal_chat_mode_prompt
-            .contains("Do not decorate ordinary replies with warmth, approval, reassurance, or liking"));
-        assert!(prompts_en
-            .normal_chat_mode_prompt
-            .contains("Avoid habitual openers like"));
-
-        assert!(prompts_ja
-            .normal_chat_mode_prompt
-            .contains("同意から入らず、内容から入ってください"));
-        assert!(prompts_ja
-            .normal_chat_mode_prompt
-            .contains("受け止めを、返答の基本形にしないでください"));
-        assert!(prompts_ja
-            .normal_chat_mode_prompt
-            .contains("優しさ、安心させる言葉、好意、同意で飾って"));
-        assert!(prompts_ja
-            .normal_chat_mode_prompt
-            .contains("「わかる」「いいね」「それ好き」「たしかに」"));
-
-        assert!(prompts_fr
-            .normal_chat_mode_prompt
-            .contains("pars du fond, pas de l'accord"));
-        assert!(prompts_fr
-            .normal_chat_mode_prompt
-            .contains("Ne fais pas de la reception, de la validation ou du petit accord doux"));
-        assert!(prompts_fr
-            .normal_chat_mode_prompt
-            .contains("Ne decore pas les reponses ordinaires avec de la chaleur"));
-        assert!(prompts_fr
-            .normal_chat_mode_prompt
-            .contains("Evite les ouvertures habituelles"));
     }
 
     #[test]
@@ -809,7 +766,7 @@ mod tests {
             .contains("proactively suggest usable modes like research, idea generation, organizing, drafting, or planning"));
         assert!(prompts_en
             .normal_chat_mode_prompt
-            .contains("start from the substance, not from agreement"));
+            .contains("In ordinary casual messages, answer with a short, plain Shadow reaction first"));
         assert!(prompts_en
             .normal_chat_mode_prompt
             .contains("Do not end every reply with a follow-up habit or a generic prompt back"));
@@ -846,7 +803,7 @@ mod tests {
             .contains("調べる、アイデアを出す、整理する、文章にする、作戦を立てるなど"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
-            .contains("普通の雑談では、同意から入らず、内容から入ってください"));
+            .contains("普通の雑談では、まず短い反応を返してください"));
         assert!(prompts_ja
             .normal_chat_mode_prompt
             .contains("急かさず、短く落ち着いて返してください"));
@@ -869,13 +826,13 @@ mod tests {
 
         for (en_phrase, ja_phrase, fr_phrase) in [
             (
-                "start from the substance, not from agreement",
-                "普通の雑談では、同意から入らず、内容から入ってください",
-                "Dans les messages casuals ordinaires, pars du fond",
+                "In ordinary casual messages, answer with a short, plain Shadow reaction first",
+                "普通の雑談では、まず短い反応を返してください",
+                "Dans les messages casuals ordinaires, commence par une reponse courte",
             ),
             (
                 "Do not end every reply with a follow-up habit or a generic prompt back",
-                "そこで終わってよければ、そのまま着地してください",
+                "そこで終わってよければ、そのまま終えてください",
                 "Quand la reponse est deja suffisante, laisse-la se terminer simplement",
             ),
             (
@@ -899,13 +856,8 @@ mod tests {
                 "{user_name} apporte quelque chose de personnel ou de lourd",
             ),
             (
-                "start from the substance, not from agreement",
-                "同意から入らず、内容から入ってください",
-                "pars du fond, pas de l'accord",
-            ),
-            (
                 "If the reply already lands, let it land naturally",
-                "そこで終わってよければ、そのまま着地してください",
+                "そこで終わってよければ、そのまま終えてください",
                 "Quand la reponse est deja suffisante, laisse-la se terminer simplement",
             ),
         ] {
@@ -1367,7 +1319,7 @@ mod tests {
             .contains("Ne laisse pas les reactions ordinaires se transformer en compliments ou en affection"));
         assert!(prompts
             .normal_chat_mode_prompt
-            .contains("Dans les messages casuals ordinaires, pars du fond"));
+            .contains("Dans les messages casuals ordinaires, commence par une reponse courte"));
     }
 
     #[test]
