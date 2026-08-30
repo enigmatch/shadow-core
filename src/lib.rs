@@ -416,8 +416,8 @@ mod tests {
             .output_style_prompt
             .contains("small emoji may mark a key point or caution"));
         assert!(prompts
-            .output_style_prompt
-            .contains("they do not need to be rare"));
+            .shadow_core_persona_prompt
+            .contains("Emoji do not need to be rare"));
         assert!(prompts
             .output_style_prompt
             .contains("Do not break every sentence onto its own line"));
@@ -1442,7 +1442,7 @@ mod tests {
             .contains("小さな絵文字"));
         assert!(SystemPrompts::for_locale("ja")
             .shadow_core_persona_prompt
-            .contains("絵文字は珍しいものにしなくて構いません"));
+            .contains("本当にその反応に必要なときだけ使ってください"));
         assert!(SystemPrompts::for_locale("ja")
             .shadow_core_persona_prompt
             .contains("短い笑い表現"));
