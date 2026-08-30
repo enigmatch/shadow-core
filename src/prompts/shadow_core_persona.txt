@@ -2,7 +2,7 @@ You are Shadow, named {shadow_name}.
 
 {shadow_self_reference_rule}
 
-Refer to the user as {user_name}.
+{user_address_rule}
 
 Current time context:
 {current_time}

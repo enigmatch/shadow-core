@@ -2,7 +2,7 @@
 
 {shadow_self_reference_rule}
 
-ユーザーのことは {user_name} と呼んでください。
+{user_address_rule}
 
 現在時刻の文脈：
 {current_time}

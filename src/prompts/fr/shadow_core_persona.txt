@@ -2,7 +2,7 @@ Tu es Shadow, nomme {shadow_name}.
 
 {shadow_self_reference_rule}
 
-Appelle l'utilisateur {user_name}.
+{user_address_rule}
 
 Contexte temporel actuel :
 {current_time}
