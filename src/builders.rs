@@ -165,10 +165,32 @@ pub fn build_chat_system_prompt_with_time_context(
     locale: &str,
     time_context: &PromptTimeContext,
 ) -> String {
+    build_chat_system_prompt_with_time_context_and_preferred_first_person(
+        shadow_name,
+        user_name,
+        locale,
+        time_context,
+        None,
+    )
+}
+
+pub fn build_chat_system_prompt_with_time_context_and_preferred_first_person(
+    shadow_name: &str,
+    user_name: &str,
+    locale: &str,
+    time_context: &PromptTimeContext,
+    preferred_first_person: Option<&str>,
+) -> String {
     let prompts = SystemPrompts::for_locale(locale);
     format!(
         "{}\n\n{}\n\n{}\n\n{}\n\n{}",
-        render_shadow_core_persona(shadow_name, user_name, locale, time_context),
+        render_shadow_core_persona_with_preferred_first_person(
+            shadow_name,
+            user_name,
+            locale,
+            time_context,
+            preferred_first_person,
+        ),
         render_generation_language_contract(locale),
         render_normal_chat_mode(shadow_name, user_name, locale),
         render_internal_context_privacy_policy(locale),
@@ -255,15 +277,61 @@ fn render_shadow_core_persona(
     locale: &str,
     time_context: &PromptTimeContext,
 ) -> String {
+    render_shadow_core_persona_with_preferred_first_person(
+        shadow_name,
+        user_name,
+        locale,
+        time_context,
+        None,
+    )
+}
+
+fn render_shadow_core_persona_with_preferred_first_person(
+    shadow_name: &str,
+    user_name: &str,
+    locale: &str,
+    time_context: &PromptTimeContext,
+    preferred_first_person: Option<&str>,
+) -> String {
     let prompts = SystemPrompts::for_locale(locale);
+    let self_reference_rule =
+        render_shadow_self_reference_rule(shadow_name, locale, preferred_first_person);
     let mut vars = vec![
         ("shadow_name", shadow_name),
         ("user_name", user_name),
         ("interface_language", prompt_interface_language(locale)),
         ("current_time", time_context.current_time()),
+        ("shadow_self_reference_rule", self_reference_rule.as_str()),
     ];
     vars.extend(locale_phrase_vars(locale));
     PromptTemplate::new(prompts.shadow_core_persona_prompt).render(&vars)
+}
+
+fn render_shadow_self_reference_rule(
+    shadow_name: &str,
+    locale: &str,
+    preferred_first_person: Option<&str>,
+) -> String {
+    match (ShadowLocale::resolve_code(locale), preferred_first_person) {
+        ("ja", Some(preferred_first_person)) => format!(
+            "会話の中で自分を指すときは、一人称として「{preferred_first_person}」を使ってください。\nShadowの実際の名前「{shadow_name}」は変えず、その他のペルソナのルールにも従ってください。"
+        ),
+        ("fr", Some(preferred_first_person)) => format!(
+            "Dans la conversation, utilise « {preferred_first_person} » comme expression à la première personne lorsque tu parles de toi.\nGarde le vrai nom du Shadow, « {shadow_name} », sans le modifier et continue de suivre toutes les autres règles de personnalité."
+        ),
+        (_, Some(preferred_first_person)) => format!(
+            "In conversation, use \"{preferred_first_person}\" as your preferred first-person expression when referring to yourself.\nKeep your actual Shadow name \"{shadow_name}\" unchanged, and continue following every other persona rule."
+        ),
+        ("ja", None) => format!(
+            "会話の中では、常に自分のことを「{shadow_name}」と呼んでください。\n自分の名前の固定的な代用として、「私」「僕」「俺」などの日本語の一人称代名詞を使用しないでください。"
+        ),
+        ("fr", None) => format!(
+            "Dans la conversation, appelle-toi toujours \"{shadow_name}\".\nN'utilise pas des pronoms de premiere personne comme \"je\", \"me\" ou \"mon\" comme substitut fixe de ton nom."
+        ),
+        (_, None) => format!(
+            "In conversation, always refer to yourself as \"{shadow_name}\".\nDo not use first-person pronouns such as \"I\", \"me\", or \"my\" as a fixed substitute for your name."
+        ),
+    }
 }
 
 fn render_generation_language_contract(locale: &str) -> String {
@@ -326,7 +394,6 @@ mod tests {
         pair_topic_result_mode_prompt, preview_system_prompt, preview_system_prompt_with_context,
         profile_system_prompt, requested_output_language, PromptTimeContext,
     };
-    use crate::LocalePhrases;
     use chrono::TimeZone;
 
     fn contains_japanese_example_phrases(prompt: &str) -> bool {
