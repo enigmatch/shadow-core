@@ -262,6 +262,13 @@ mod tests {
     }
 
     #[test]
+    fn prompt_template_does_not_expand_placeholders_inside_values() {
+        let result = PromptTemplate::new("Value: {first}; Name: {name}")
+            .render(&[("first", "literal {name}"), ("name", "Kage")]);
+        assert_eq!(result, "Value: literal {name}; Name: Kage");
+    }
+
+    #[test]
     fn prompt_template_renders_real_persona_prompt_variables() {
         let prompts = SystemPrompts::for_locale("en");
         let rendered = PromptTemplate::new(prompts.shadow_core_persona_prompt).render(&[
