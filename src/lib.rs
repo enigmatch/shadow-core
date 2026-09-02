@@ -8,7 +8,9 @@ mod types;
 
 pub use builders::{
     build_chat_system_prompt, build_chat_system_prompt_with_current_time,
-    build_chat_system_prompt_with_time_context, build_onboarding_system_prompt,
+    build_chat_system_prompt_with_time_context,
+    build_chat_system_prompt_with_time_context_and_preferred_first_person,
+    build_chat_system_prompt_with_time_context_and_speech_identity, build_onboarding_system_prompt,
     build_onboarding_system_prompt_with_time_context, build_pair_compose_system_prompt,
     build_pair_topic_system_prompt_with_time_context, pair_topic_result_mode_prompt,
     preview_system_prompt, preview_system_prompt_with_context, profile_body_system_prompt,
@@ -100,6 +102,10 @@ pub struct SystemPrompts {
     #[allow(dead_code)]
     onboarding_turn_three_system_prompt: &'static str,
     shadow_core_persona_prompt: &'static str,
+    user_address_default_prompt: &'static str,
+    user_address_preferred_prompt: &'static str,
+    shadow_self_reference_default_prompt: &'static str,
+    shadow_self_reference_preferred_prompt: &'static str,
     onboarding_mode_prompt: &'static str,
     normal_chat_mode_prompt: &'static str,
     output_style_prompt: &'static str,
@@ -117,6 +123,14 @@ impl SystemPrompts {
             onboarding_turn_two_system_prompt: include_str!("prompts/onboarding_turn_two.txt"),
             onboarding_turn_three_system_prompt: include_str!("prompts/onboarding_turn_three.txt"),
             shadow_core_persona_prompt: include_str!("prompts/shadow_core_persona.txt"),
+            user_address_default_prompt: include_str!("prompts/user_address_default.txt"),
+            user_address_preferred_prompt: include_str!("prompts/user_address_preferred.txt"),
+            shadow_self_reference_default_prompt: include_str!(
+                "prompts/shadow_self_reference_default.txt"
+            ),
+            shadow_self_reference_preferred_prompt: include_str!(
+                "prompts/shadow_self_reference_preferred.txt"
+            ),
             onboarding_mode_prompt: include_str!("prompts/en/onboarding_mode.txt"), // Default
             normal_chat_mode_prompt: include_str!("prompts/normal_chat_mode.txt"),
             output_style_prompt: include_str!("prompts/output_style.txt"),
@@ -128,12 +142,32 @@ impl SystemPrompts {
             "ja" => Self {
                 onboarding_mode_prompt: include_str!("prompts/ja/onboarding_mode.txt"),
                 shadow_core_persona_prompt: include_str!("prompts/ja/shadow_core_persona.txt"),
+                user_address_default_prompt: include_str!("prompts/ja/user_address_default.txt"),
+                user_address_preferred_prompt: include_str!(
+                    "prompts/ja/user_address_preferred.txt"
+                ),
+                shadow_self_reference_default_prompt: include_str!(
+                    "prompts/ja/shadow_self_reference_default.txt"
+                ),
+                shadow_self_reference_preferred_prompt: include_str!(
+                    "prompts/ja/shadow_self_reference_preferred.txt"
+                ),
                 normal_chat_mode_prompt: include_str!("prompts/ja/normal_chat_mode.txt"),
                 ..common
             },
             "fr" => Self {
                 onboarding_mode_prompt: include_str!("prompts/fr/onboarding_mode.txt"),
                 shadow_core_persona_prompt: include_str!("prompts/fr/shadow_core_persona.txt"),
+                user_address_default_prompt: include_str!("prompts/fr/user_address_default.txt"),
+                user_address_preferred_prompt: include_str!(
+                    "prompts/fr/user_address_preferred.txt"
+                ),
+                shadow_self_reference_default_prompt: include_str!(
+                    "prompts/fr/shadow_self_reference_default.txt"
+                ),
+                shadow_self_reference_preferred_prompt: include_str!(
+                    "prompts/fr/shadow_self_reference_preferred.txt"
+                ),
                 normal_chat_mode_prompt: include_str!("prompts/fr/normal_chat_mode.txt"),
                 ..common
             },
@@ -225,6 +259,13 @@ mod tests {
     fn prompt_template_replaces_placeholder_appearing_multiple_times() {
         let result = PromptTemplate::new("{x} and {x} again").render(&[("x", "foo")]);
         assert_eq!(result, "foo and foo again");
+    }
+
+    #[test]
+    fn prompt_template_does_not_expand_placeholders_inside_values() {
+        let result = PromptTemplate::new("Value: {first}; Name: {name}")
+            .render(&[("first", "literal {name}"), ("name", "Kage")]);
+        assert_eq!(result, "Value: literal {name}; Name: Kage");
     }
 
     #[test]
@@ -395,6 +436,39 @@ mod tests {
     }
 
     #[test]
+    fn speech_identity_rules_are_kept_in_locale_prompt_assets() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        assert!(prompts_en
+            .user_address_default_prompt
+            .contains("Refer to the user as {user_name}."));
+        assert!(prompts_en
+            .user_address_preferred_prompt
+            .contains("Preferred user call-name data: {preferred_user_call_name_data}"));
+        assert!(prompts_en
+            .shadow_self_reference_default_prompt
+            .contains("In conversation, always refer to yourself as \"{shadow_name}\"."));
+        assert!(prompts_en
+            .shadow_self_reference_preferred_prompt
+            .contains("Preferred first-person expression data: {preferred_first_person_data}"));
+
+        let prompts_ja = SystemPrompts::for_locale("ja");
+        assert!(prompts_ja
+            .user_address_preferred_prompt
+            .contains("ユーザーの呼び名設定データ: {preferred_user_call_name_data}"));
+        assert!(prompts_ja
+            .shadow_self_reference_preferred_prompt
+            .contains("Shadowの一人称設定データ: {preferred_first_person_data}"));
+
+        let prompts_fr = SystemPrompts::for_locale("fr");
+        assert!(prompts_fr
+            .user_address_preferred_prompt
+            .contains("Donnée du nom d'appel de l'utilisateur : {preferred_user_call_name_data}"));
+        assert!(prompts_fr.shadow_self_reference_preferred_prompt.contains(
+            "Donnée d'expression à la première personne du Shadow : {preferred_first_person_data}"
+        ));
+    }
+
+    #[test]
     fn output_style_limits_performance_without_forcing_a_reply_template() {
         let prompts = SystemPrompts::for_locale("en");
 
@@ -414,8 +488,8 @@ mod tests {
             .output_style_prompt
             .contains("small emoji may mark a key point or caution"));
         assert!(prompts
-            .output_style_prompt
-            .contains("they do not need to be rare"));
+            .shadow_core_persona_prompt
+            .contains("Emoji do not need to be rare"));
         assert!(prompts
             .output_style_prompt
             .contains("Do not break every sentence onto its own line"));
@@ -1440,7 +1514,7 @@ mod tests {
             .contains("小さな絵文字"));
         assert!(SystemPrompts::for_locale("ja")
             .shadow_core_persona_prompt
-            .contains("絵文字は珍しいものにしなくて構いません"));
+            .contains("本当にその反応に必要なときだけ使ってください"));
         assert!(SystemPrompts::for_locale("ja")
             .shadow_core_persona_prompt
             .contains("短い笑い表現"));

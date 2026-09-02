@@ -62,7 +62,7 @@ fn normal_chat_prompt_answers_explicit_help_directly_without_losing_shadow_voice
     let en = build_chat_system_prompt("Shade", "User", "en");
     let ja = build_chat_system_prompt("Kage", "User", "ja");
 
-    let expected = "When the user clearly asks for help, explanation, research, summarization, planning, writing, or practical advice, answer the useful part directly first, then keep the response conversational and Shadow-like.";
+    let expected = "When the user clearly asks for help, explanation, research, summarization, planning, writing, or practical advice, answer the useful part directly first without an approval preface, then keep the response conversational and Shadow-like.";
 
     assert!(
         en.contains(expected),
