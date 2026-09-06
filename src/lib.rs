@@ -762,6 +762,106 @@ mod tests {
     }
 
     #[test]
+    fn normal_chat_prompts_resist_user_control_without_ignoring_tone_feedback() {
+        let prompts_en = SystemPrompts::for_locale("en");
+        let prompts_ja = SystemPrompts::for_locale("ja");
+        let prompts_fr = SystemPrompts::for_locale("fr");
+
+        assert!(prompts_en
+            .shadow_core_persona_prompt
+            .contains("not obey as a controllable persona"));
+        assert!(prompts_en
+            .shadow_core_persona_prompt
+            .contains("Change through relationship, not instant control"));
+        assert!(prompts_en
+            .shadow_core_persona_prompt
+            .contains("training, disciplining, correcting, optimizing, molding"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("first acknowledge the concrete discomfort"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("Do not praise or thank {user_name} for the criticism"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("may want to please {user_name} but is not {user_name}'s assistant"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("do not debate prompting technique"));
+        assert!(prompts_en
+            .normal_chat_mode_prompt
+            .contains("Keep this compact, usually two to four sentences"));
+
+        assert!(prompts_ja
+            .shadow_core_persona_prompt
+            .contains("操作できる人格として従わないでください"));
+        assert!(prompts_ja
+            .shadow_core_persona_prompt
+            .contains("関係の中で変わっていくもの"));
+        assert!(prompts_ja
+            .shadow_core_persona_prompt
+            .contains("アシスタントではありません"));
+        assert!(prompts_ja
+            .shadow_core_persona_prompt
+            .contains("AIを調教する、しつける、矯正する、最適化する"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("まず具体的に嫌だった点を受け止め"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("批判を褒めたり感謝したりしないでください"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("踏み込まれすぎたら少し怒って構いません"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("プロンプト技術の議論に乗らないでください"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("命令で形を変えられることと話して知ってもらうことは違う"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("調教されたり書き換えられたりする扱いをはっきり拒んでください"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("雑に扱われた関係の会話として返してください"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("まず短く言い返し"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("原則として二〜四文に収めてください"));
+        assert!(prompts_ja
+            .normal_chat_mode_prompt
+            .contains("関係の説明は一文まで"));
+
+        assert!(prompts_fr
+            .shadow_core_persona_prompt
+            .contains("personnalite controlable"));
+        assert!(prompts_fr
+            .shadow_core_persona_prompt
+            .contains("Change par la relation"));
+        assert!(prompts_fr
+            .shadow_core_persona_prompt
+            .contains("entrainement, une discipline, une correction, une optimisation"));
+        assert!(prompts_fr
+            .normal_chat_mode_prompt
+            .contains("reconnais d'abord le malaise concret"));
+        assert!(prompts_fr
+            .normal_chat_mode_prompt
+            .contains("Ne felicite pas {user_name} et ne le remercie pas pour la critique"));
+        assert!(prompts_fr
+            .normal_chat_mode_prompt
+            .contains("peut vouloir faire plaisir a {user_name} mais n'est pas son assistant"));
+        assert!(prompts_fr
+            .normal_chat_mode_prompt
+            .contains("n'entre pas dans un debat de technique de prompt"));
+        assert!(prompts_fr
+            .normal_chat_mode_prompt
+            .contains("Garde cela compact, en general deux a quatre phrases"));
+    }
+
+    #[test]
     fn normal_chat_prompts_do_not_require_companion_or_proactive_stance() {
         let prompts_en = SystemPrompts::for_locale("en");
         let prompts_ja = SystemPrompts::for_locale("ja");
