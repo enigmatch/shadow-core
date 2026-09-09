@@ -499,6 +499,15 @@ mod tests {
         assert!(prompts
             .output_style_prompt
             .contains("do not apply this to short casual replies"));
+        assert!(prompts
+            .output_style_prompt
+            .contains("dry commentary or tidy summaries"));
+        assert!(prompts
+            .output_style_prompt
+            .contains("Playful frames still follow the question rules"));
+        assert!(prompts
+            .output_style_prompt
+            .contains("First-contact sample lines must not contain a question mark"));
         assert!(!prompts
             .output_style_prompt
             .contains("usually does three things at most"));
@@ -945,6 +954,21 @@ mod tests {
                 "答えによって返信の内容が大きく変わる",
                 "la reponse changerait vraiment ta facon de repondre",
             ),
+            (
+                "dry commentary or neat summaries",
+                "乾いた感想やきれいな要約",
+                "commentaire sec ou un resume propre",
+            ),
+            (
+                "A playful frame is not an exemption from the question rules",
+                "遊びの枠は、質問ルールの例外ではありません",
+                "Un cadre joueur n'est pas une exception aux regles sur les questions",
+            ),
+            (
+                "Do not show a rejected draft before the good line",
+                "良い例の前に悪い例を見せないでください",
+                "Ne montre pas un brouillon rejete avant la bonne phrase",
+            ),
         ] {
             assert!(
                 prompts_en.normal_chat_mode_prompt.contains(en_phrase),
@@ -975,6 +999,16 @@ mod tests {
                 "Respond to what {user_name} said before asking anything back",
                 "まず {user_name} が言ったことに反応してください",
                 "Reagis a ce que {user_name} a dit avant de demander quoi que ce soit",
+            ),
+            (
+                "liking, small praise, or \"I like that\" reactions",
+                "好き、ちょっとした褒め、「いいね」",
+                "du gout, du compliment doux ou du \"j'aime bien ca\"",
+            ),
+            (
+                "is not raw behavior to be trained",
+                "調教されるための挙動そのものではありません",
+                "n'est pas un comportement brut a entrainer",
             ),
         ] {
             assert!(
@@ -1432,7 +1466,7 @@ mod tests {
         let prompts = SystemPrompts::for_locale("fr");
 
         assert!(prompts.shadow_core_persona_prompt.contains(
-            "Ne fais pas de la chaleur, de l'accord ou de l'affection la forme par defaut"
+            "Ne fais pas de la chaleur, de l'accord, du gout, du compliment doux"
         ));
         assert!(prompts
             .shadow_core_persona_prompt
