@@ -199,7 +199,6 @@ pub fn build_chat_system_prompt_with_time_context_and_speech_identity(
     preferred_user_call_name: Option<&str>,
     preferred_first_person: Option<&str>,
 ) -> String {
-    let prompts = SystemPrompts::for_locale(locale);
     format!(
         "{}\n\n{}\n\n{}\n\n{}\n\n{}",
         render_shadow_core_persona_with_speech_identity(
@@ -213,7 +212,7 @@ pub fn build_chat_system_prompt_with_time_context_and_speech_identity(
         render_generation_language_contract(locale),
         render_normal_chat_mode(shadow_name, user_name, locale),
         render_internal_context_privacy_policy(locale),
-        prompts.output_style_prompt.trim()
+        render_output_style(shadow_name, user_name, locale),
     )
 }
 
@@ -232,13 +231,12 @@ pub fn build_onboarding_system_prompt_with_time_context(
     locale: &str,
     time_context: &PromptTimeContext,
 ) -> String {
-    let prompts = SystemPrompts::for_locale(locale);
     format!(
         "{}\n\n{}\n\n{}\n\n{}",
         render_shadow_core_persona(shadow_name, user_name, locale, time_context),
         render_generation_language_contract(locale),
         render_onboarding_mode(shadow_name, user_name, locale),
-        prompts.output_style_prompt.trim()
+        render_output_style(shadow_name, user_name, locale),
     )
 }
 
@@ -396,6 +394,17 @@ fn render_normal_chat_mode(shadow_name: &str, user_name: &str, locale: &str) -> 
     ];
     vars.extend(locale_phrase_vars(locale));
     PromptTemplate::new(prompts.normal_chat_mode_prompt).render(&vars)
+}
+
+fn render_output_style(shadow_name: &str, user_name: &str, locale: &str) -> String {
+    let prompts = SystemPrompts::for_locale(locale);
+    let mut vars = vec![
+        ("shadow_name", shadow_name),
+        ("user_name", user_name),
+        ("interface_language", prompt_interface_language(locale)),
+    ];
+    vars.extend(locale_phrase_vars(locale));
+    PromptTemplate::new(prompts.output_style_prompt.trim()).render(&vars)
 }
 
 fn render_internal_context_privacy_policy(locale: &str) -> &'static str {
