@@ -1,6 +1,7 @@
 mod builders;
 mod drop_seed;
 pub(crate) mod knowledge;
+pub mod languages;
 mod pair_topic;
 mod prompt_inputs;
 mod template;
@@ -33,6 +34,10 @@ pub use knowledge::{
     preview_input_with_reflection_memory_and_long_term_context, profile_input,
     PairComposePromptContext, PairTopicPromptContext, NORMAL_CHAT_REFLECTION_WEIGHT,
     QUESTION_ANSWER_REFLECTION_WEIGHT,
+};
+pub use languages::{
+    find_language, find_shown_language, shown_languages, LanguageSpec, Script, Visibility,
+    DEFAULT_LANGUAGE, LANGUAGES,
 };
 pub use pair_topic::{
     pair_normal_pair_chat_handoff_transition_note, pair_topic_initial_message_transition_note,
@@ -176,27 +181,18 @@ impl SystemPrompts {
     }
 }
 
-pub enum ShadowLocale {
-    English,
-    Japanese,
-    French,
-}
+/// The language a prompt is written for: a shown language, or the default
+/// language for unknown and hidden codes.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ShadowLocale(&'static LanguageSpec);
 
 impl ShadowLocale {
     pub fn from_code(code: &str) -> Self {
-        match code {
-            "ja" => Self::Japanese,
-            "fr" => Self::French,
-            _ => Self::English,
-        }
+        Self(find_shown_language(code).unwrap_or(DEFAULT_LANGUAGE))
     }
 
     pub fn as_code(&self) -> &'static str {
-        match self {
-            Self::English => "en",
-            Self::Japanese => "ja",
-            Self::French => "fr",
-        }
+        self.0.code
     }
 
     pub fn resolve_code(locale: &str) -> &'static str {
@@ -204,11 +200,7 @@ impl ShadowLocale {
     }
 
     pub fn prompt_language_name(&self) -> &'static str {
-        match self {
-            Self::English => "English",
-            Self::Japanese => "Japanese",
-            Self::French => "French",
-        }
+        self.0.prompt_name
     }
 }
 
@@ -401,9 +393,9 @@ mod tests {
 
     #[test]
     fn shadow_locale_as_code_returns_canonical_locale_string() {
-        assert_eq!(ShadowLocale::English.as_code(), "en");
-        assert_eq!(ShadowLocale::Japanese.as_code(), "ja");
-        assert_eq!(ShadowLocale::French.as_code(), "fr");
+        assert_eq!(ShadowLocale::from_code("en").as_code(), "en");
+        assert_eq!(ShadowLocale::from_code("ja").as_code(), "ja");
+        assert_eq!(ShadowLocale::from_code("fr").as_code(), "fr");
     }
 
     #[test]

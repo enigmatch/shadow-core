@@ -1,0 +1,166 @@
+//! The single list of languages SBT knows about.
+//!
+//! Every other place that needs "which languages exist" reads from here, so a
+//! new language is added by one entry instead of edits scattered across the
+//! codebase that silently fall back to English when one is missed.
+
+/// Whether users can pick the language yet.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Visibility {
+    /// Offered in the language switcher, accepted in URLs, and given its own
+    /// prompts.
+    Shown,
+    /// Its catalog loads, but users are not offered it yet and prompts treat
+    /// it as the default language. Used while a language is still in progress.
+    Hidden,
+}
+
+/// The writing system a language uses, for rules that depend on script
+/// rather than on one specific language (typography, length limits).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Script {
+    Latin,
+    Japanese,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub struct LanguageSpec {
+    /// Short code used in URLs, cookies and stored data, e.g. `ja`.
+    pub code: &'static str,
+    /// Fluent catalog folder name, e.g. `ja-JP`.
+    pub catalog_id: &'static str,
+    /// Name shown in the language switcher, written in the language itself.
+    pub switcher_label: &'static str,
+    /// English name of the language, as told to the LLM.
+    pub prompt_name: &'static str,
+    pub script: Script,
+    pub visibility: Visibility,
+}
+
+impl LanguageSpec {
+    #[must_use]
+    pub fn is_shown(&self) -> bool {
+        self.visibility == Visibility::Shown
+    }
+}
+
+pub const LANGUAGES: &[LanguageSpec] = &[
+    LanguageSpec {
+        code: "en",
+        catalog_id: "en-US",
+        switcher_label: "English",
+        prompt_name: "English",
+        script: Script::Latin,
+        visibility: Visibility::Shown,
+    },
+    LanguageSpec {
+        code: "ja",
+        catalog_id: "ja-JP",
+        switcher_label: "日本語",
+        prompt_name: "Japanese",
+        script: Script::Japanese,
+        visibility: Visibility::Shown,
+    },
+    LanguageSpec {
+        code: "fr",
+        catalog_id: "fr-FR",
+        switcher_label: "Français",
+        prompt_name: "French",
+        script: Script::Latin,
+        visibility: Visibility::Shown,
+    },
+    LanguageSpec {
+        code: "de",
+        catalog_id: "de-DE",
+        switcher_label: "Deutsch",
+        prompt_name: "German",
+        script: Script::Latin,
+        visibility: Visibility::Hidden,
+    },
+];
+
+/// The language used whenever a code is unknown or not shown.
+pub const DEFAULT_LANGUAGE: &LanguageSpec = &LANGUAGES[0];
+
+/// Any registered language, shown or hidden. Matching is exact: callers that
+/// accept tags such as `fr-FR` reduce them to the short code themselves.
+#[must_use]
+pub fn find_language(code: &str) -> Option<&'static LanguageSpec> {
+    LANGUAGES.iter().find(|language| language.code == code)
+}
+
+/// A language users can pick, or `None` for unknown and hidden codes.
+#[must_use]
+pub fn find_shown_language(code: &str) -> Option<&'static LanguageSpec> {
+    find_language(code).filter(|language| language.is_shown())
+}
+
+/// Languages users can pick, in switcher order.
+pub fn shown_languages() -> impl Iterator<Item = &'static LanguageSpec> {
+    LANGUAGES.iter().filter(|language| language.is_shown())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        find_language, find_shown_language, shown_languages, Visibility, DEFAULT_LANGUAGE,
+        LANGUAGES,
+    };
+    use std::collections::HashSet;
+
+    #[test]
+    fn shown_languages_keep_the_current_switcher_order() {
+        let codes = shown_languages()
+            .map(|language| language.code)
+            .collect::<Vec<_>>();
+        assert_eq!(codes, vec!["en", "ja", "fr"]);
+    }
+
+    #[test]
+    fn default_language_is_shown_english() {
+        assert_eq!(DEFAULT_LANGUAGE.code, "en");
+        assert_eq!(DEFAULT_LANGUAGE.catalog_id, "en-US");
+        assert_eq!(DEFAULT_LANGUAGE.visibility, Visibility::Shown);
+    }
+
+    #[test]
+    fn hidden_language_is_found_but_not_shown() {
+        assert_eq!(find_language("de").map(|l| l.catalog_id), Some("de-DE"));
+        assert_eq!(find_shown_language("de"), None);
+        assert!(shown_languages().all(|language| language.code != "de"));
+    }
+
+    #[test]
+    fn lookup_is_exact_and_rejects_unknown_codes() {
+        assert_eq!(find_shown_language("ja").map(|l| l.code), Some("ja"));
+        assert_eq!(find_language("ja-JP"), None);
+        assert_eq!(find_language("JA"), None);
+        assert_eq!(find_language("xx"), None);
+        assert_eq!(find_language(""), None);
+    }
+
+    #[test]
+    fn codes_and_catalog_ids_are_unique() {
+        let codes = LANGUAGES.iter().map(|l| l.code).collect::<HashSet<_>>();
+        let catalogs = LANGUAGES
+            .iter()
+            .map(|l| l.catalog_id)
+            .collect::<HashSet<_>>();
+        assert_eq!(codes.len(), LANGUAGES.len());
+        assert_eq!(catalogs.len(), LANGUAGES.len());
+    }
+
+    #[test]
+    fn catalog_id_starts_with_its_code() {
+        for language in LANGUAGES {
+            assert!(
+                language
+                    .catalog_id
+                    .starts_with(&format!("{}-", language.code)),
+                "{} catalog id {} must start with its code",
+                language.code,
+                language.catalog_id
+            );
+        }
+    }
+}
