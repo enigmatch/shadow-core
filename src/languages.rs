@@ -31,6 +31,8 @@ pub struct LanguageSpec {
     pub catalog_id: &'static str,
     /// Name shown in the language switcher, written in the language itself.
     pub switcher_label: &'static str,
+    /// Flag emoji shown on the language button, e.g. 🇯🇵.
+    pub flag: &'static str,
     /// English name of the language, as told to the LLM.
     pub prompt_name: &'static str,
     pub script: Script,
@@ -60,6 +62,7 @@ pub const LANGUAGES: &[LanguageSpec] = &[
         code: "en",
         catalog_id: "en-US",
         switcher_label: "English",
+        flag: "🇺🇸",
         prompt_name: "English",
         script: Script::Latin,
         visibility: Visibility::Shown,
@@ -69,6 +72,7 @@ pub const LANGUAGES: &[LanguageSpec] = &[
         code: "ja",
         catalog_id: "ja-JP",
         switcher_label: "日本語",
+        flag: "🇯🇵",
         prompt_name: "Japanese",
         script: Script::Japanese,
         visibility: Visibility::Shown,
@@ -78,6 +82,7 @@ pub const LANGUAGES: &[LanguageSpec] = &[
         code: "fr",
         catalog_id: "fr-FR",
         switcher_label: "Français",
+        flag: "🇫🇷",
         prompt_name: "French",
         script: Script::Latin,
         visibility: Visibility::Shown,
@@ -87,6 +92,7 @@ pub const LANGUAGES: &[LanguageSpec] = &[
         code: "de",
         catalog_id: "de-DE",
         switcher_label: "Deutsch",
+        flag: "🇩🇪",
         prompt_name: "German",
         script: Script::Latin,
         visibility: Visibility::Hidden,
