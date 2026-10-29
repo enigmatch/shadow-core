@@ -791,7 +791,7 @@ mod tests {
 
     #[test]
     fn profile_system_prompt_returns_non_empty_string_for_each_locale() {
-        for locale in ["en", "ja", "fr"] {
+        for locale in crate::shown_languages().map(|language| language.code) {
             assert!(
                 !profile_system_prompt(locale).trim().is_empty(),
                 "profile_system_prompt must not be empty for locale '{locale}'"
@@ -801,7 +801,7 @@ mod tests {
 
     #[test]
     fn pair_topic_result_mode_prompt_returns_non_empty_string_for_each_locale() {
-        for locale in ["en", "ja", "fr"] {
+        for locale in crate::shown_languages().map(|language| language.code) {
             assert!(
                 !pair_topic_result_mode_prompt(locale).trim().is_empty(),
                 "pair_topic_result_mode_prompt must not be empty for locale '{locale}'"
