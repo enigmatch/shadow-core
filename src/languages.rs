@@ -35,12 +35,23 @@ pub struct LanguageSpec {
     pub prompt_name: &'static str,
     pub script: Script,
     pub visibility: Visibility,
+    /// Whether new content is translated into this language as soon as it is
+    /// created. When false, readers get the original with an on-demand
+    /// translate option, so adding a language does not multiply translation
+    /// jobs for every new message, answer and question.
+    pub auto_translate: bool,
 }
 
 impl LanguageSpec {
     #[must_use]
     pub fn is_shown(&self) -> bool {
         self.visibility == Visibility::Shown
+    }
+
+    /// Hidden languages are never auto-translated, whatever their flag says.
+    #[must_use]
+    pub fn is_auto_translated(&self) -> bool {
+        self.is_shown() && self.auto_translate
     }
 }
 
@@ -52,6 +63,7 @@ pub const LANGUAGES: &[LanguageSpec] = &[
         prompt_name: "English",
         script: Script::Latin,
         visibility: Visibility::Shown,
+        auto_translate: true,
     },
     LanguageSpec {
         code: "ja",
@@ -60,6 +72,7 @@ pub const LANGUAGES: &[LanguageSpec] = &[
         prompt_name: "Japanese",
         script: Script::Japanese,
         visibility: Visibility::Shown,
+        auto_translate: true,
     },
     LanguageSpec {
         code: "fr",
@@ -68,6 +81,7 @@ pub const LANGUAGES: &[LanguageSpec] = &[
         prompt_name: "French",
         script: Script::Latin,
         visibility: Visibility::Shown,
+        auto_translate: true,
     },
     LanguageSpec {
         code: "de",
@@ -76,6 +90,7 @@ pub const LANGUAGES: &[LanguageSpec] = &[
         prompt_name: "German",
         script: Script::Latin,
         visibility: Visibility::Hidden,
+        auto_translate: false,
     },
 ];
 
@@ -107,6 +122,27 @@ mod tests {
         LANGUAGES,
     };
     use std::collections::HashSet;
+
+    #[test]
+    fn current_shown_languages_are_all_auto_translated() {
+        let codes = LANGUAGES
+            .iter()
+            .filter(|language| language.is_auto_translated())
+            .map(|language| language.code)
+            .collect::<Vec<_>>();
+        assert_eq!(codes, vec!["en", "ja", "fr"]);
+    }
+
+    #[test]
+    fn hidden_languages_are_never_auto_translated() {
+        for language in LANGUAGES.iter().filter(|language| !language.is_shown()) {
+            assert!(
+                !language.is_auto_translated(),
+                "{} is hidden, so new content must not be translated into it",
+                language.code
+            );
+        }
+    }
 
     #[test]
     fn shown_languages_keep_the_current_switcher_order() {
