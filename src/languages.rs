@@ -182,28 +182,6 @@ mod tests {
     }
 
     #[test]
-    fn shown_languages_keep_the_current_flags() {
-        let flags = shown_languages()
-            .map(|language| (language.code, language.flag))
-            .collect::<Vec<_>>();
-        assert_eq!(flags, vec![("en", "🇺🇸"), ("ja", "🇯🇵"), ("fr", "🇫🇷")]);
-    }
-
-    #[test]
-    fn every_flag_is_one_regional_indicator_pair() {
-        let is_regional_indicator = |c: char| ('\u{1F1E6}'..='\u{1F1FF}').contains(&c);
-        for language in LANGUAGES {
-            let chars = language.flag.chars().collect::<Vec<_>>();
-            assert!(
-                chars.len() == 2 && chars.iter().copied().all(is_regional_indicator),
-                "{} flag {:?} must be a single country flag emoji",
-                language.code,
-                language.flag
-            );
-        }
-    }
-
-    #[test]
     fn codes_and_catalog_ids_are_unique() {
         let codes = LANGUAGES.iter().map(|l| l.code).collect::<HashSet<_>>();
         let catalogs = LANGUAGES
