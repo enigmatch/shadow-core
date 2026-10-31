@@ -1,5 +1,4 @@
 mod builders;
-mod drop_seed;
 pub(crate) mod knowledge;
 pub mod languages;
 mod localized;
@@ -18,7 +17,6 @@ pub use builders::{
     preview_system_prompt, preview_system_prompt_with_context, profile_body_system_prompt,
     profile_system_prompt, requested_output_language, PromptTimeContext,
 };
-pub use drop_seed::{render_drop_definitions_for_locale, DropDefinition, DROP_DEFINITIONS};
 pub use knowledge::{
     build_chat_context_planner_instructions, build_explicit_correction_input,
     build_onboarding_phase_instructions, build_onboarding_prompt_input,
