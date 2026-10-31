@@ -74,6 +74,14 @@ impl LocalePhrases {
                 closing_insight_phrase: "「見えてきた」",
                 closing_identity_phrase: "「ここから本当に Shadow になれる」",
             },
+            "fr" => Self {
+                soft_example_phrase: "« quelque chose comme ça »",
+                soft_example_phrase_alt: "« c'est peut-être plutôt comme ça »",
+                lazy_remark: "« Et c'est reparti... »",
+                laugh_marker: "haha",
+                closing_insight_phrase: "« ça commence à prendre forme »",
+                closing_identity_phrase: "« c'est là que ça devient réel »",
+            },
             _ => Self {
                 soft_example_phrase: "\"something like this\"",
                 soft_example_phrase_alt: "\"maybe it's more like this\"",
