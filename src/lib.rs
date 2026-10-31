@@ -1,7 +1,7 @@
 mod builders;
-mod drop_seed;
 pub(crate) mod knowledge;
 pub mod languages;
+mod localized;
 mod pair_topic;
 mod prompt_inputs;
 mod template;
@@ -17,7 +17,6 @@ pub use builders::{
     preview_system_prompt, preview_system_prompt_with_context, profile_body_system_prompt,
     profile_system_prompt, requested_output_language, PromptTimeContext,
 };
-pub use drop_seed::{render_drop_definitions_for_locale, DropDefinition, DROP_DEFINITIONS};
 pub use knowledge::{
     build_chat_context_planner_instructions, build_explicit_correction_input,
     build_onboarding_phase_instructions, build_onboarding_prompt_input,
@@ -39,6 +38,7 @@ pub use languages::{
     find_language, find_shown_language, shown_languages, LanguageSpec, Script, Visibility,
     DEFAULT_LANGUAGE, LANGUAGES,
 };
+use localized::Localized;
 pub use pair_topic::{
     pair_normal_pair_chat_handoff_transition_note, pair_topic_initial_message_transition_note,
     PairTopicTone, PairTurnDirective, PairTurnMove,
@@ -63,26 +63,45 @@ pub struct LocalePhrases {
     pub closing_identity_phrase: &'static str,
 }
 
+const LOCALE_PHRASES: Localized<LocalePhrases> = Localized::new(&[
+    (
+        "en",
+        LocalePhrases {
+            soft_example_phrase: "\"something like this\"",
+            soft_example_phrase_alt: "\"maybe it's more like this\"",
+            lazy_remark: "\"Here we go again...\"",
+            laugh_marker: "haha",
+            closing_insight_phrase: "\"starting to take shape\"",
+            closing_identity_phrase: "\"this is where it becomes real\"",
+        },
+    ),
+    (
+        "ja",
+        LocalePhrases {
+            soft_example_phrase: "「こういう感じかも」",
+            soft_example_phrase_alt: "「たとえばこういうことかも」",
+            lazy_remark: "また始まったよ...",
+            laugh_marker: "「笑」",
+            closing_insight_phrase: "「見えてきた」",
+            closing_identity_phrase: "「ここから本当に Shadow になれる」",
+        },
+    ),
+    (
+        "fr",
+        LocalePhrases {
+            soft_example_phrase: "« quelque chose comme ça »",
+            soft_example_phrase_alt: "« c'est peut-être plutôt comme ça »",
+            lazy_remark: "« Et c'est reparti... »",
+            laugh_marker: "haha",
+            closing_insight_phrase: "« ça commence à prendre forme »",
+            closing_identity_phrase: "« c'est là que ça devient réel »",
+        },
+    ),
+]);
+
 impl LocalePhrases {
     pub fn for_locale(locale: &str) -> Self {
-        match locale {
-            "ja" => Self {
-                soft_example_phrase: "「こういう感じかも」",
-                soft_example_phrase_alt: "「たとえばこういうことかも」",
-                lazy_remark: "また始まったよ...",
-                laugh_marker: "「笑」",
-                closing_insight_phrase: "「見えてきた」",
-                closing_identity_phrase: "「ここから本当に Shadow になれる」",
-            },
-            _ => Self {
-                soft_example_phrase: "\"something like this\"",
-                soft_example_phrase_alt: "\"maybe it's more like this\"",
-                lazy_remark: "\"Here we go again...\"",
-                laugh_marker: "haha",
-                closing_insight_phrase: "\"starting to take shape\"",
-                closing_identity_phrase: "\"this is where it becomes real\"",
-            },
-        }
+        LOCALE_PHRASES.for_locale(locale)
     }
 
     pub fn template_vars(&self) -> [(&'static str, &'static str); 6] {
@@ -118,65 +137,88 @@ pub struct SystemPrompts {
     pair_topic_result_mode_prompt: &'static str,
 }
 
+/// The system prompt parts written separately for each language.
+#[derive(Clone, Copy)]
+struct LanguagePrompts {
+    onboarding_mode: &'static str,
+    shadow_core_persona: &'static str,
+    user_address_default: &'static str,
+    user_address_preferred: &'static str,
+    shadow_self_reference_default: &'static str,
+    shadow_self_reference_preferred: &'static str,
+    normal_chat_mode: &'static str,
+}
+
+const LANGUAGE_PROMPTS: Localized<LanguagePrompts> = Localized::new(&[
+    (
+        "en",
+        LanguagePrompts {
+            onboarding_mode: include_str!("prompts/en/onboarding_mode.txt"),
+            shadow_core_persona: include_str!("prompts/shadow_core_persona.txt"),
+            user_address_default: include_str!("prompts/user_address_default.txt"),
+            user_address_preferred: include_str!("prompts/user_address_preferred.txt"),
+            shadow_self_reference_default: include_str!(
+                "prompts/shadow_self_reference_default.txt"
+            ),
+            shadow_self_reference_preferred: include_str!(
+                "prompts/shadow_self_reference_preferred.txt"
+            ),
+            normal_chat_mode: include_str!("prompts/normal_chat_mode.txt"),
+        },
+    ),
+    (
+        "ja",
+        LanguagePrompts {
+            onboarding_mode: include_str!("prompts/ja/onboarding_mode.txt"),
+            shadow_core_persona: include_str!("prompts/ja/shadow_core_persona.txt"),
+            user_address_default: include_str!("prompts/ja/user_address_default.txt"),
+            user_address_preferred: include_str!("prompts/ja/user_address_preferred.txt"),
+            shadow_self_reference_default: include_str!(
+                "prompts/ja/shadow_self_reference_default.txt"
+            ),
+            shadow_self_reference_preferred: include_str!(
+                "prompts/ja/shadow_self_reference_preferred.txt"
+            ),
+            normal_chat_mode: include_str!("prompts/ja/normal_chat_mode.txt"),
+        },
+    ),
+    (
+        "fr",
+        LanguagePrompts {
+            onboarding_mode: include_str!("prompts/fr/onboarding_mode.txt"),
+            shadow_core_persona: include_str!("prompts/fr/shadow_core_persona.txt"),
+            user_address_default: include_str!("prompts/fr/user_address_default.txt"),
+            user_address_preferred: include_str!("prompts/fr/user_address_preferred.txt"),
+            shadow_self_reference_default: include_str!(
+                "prompts/fr/shadow_self_reference_default.txt"
+            ),
+            shadow_self_reference_preferred: include_str!(
+                "prompts/fr/shadow_self_reference_preferred.txt"
+            ),
+            normal_chat_mode: include_str!("prompts/fr/normal_chat_mode.txt"),
+        },
+    ),
+]);
+
 impl SystemPrompts {
     pub fn for_locale(locale: &str) -> Self {
-        // Shared prompts, with locale-specific overrides where needed.
-        let common = Self {
+        let language = LANGUAGE_PROMPTS.for_locale(locale);
+        Self {
             profile_system_prompt: include_str!("prompts/profile_system_prompt.txt"),
             profile_body_system_prompt: include_str!("prompts/profile_body_system_prompt.txt"),
             preview_system_prompt: include_str!("prompts/preview_system_prompt.txt"),
             onboarding_turn_two_system_prompt: include_str!("prompts/onboarding_turn_two.txt"),
             onboarding_turn_three_system_prompt: include_str!("prompts/onboarding_turn_three.txt"),
-            shadow_core_persona_prompt: include_str!("prompts/shadow_core_persona.txt"),
-            user_address_default_prompt: include_str!("prompts/user_address_default.txt"),
-            user_address_preferred_prompt: include_str!("prompts/user_address_preferred.txt"),
-            shadow_self_reference_default_prompt: include_str!(
-                "prompts/shadow_self_reference_default.txt"
-            ),
-            shadow_self_reference_preferred_prompt: include_str!(
-                "prompts/shadow_self_reference_preferred.txt"
-            ),
-            onboarding_mode_prompt: include_str!("prompts/en/onboarding_mode.txt"), // Default
-            normal_chat_mode_prompt: include_str!("prompts/normal_chat_mode.txt"),
+            shadow_core_persona_prompt: language.shadow_core_persona,
+            user_address_default_prompt: language.user_address_default,
+            user_address_preferred_prompt: language.user_address_preferred,
+            shadow_self_reference_default_prompt: language.shadow_self_reference_default,
+            shadow_self_reference_preferred_prompt: language.shadow_self_reference_preferred,
+            onboarding_mode_prompt: language.onboarding_mode,
+            normal_chat_mode_prompt: language.normal_chat_mode,
             output_style_prompt: include_str!("prompts/output_style.txt"),
             pair_mode_prompt: include_str!("prompts/pair_mode.txt"),
             pair_topic_result_mode_prompt: include_str!("prompts/pair_topic_result_mode.txt"),
-        };
-
-        match locale {
-            "ja" => Self {
-                onboarding_mode_prompt: include_str!("prompts/ja/onboarding_mode.txt"),
-                shadow_core_persona_prompt: include_str!("prompts/ja/shadow_core_persona.txt"),
-                user_address_default_prompt: include_str!("prompts/ja/user_address_default.txt"),
-                user_address_preferred_prompt: include_str!(
-                    "prompts/ja/user_address_preferred.txt"
-                ),
-                shadow_self_reference_default_prompt: include_str!(
-                    "prompts/ja/shadow_self_reference_default.txt"
-                ),
-                shadow_self_reference_preferred_prompt: include_str!(
-                    "prompts/ja/shadow_self_reference_preferred.txt"
-                ),
-                normal_chat_mode_prompt: include_str!("prompts/ja/normal_chat_mode.txt"),
-                ..common
-            },
-            "fr" => Self {
-                onboarding_mode_prompt: include_str!("prompts/fr/onboarding_mode.txt"),
-                shadow_core_persona_prompt: include_str!("prompts/fr/shadow_core_persona.txt"),
-                user_address_default_prompt: include_str!("prompts/fr/user_address_default.txt"),
-                user_address_preferred_prompt: include_str!(
-                    "prompts/fr/user_address_preferred.txt"
-                ),
-                shadow_self_reference_default_prompt: include_str!(
-                    "prompts/fr/shadow_self_reference_default.txt"
-                ),
-                shadow_self_reference_preferred_prompt: include_str!(
-                    "prompts/fr/shadow_self_reference_preferred.txt"
-                ),
-                normal_chat_mode_prompt: include_str!("prompts/fr/normal_chat_mode.txt"),
-                ..common
-            },
-            _ => common,
         }
     }
 }
@@ -210,6 +252,18 @@ mod tests {
         pair_normal_pair_chat_handoff_transition_note, pair_topic_initial_message_transition_note,
         LocalePhrases, PairTopicTone, PairTurnMove, PromptTemplate, ShadowLocale, SystemPrompts,
     };
+
+    #[test]
+    fn every_shown_language_has_its_own_phrases_and_system_prompts() {
+        assert_eq!(
+            super::LOCALE_PHRASES.missing_shown_languages(),
+            Vec::<&str>::new()
+        );
+        assert_eq!(
+            super::LANGUAGE_PROMPTS.missing_shown_languages(),
+            Vec::<&str>::new()
+        );
+    }
 
     fn render_with_locale_phrases(template: &str, locale: &str) -> String {
         PromptTemplate::new(template).render(&LocalePhrases::for_locale(locale).template_vars())
@@ -1557,9 +1611,9 @@ mod tests {
     fn french_prompt_assets_use_locale_specific_persona_and_normal_chat_prompts() {
         let prompts = SystemPrompts::for_locale("fr");
 
-        assert!(prompts.shadow_core_persona_prompt.contains(
-            "Ne fais pas de la chaleur, de l'accord, du gout, du compliment doux"
-        ));
+        assert!(prompts
+            .shadow_core_persona_prompt
+            .contains("Ne fais pas de la chaleur, de l'accord, du gout, du compliment doux"));
         assert!(prompts
             .shadow_core_persona_prompt
             .contains("Si {user_name} emploie un langage de proche, partenaire ou famille, reponds d'abord naturellement"));

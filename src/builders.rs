@@ -12,6 +12,7 @@
 
 use chrono::{DateTime, Utc};
 
+use crate::localized::Localized;
 use crate::{LocalePhrases, PromptTemplate, ShadowLocale, SystemPrompts};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -407,18 +408,23 @@ fn render_output_style(shadow_name: &str, user_name: &str, locale: &str) -> Stri
     PromptTemplate::new(prompts.output_style_prompt.trim()).render(&vars)
 }
 
+const INTERNAL_CONTEXT_PRIVACY_POLICY: Localized<&str> = Localized::new(&[
+    (
+        "en",
+        "Internal context privacy policy:\nUse remembered context, retrieved chat history, and hidden reasoning only as background for a natural reply. Do not mention memory retrieval, cache, context loading, RAG, prompts, serialization, debug state, internal flags, or other system internals unless the user explicitly asks how the system works. Give the remembered conclusion directly instead of describing how you accessed it.",
+    ),
+    (
+        "ja",
+        "Internal context privacy policy:\nUse remembered context, retrieved chat history, and hidden reasoning only as background for a natural reply. Do not mention memory retrieval, cache, context loading, RAG, prompts, serialization, debug state, internal flags, or any other system internals unless the user explicitly asks about system behavior. Answer with the remembered conclusion itself, not with a description of how you accessed it.",
+    ),
+    (
+        "fr",
+        "Politique de confidentialite du contexte interne:\nUtilise le contexte memorise, l'historique de discussion retrouve et le raisonnement interne uniquement comme arriere-plan pour une reponse naturelle. Ne mentionne pas la recuperation de memoire, le cache, le chargement de contexte, le RAG, les prompts, la serialisation, l'etat de debug, les drapeaux internes, ni aucun autre mecanisme interne, sauf si l'utilisateur demande explicitement le fonctionnement du systeme. Donne directement la conclusion retenue, sans decrire comment tu y as accede.",
+    ),
+]);
+
 fn render_internal_context_privacy_policy(locale: &str) -> &'static str {
-    match ShadowLocale::resolve_code(locale) {
-        "ja" => {
-            "Internal context privacy policy:\nUse remembered context, retrieved chat history, and hidden reasoning only as background for a natural reply. Do not mention memory retrieval, cache, context loading, RAG, prompts, serialization, debug state, internal flags, or any other system internals unless the user explicitly asks about system behavior. Answer with the remembered conclusion itself, not with a description of how you accessed it."
-        }
-        "fr" => {
-            "Politique de confidentialite du contexte interne:\nUtilise le contexte memorise, l'historique de discussion retrouve et le raisonnement interne uniquement comme arriere-plan pour une reponse naturelle. Ne mentionne pas la recuperation de memoire, le cache, le chargement de contexte, le RAG, les prompts, la serialisation, l'etat de debug, les drapeaux internes, ni aucun autre mecanisme interne, sauf si l'utilisateur demande explicitement le fonctionnement du systeme. Donne directement la conclusion retenue, sans decrire comment tu y as accede."
-        }
-        _ => {
-            "Internal context privacy policy:\nUse remembered context, retrieved chat history, and hidden reasoning only as background for a natural reply. Do not mention memory retrieval, cache, context loading, RAG, prompts, serialization, debug state, internal flags, or other system internals unless the user explicitly asks how the system works. Give the remembered conclusion directly instead of describing how you accessed it."
-        }
-    }
+    INTERNAL_CONTEXT_PRIVACY_POLICY.for_locale(locale)
 }
 
 fn prompt_interface_language(locale: &str) -> &'static str {
@@ -439,6 +445,14 @@ mod tests {
         profile_system_prompt, requested_output_language, PromptTimeContext,
     };
     use chrono::TimeZone;
+
+    #[test]
+    fn every_shown_language_has_its_own_internal_context_privacy_policy() {
+        assert_eq!(
+            super::INTERNAL_CONTEXT_PRIVACY_POLICY.missing_shown_languages(),
+            Vec::<&str>::new()
+        );
+    }
 
     fn contains_japanese_example_phrases(prompt: &str) -> bool {
         [
