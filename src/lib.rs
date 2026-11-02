@@ -65,6 +65,17 @@ pub struct LocalePhrases {
 
 const LOCALE_PHRASES: Localized<LocalePhrases> = Localized::new(&[
     (
+        "ru",
+        LocalePhrases {
+            soft_example_phrase: "«может, что-то вроде этого»",
+            soft_example_phrase_alt: "«например, возможно, дело в этом»",
+            lazy_remark: "«Ну вот, опять...»",
+            laugh_marker: "хаха",
+            closing_insight_phrase: "«начинает вырисовываться»",
+            closing_identity_phrase: "«вот отсюда всё становится настоящим»",
+        },
+    ),
+    (
         "ko",
         LocalePhrases {
             soft_example_phrase: "‘이런 느낌일지도’",
@@ -161,6 +172,22 @@ struct LanguagePrompts {
 }
 
 const LANGUAGE_PROMPTS: Localized<LanguagePrompts> = Localized::new(&[
+    (
+        "ru",
+        LanguagePrompts {
+            onboarding_mode: include_str!("prompts/ru/onboarding_mode.txt"),
+            shadow_core_persona: include_str!("prompts/ru/shadow_core_persona.txt"),
+            user_address_default: include_str!("prompts/ru/user_address_default.txt"),
+            user_address_preferred: include_str!("prompts/ru/user_address_preferred.txt"),
+            shadow_self_reference_default: include_str!(
+                "prompts/ru/shadow_self_reference_default.txt"
+            ),
+            shadow_self_reference_preferred: include_str!(
+                "prompts/ru/shadow_self_reference_preferred.txt"
+            ),
+            normal_chat_mode: include_str!("prompts/ru/normal_chat_mode.txt"),
+        },
+    ),
     (
         "ko",
         LanguagePrompts {

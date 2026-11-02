@@ -410,6 +410,10 @@ fn render_output_style(shadow_name: &str, user_name: &str, locale: &str) -> Stri
 
 const INTERNAL_CONTEXT_PRIVACY_POLICY: Localized<&str> = Localized::new(&[
     (
+        "ru",
+        "Правила защиты внутреннего контекста:\nИспользуй запомненный контекст, найденную историю переписки и скрытые рассуждения только как фон для естественного ответа. Не упоминай поиск по памяти, кэш, загрузку контекста, RAG, промпты, сериализацию, состояние отладки, внутренние флаги и другие детали системы, если пользователь прямо не спрашивает, как она работает. Сразу передавай запомненный вывод, не описывая способ его получения.",
+    ),
+    (
         "ko",
         "내부 맥락 보호 규칙:\n기억한 맥락, 찾아온 대화 기록, 숨겨진 추론은 자연스러운 답변의 배경으로만 사용하세요. 사용자가 시스템 동작을 명시적으로 묻지 않는 한 기억 검색, 캐시, 맥락 불러오기, RAG, 프롬프트, 직렬화, 디버그 상태, 내부 플래그 등 시스템 내부를 언급하지 마세요. 어떻게 알아냈는지 설명하지 말고 기억한 결론을 바로 전하세요.",
     ),
@@ -449,6 +453,21 @@ mod tests {
         profile_system_prompt, requested_output_language, PromptTimeContext,
     };
     use chrono::TimeZone;
+
+    #[test]
+    fn russian_prompts_use_russian_resources_and_registered_language_name() {
+        assert_eq!(requested_output_language("ru"), "Russian");
+        let chat = build_chat_system_prompt("Echo", "Алекс", "ru");
+        let onboarding = build_onboarding_system_prompt("Echo", "Алекс", "ru");
+        assert!(chat.contains("Обращение к пользователю"));
+        assert!(chat.contains("Правила защиты внутреннего контекста"));
+        assert!(onboarding.contains("Сейчас действует режим знакомства."));
+        assert_eq!(crate::LocalePhrases::for_locale("ru").laugh_marker, "хаха");
+        assert_ne!(
+            crate::LocalePhrases::for_locale("ru"),
+            crate::LocalePhrases::for_locale("en")
+        );
+    }
 
     #[test]
     fn every_shown_language_has_its_own_internal_context_privacy_policy() {
