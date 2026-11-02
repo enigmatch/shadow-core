@@ -65,6 +65,17 @@ pub struct LocalePhrases {
 
 const LOCALE_PHRASES: Localized<LocalePhrases> = Localized::new(&[
     (
+        "ko",
+        LocalePhrases {
+            soft_example_phrase: "‘이런 느낌일지도’",
+            soft_example_phrase_alt: "‘예를 들면 이런 걸 수도 있겠다’",
+            lazy_remark: "‘또 시작이네...’",
+            laugh_marker: "ㅎㅎ",
+            closing_insight_phrase: "‘조금씩 윤곽이 보이네’",
+            closing_identity_phrase: "‘이제 진짜 Shadow가 되어 갈 수 있겠어’",
+        },
+    ),
+    (
         "en",
         LocalePhrases {
             soft_example_phrase: "\"something like this\"",
@@ -150,6 +161,22 @@ struct LanguagePrompts {
 }
 
 const LANGUAGE_PROMPTS: Localized<LanguagePrompts> = Localized::new(&[
+    (
+        "ko",
+        LanguagePrompts {
+            onboarding_mode: include_str!("prompts/ko/onboarding_mode.txt"),
+            shadow_core_persona: include_str!("prompts/ko/shadow_core_persona.txt"),
+            user_address_default: include_str!("prompts/ko/user_address_default.txt"),
+            user_address_preferred: include_str!("prompts/ko/user_address_preferred.txt"),
+            shadow_self_reference_default: include_str!(
+                "prompts/ko/shadow_self_reference_default.txt"
+            ),
+            shadow_self_reference_preferred: include_str!(
+                "prompts/ko/shadow_self_reference_preferred.txt"
+            ),
+            normal_chat_mode: include_str!("prompts/ko/normal_chat_mode.txt"),
+        },
+    ),
     (
         "en",
         LanguagePrompts {

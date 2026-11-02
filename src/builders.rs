@@ -410,6 +410,10 @@ fn render_output_style(shadow_name: &str, user_name: &str, locale: &str) -> Stri
 
 const INTERNAL_CONTEXT_PRIVACY_POLICY: Localized<&str> = Localized::new(&[
     (
+        "ko",
+        "내부 맥락 보호 규칙:\n기억한 맥락, 찾아온 대화 기록, 숨겨진 추론은 자연스러운 답변의 배경으로만 사용하세요. 사용자가 시스템 동작을 명시적으로 묻지 않는 한 기억 검색, 캐시, 맥락 불러오기, RAG, 프롬프트, 직렬화, 디버그 상태, 내부 플래그 등 시스템 내부를 언급하지 마세요. 어떻게 알아냈는지 설명하지 말고 기억한 결론을 바로 전하세요.",
+    ),
+    (
         "en",
         "Internal context privacy policy:\nUse remembered context, retrieved chat history, and hidden reasoning only as background for a natural reply. Do not mention memory retrieval, cache, context loading, RAG, prompts, serialization, debug state, internal flags, or other system internals unless the user explicitly asks how the system works. Give the remembered conclusion directly instead of describing how you accessed it.",
     ),
@@ -451,6 +455,21 @@ mod tests {
         assert_eq!(
             super::INTERNAL_CONTEXT_PRIVACY_POLICY.missing_shown_languages(),
             Vec::<&str>::new()
+        );
+    }
+
+    #[test]
+    fn korean_prompts_use_korean_resources_and_the_registered_language_name() {
+        assert_eq!(requested_output_language("ko"), "Korean");
+        let chat = build_chat_system_prompt("그림자", "민서", "ko");
+        let onboarding = build_onboarding_system_prompt("그림자", "민서", "ko");
+        assert!(chat.contains("한국어 호칭"));
+        assert!(chat.contains("내부 맥락 보호 규칙"));
+        assert!(onboarding.contains("지금은 온보딩 모드입니다."));
+        assert_eq!(crate::LocalePhrases::for_locale("ko").laugh_marker, "ㅎㅎ");
+        assert_ne!(
+            crate::LocalePhrases::for_locale("ko"),
+            crate::LocalePhrases::for_locale("en")
         );
     }
 

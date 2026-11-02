@@ -21,6 +21,7 @@ pub enum Visibility {
 pub enum Script {
     Latin,
     Japanese,
+    Hangul,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -89,6 +90,16 @@ pub const LANGUAGES: &[LanguageSpec] = &[
         auto_translate: true,
     },
     LanguageSpec {
+        code: "ko",
+        catalog_id: "ko-KR",
+        switcher_label: "한국어",
+        flag: "🇰🇷",
+        prompt_name: "Korean",
+        script: Script::Hangul,
+        visibility: Visibility::Shown,
+        auto_translate: false,
+    },
+    LanguageSpec {
         code: "de",
         catalog_id: "de-DE",
         switcher_label: "Deutsch",
@@ -130,7 +141,20 @@ mod tests {
     use std::collections::HashSet;
 
     #[test]
-    fn current_shown_languages_are_all_auto_translated() {
+    fn korean_is_selectable_with_its_own_writing_system_and_explicit_translation_policy() {
+        let language = find_shown_language("ko").expect("Korean should be selectable");
+        assert_eq!(language.catalog_id, "ko-KR");
+        assert_eq!(language.switcher_label, "한국어");
+        assert_eq!(language.prompt_name, "Korean");
+        assert_eq!(language.script, super::Script::Hangul);
+        assert!(
+            !language.is_auto_translated(),
+            "Korean uses on-demand translation"
+        );
+    }
+
+    #[test]
+    fn existing_languages_keep_automatic_translation() {
         let codes = LANGUAGES
             .iter()
             .filter(|language| language.is_auto_translated())
@@ -155,7 +179,7 @@ mod tests {
         let codes = shown_languages()
             .map(|language| language.code)
             .collect::<Vec<_>>();
-        assert_eq!(codes, vec!["en", "ja", "fr"]);
+        assert_eq!(codes, vec!["en", "ja", "fr", "ko"]);
     }
 
     #[test]
